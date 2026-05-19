@@ -1,9 +1,27 @@
+# Variáveis carregadas de match\.env (veja .env.example)
+global_vars:
+  - name: atendente_nome
+    type: shell
+    params:
+      shell: powershell
+      cmd: '& "$env:CONFIG\match\scripts\read-env.ps1" -Key ATENDENTE_NOME -Default "Bruno"'
+  - name: empresa_nome
+    type: shell
+    params:
+      shell: powershell
+      cmd: '& "$env:CONFIG\match\scripts\read-env.ps1" -Key EMPRESA_NOME -Default "COM4"'
+  - name: email_atendimento
+    type: shell
+    params:
+      shell: powershell
+      cmd: '& "$env:CONFIG\match\scripts\read-env.ps1" -Key EMAIL_ATENDIMENTO -Default "atendimento@com4.com.br"'
+
 matches:
   # 1. Saudação Dinâmica (Verifica a hora do sistema via PowerShell)
-  - trigger: "/ola"
+  - trigger: "/dia"
     replace: |
       Olá, {{saudacao}}! Tudo bem? 😊
-      Sou João Pedro e vou prosseguir com o seu atendimento.
+      Sou {{atendente_nome}} e vou prosseguir com o seu atendimento.
       Para que possamos dar andamento, por favor, confirme os seguintes dados:
       Nome:
       Telefone:
@@ -14,7 +32,7 @@ matches:
         params:
           cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'bom dia' } elseif ($h -lt 18) { 'boa tarde' } else { 'boa noite' }"
           shell: powershell
-
+          
   # 2. Protocolo Automatizado (Cola o que estiver no seu Ctrl+C)
   - trigger: "/proto"
     replace: "O número do protocolo referente a este atendimento é: {{clipboard}}"
@@ -109,8 +127,8 @@ matches:
   - trigger: "/aux"
     replace: "Posso lhe auxiliar com mais alguma solicitação hoje?"
 
-  - trigger: "/chau"
-    replace: "A COM4 agradece o seu contato! Tenha um excelente dia e conte sempre conosco."
+  - trigger: "/tchau"
+    replace: "A {{empresa_nome}} agradece o seu contato! Tenha um excelente dia e conte sempre conosco."
 
   # ==========================================
   # REGISTROS INTERNOS DE CHAMADO (FINANCEIRO/NOC)
@@ -175,14 +193,14 @@ matches:
       Para auxiliar no processo, estou enviando em anexo um material de apoio em PDF com o passo a passo ilustrado.
       Qualquer dúvida, seguimos à disposição!
       
-      # ==========================================
+  # ==========================================
   # CREDENCIAIS E ACESSOS (CPANEL)
   # ==========================================
 
   # Solicitação de e-mail formal para envio de credenciais cPanel
   - trigger: "/cpanel"
     replace: |
-      Para que possamos enviar os dados de acesso ao cPanel, solicitamos o envio de um e-mail para atendimento@com4.com.br com as informações listadas abaixo.
+      Para que possamos enviar os dados de acesso ao cPanel, solicitamos o envio de um e-mail para {{email_atendimento}} com as informações listadas abaixo.
       
       Importante: Por questões de segurança, os dados devem ser enviados obrigatoriamente de um endereço de e-mail que possua o domínio da empresa.
       
@@ -196,19 +214,60 @@ matches:
   # ENCERRAMENTO SIMPLES
   # ==========================================
 
-  - trigger: "/enc"
+  - trigger: "/cha"
     replace: "chamado encerrado"
     
-  # ==========================================
-  # TENHA UM OTIMO DIA
+# ==========================================
+  # VERIFICAÇÃO FÍSICA E TROUBLESHOOTING
   # ==========================================
 
-  - trigger: "/dia"
-    replace: "Por nada! Tenha um ótimo dia."
-    
+  # Orientação de verificação do cabo Drop/Fibra
+  - trigger: "/fibra"
+    replace: |
+      Por favor, verifique se o cabo de fibra óptica está firmemente conectado. É importante ressaltar que não é necessário remover ou limpar o cabo, pois ele é extremamente sensível. Apenas certifique-se de que a conexão esteja segura e examine o cabo em toda a sua extensão visível para verificar se há alguma dobra, torção ou rompimento. A sua atenção a estes detalhes é muito importante para resolvermos o problema.
+      
+# ==========================================
+  # DIAGNÓSTICO DE SINAL (MODEM)
   # ==========================================
-  # Separeção
+
+  # Explicação sobre LED de LOS (Luz Vermelha)
+  - trigger: "/loss"
+    replace: |
+      Entendo. A luz vermelha no seu modem {{empresa_nome}} (aquele branco com o logo da {{empresa_nome}}) indica que o equipamento está com perda de sinal, ou seja, houve uma interrupção na conexão de fibra óptica com a nossa central. Para solucionar este problema, vou encaminhar a sua solicitação para o nosso setor de manutenção de fibra óptica. Eles farão os devidos reparos para restabelecer a sua conexão o mais rápido possível.
+      
+# ==========================================
+  # AGENDAMENTO DE VISITA TÉCNICA (FIBRA/CAMPO)
   # ==========================================
-  
-  - trigger: "/--"
-    replace: "----------------------------------------------------------"
+
+  - trigger: "/visita"
+    replace: |
+      Para darmos andamento à sua solicitação, e prosseguir com o agendamento da visita técnica ao local. Por gentileza, nos confirme as seguintes informações:
+
+      📍 Endereço completo:
+      🕒 Dias e horários de disponibilidade para receber a equipe:
+
+      ⚠️ **Avisos Importantes:**
+      1. A visita técnica deve ser acompanhada obrigatoriamente por uma pessoa maior de 18 anos.
+      2. A formalização do agendamento será realizada pela nossa equipe técnica de fibra, que entrará em contato por este mesmo telefone informando a data e o horário exatos da visita.
+# ==========================================
+  # INFORMATIVO DE SUSPENSÃO (FINANCEIRO)
+  # ==========================================
+
+  # Informar bloqueio por falta de pagamento
+  - trigger: "/bloqueado"
+    form: |
+      Após verificar o seu cadastro, identifiquei que os seus serviços encontram-se temporariamente suspensos devido à fatura com vencimento em [[vencimento]] constar como aberta em nosso sistema.
+      
+      Para normalizarmos o seu acesso, por gentileza, nos envie o comprovante caso o pagamento já tenha sido realizado. Se precisar, posso emitir a 2ª via atualizada do boleto para você agora mesmo. Como prefere seguir?
+  # ==========================================
+  # ESCALONAMENTO DE CHAMADOS (N2)
+  # ==========================================
+
+  # Informar o cliente sobre escalonamento para a Engenharia
+  - trigger: "/eng"
+    replace: |
+      Realizamos os testes e diagnósticos iniciais e verificamos que a resolução da sua solicitação exigirá uma intervenção mais avançada na infraestrutura do servidor.
+      
+      Por este motivo, estou escalonando o seu chamado agora mesmo para a nossa equipe de Engenharia (Nível 2). Eles já receberam todo o histórico detalhado dos testes que realizamos e assumirão a tratativa a partir deste momento.
+      
+      Você receberá um novo retorno neste mesmo chamado assim que a intervenção for concluída ou caso os engenheiros precisem de alguma informação adicional.
