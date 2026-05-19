@@ -1,0 +1,214 @@
+matches:
+  # 1. Saudação Dinâmica (Verifica a hora do sistema via PowerShell)
+  - trigger: "/ola"
+    replace: |
+      Olá, {{saudacao}}! Tudo bem? 😊
+      Sou João Pedro e vou prosseguir com o seu atendimento.
+      Para que possamos dar andamento, por favor, confirme os seguintes dados:
+      Nome:
+      Telefone:
+      E-mail:
+    vars:
+      - name: saudacao
+        type: shell
+        params:
+          cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'bom dia' } elseif ($h -lt 18) { 'boa tarde' } else { 'boa noite' }"
+          shell: powershell
+
+  # 2. Protocolo Automatizado (Cola o que estiver no seu Ctrl+C)
+  - trigger: "/proto"
+    replace: "O número do protocolo referente a este atendimento é: {{clipboard}}"
+    vars:
+      - name: clipboard
+        type: clipboard
+
+# 3. Desbloqueio (Calcula D+2 Dias Úteis via PowerShell)
+  - trigger: "/unblock"
+    replace: "Certo! Realizei o desbloqueio em acordo dos seus serviços hoje. Por favor, note que caso o pagamento não seja compensado até o final do dia {{data_2d_uteis}}, o sistema aplicará um novo bloqueio automaticamente."
+    vars:
+      - name: data_2d_uteis
+        type: shell
+        params:
+          cmd: "$d = Get-Date; $c = 2; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
+          shell: powershell
+
+  # 4. Envio de 2ª Via (Abre formulário para digitar o vencimento)
+  - trigger: "/seg"
+    form: |
+      Conforme solicitado, segue em anexo a segunda via do boleto com vencimento em [[vencimento]]. Por gentileza, confira os dados antes de efetuar o pagamento. Se possível, nos envie o comprovante por aqui para agilizarmos a baixa no sistema.
+
+# 5. Registro Interno de Desbloqueio (Formulário Variável + D+2 Dias Úteis)
+  - trigger: "/desbloq"
+    replace: |
+      Contato via: {{formulario.canal}}
+      Solicitante: {{formulario.nome}} - {{formulario.telefone}}
+      Ação: Desbloqueio em acordo realizado.
+      Prazo estendido para: {{data_2d_uteis}}.
+      Aguardando baixa bancária no sistema.
+    vars:
+      - name: data_2d_uteis
+        type: shell
+        params:
+          cmd: "$d = Get-Date; $c = 2; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
+          shell: powershell
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Nome: [[nome]]
+            Telefone: [[telefone]]
+          fields:
+            canal:
+              type: choice
+              values:
+                - Blip
+                - Ligação
+
+ # 6. Registro Interno de Baixa (Formulário Variável + D+1 Dia Útil)
+  - trigger: "/baixa"
+    replace: |
+      Contato via {{formulario.canal}}. Cliente enviou comprovante de pagamento (em anexo). 
+      Chamado em aguardo de compensação bancária prevista para {{data_1d_util}}.
+    vars:
+      - name: data_1d_util
+        type: shell
+        params:
+          cmd: "$d = Get-Date; $c = 1; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
+          shell: powershell
+      - name: formulario
+        type: form
+        params:
+          layout: "Canal: [[canal]]"
+          fields:
+            canal:
+              type: choice
+              values:
+                - Blip
+                - E-mail
+                - Ligação
+
+# ==========================================
+  # TEXTOS COMPLEMENTARES: FINANCEIRO E DESBLOQUEIO
+  # ==========================================
+  - trigger: "/norm"
+    replace: "O desbloqueio dos seus serviços foi concluído. A sua conexão retornará à normalidade em instantes."
+
+  - trigger: "/comp"
+    replace: "Recebemos o seu comprovante! Ele já foi anexado ao seu cadastro financeiro. Muito obrigado."
+
+  # ==========================================
+  # INATIVIDADE E ENCERRAMENTO (CLIENTE)
+  # ==========================================
+  - trigger: "/alerta"
+    replace: "Olá! 😊 Ainda precisa da nossa ajuda? Como estamos há algum tempo sem interação, este atendimento será encerrado automaticamente em 30 minutos. Se precisar, é só responder!"
+
+  - trigger: "/final"
+    replace: "Como não tivemos mais retorno, estou encerrando este atendimento por inatividade. Se precisar de qualquer ajuda, basta nos chamar novamente por aqui. Estamos à disposição! 🤝"
+
+  - trigger: "/aux"
+    replace: "Posso lhe auxiliar com mais alguma solicitação hoje?"
+
+  - trigger: "/chau"
+    replace: "A COM4 agradece o seu contato! Tenha um excelente dia e conte sempre conosco."
+
+  # ==========================================
+  # REGISTROS INTERNOS DE CHAMADO (FINANCEIRO/NOC)
+  # ==========================================
+  - trigger: "/pagou"
+    replace: "Pagamento compensado e confirmado no sistema. Chamado finalizado."
+
+  - trigger: "/calote"
+    replace: "Suspensão retomada. Acordo de desbloqueio quebrado por falta de pagamento."
+    # ==========================================
+  # REGISTROS TÉCNICOS (NOC / GATEWAY)
+  # ==========================================
+  
+# Registro de orientação sobre Gateway Antispam (Formulário Variável)
+  - trigger: "/instruir"
+    replace: |
+      - O cliente entrou em contato via {{formulario.canal}} solicitando orientações técnicas sobre o funcionamento do seu gateway antispam.
+      - O cliente foi devidamente instruído e orientado quanto aos procedimentos.
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: "Canal: [[canal]]"
+          fields:
+            canal:
+              type: choice
+              values:
+                - Blip
+                - E-mail
+                - Ligação
+
+  # Registro de encerramento por inatividade (Timeout)
+  - trigger: "/timeout"
+    replace: |
+      O atendimento foi encerrado automaticamente em virtude da ausência de interação por parte do usuário. 
+      Devido à inatividade no blip, não houve o reporte de incidentes ou solicitações, resultando na finalização do ticket por timeout sem a necessidade de intervenção técnica ou aplicação de procedimentos de troubleshooting.
+
+  # Frase de encerramento padrão (Uso Interno)
+  - trigger: "/nada"
+    replace: "Nada mais a mim cabia auxiliar"
+
+  # ==========================================
+  # RESPOSTAS AO CLIENTE (PMG / RELATÓRIO)
+  # ==========================================
+
+  # Explicação detalhada sobre o Relatório do PMG
+  - trigger: "/pmg"
+    replace: |
+      Acabamos de encaminhar para a sua caixa de entrada o relatório atualizado do seu Gateway Antispam (PMG), contendo os e-mails que foram retidos em quarentena.
+
+      Para acessá-lo e gerenciar suas mensagens em tempo real, vá até o final do e-mail recebido e clique na palavra destacada "web" na frase: "Por favor use a interface web para gerenciar os spams de sua caixa de e-mail".
+
+      Verificamos que os e-mails retidos ainda não constam na sua lista de remetentes confiáveis. O nosso filtro atua de forma automática barrando mensagens com base em uma pontuação de risco (Spam Score). Para que elas cheguem até você, será necessária uma intervenção manual no painel, utilizando as seguintes opções:
+
+      ✅ **Whitelist:** Libera o e-mail retido e adiciona o remetente à sua lista de confiança, evitando que futuras mensagens dele sejam bloqueadas.
+      ❌ **Blacklist:** Bloqueia permanentemente as futuras mensagens deste remetente.
+      📨 **Entregar (Deliver):** Apenas entrega a mensagem específica na sua caixa de entrada, sem adicionar o remetente à lista de confiança.
+      🗑️ **Deletar (Delete):** Exclui permanentemente o e-mail da quarentena.
+
+      **Atenção:** Caso seja do seu interesse, é possível solicitar a desativação total do filtro Antispam para o seu domínio. No entanto, alertamos que isso remove a nossa principal linha de defesa, o que poderá aumentar significativamente o recebimento de spams, lixo eletrônico e vírus na sua caixa de entrada.
+
+      Para auxiliar no processo, estou enviando em anexo um material de apoio em PDF com o passo a passo ilustrado.
+      Qualquer dúvida, seguimos à disposição!
+      
+      # ==========================================
+  # CREDENCIAIS E ACESSOS (CPANEL)
+  # ==========================================
+
+  # Solicitação de e-mail formal para envio de credenciais cPanel
+  - trigger: "/cpanel"
+    replace: |
+      Para que possamos enviar os dados de acesso ao cPanel, solicitamos o envio de um e-mail para atendimento@com4.com.br com as informações listadas abaixo.
+      
+      Importante: Por questões de segurança, os dados devem ser enviados obrigatoriamente de um endereço de e-mail que possua o domínio da empresa.
+      
+      * CPF/CNPJ do cadastro:
+      * Nome completo do solicitante: 
+      * Razão Social:
+      * Endereço físico da empresa:
+      * Motivo da solicitação:
+      
+  # ==========================================
+  # ENCERRAMENTO SIMPLES
+  # ==========================================
+
+  - trigger: "/enc"
+    replace: "chamado encerrado"
+    
+  # ==========================================
+  # TENHA UM OTIMO DIA
+  # ==========================================
+
+  - trigger: "/dia"
+    replace: "Por nada! Tenha um ótimo dia."
+    
+  # ==========================================
+  # Separeção
+  # ==========================================
+  
+  - trigger: "/--"
+    replace: "----------------------------------------------------------"
