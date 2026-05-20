@@ -1,6 +1,8 @@
 # Wall-E — Atalhos Espanso (COM4)
 
-Documentação completa para instalar o [Espanso](https://espanso.org/), usar este repositório e operar todos os atalhos de atendimento definidos em `base.yml`.
+Documentação para instalar o [Espanso](https://espanso.org/), configurar este repositório e usar os atalhos do `base.yml`.
+
+Os **textos** dos atalhos foram revisados com foco em **clareza, coesão, quebras de linha legíveis** e **emoji** onde faz sentido (ex.: `/dia`, `/alerta`, `/pmg`). A personalização por pessoa (**nome, empresa, e-mail**) continua no arquivo **`.env`**, sem precisar editar cada frase dentro do YAML.
 
 ---
 
@@ -78,63 +80,81 @@ Anote o caminho retornado — é onde você colará o `base.yml` deste projeto.
 
 ## 3. Como usar este projeto (wall-e)
 
-Este repositório contém:
+### Conteúdo principal do repositório
 
-- **`base.yml`** — atalhos de atendimento (financeiro, NOC, PMG, fibra, etc.)
-- **`.env`** — nome do atendente, empresa e e-mail (personalização sem editar YAML)
-- **`scripts/read-env.ps1`** — leitor das variáveis do `.env`
+- **`base.yml`** — todos os triggers (financeiro, NOC, PMG, fibra, etc.) e leitura do `.env` **dentro** do próprio arquivo (variáveis `global_vars` via PowerShell).
+- **`.env.example`** — modelo de variáveis; copie para `.env` na pasta do Espanso (ver [seção 4](#4-personalização-com-arquivo-env)).
+- **`sync.ps1`** *(opcional)* — chama `scripts/sync-to-espanso.ps1`, se você mantiver essa pasta no clone (copia para `%AppData%\espanso\match\` e reinicia o daemon).
 
-### 3.1 Instalação rápida (base.yml + .env + scripts)
+Para funcionar na sua máquina, o Espanso precisa pelo menos:
 
-1. Pare o Espanso (opcional, mas recomendado):
+- `%AppData%\espanso\match\base.yml`
 
-   ```powershell
-   espanso stop
-   ```
+e, para personalização por pessoa,
 
-2. Copie os arquivos deste repositório para a pasta do Espanso:
+- `%AppData%\espanso\match\.env`
 
-   ```powershell
-   # Ajuste o caminho do repositório se necessário
-   $repo = "C:\Users\habbiner.andrade\Documents\00 - Atalhos Bot\wall-e"
-   $match = "$env:APPDATA\espanso\match"
+**Não** é obrigatório haver pasta `scripts\` no Espanso: o `base.yml` atual **não** depende de `read-env.ps1`.
 
-   Copy-Item -Path "$repo\base.yml" -Destination "$match\base.yml" -Force
-   Copy-Item -Path "$repo\scripts" -Destination "$match\scripts" -Recurse -Force
+### 3.1 Instalação manual (copiar arquivo na pasta do Espanso)
 
-   # Primeira vez: copie o exemplo e edite com seu nome
-   if (-not (Test-Path "$match\.env")) {
-     Copy-Item -Path "$repo\.env.example" -Destination "$match\.env"
-   }
-   ```
+Caminho típico no Windows:
 
-3. Edite o `.env` com seus dados (nome, empresa, e-mail):
+```text
+C:\Users\SEU_USUARIO\AppData\Roaming\espanso\match\
+```
 
-   ```powershell
-   notepad "$env:APPDATA\espanso\match\.env"
-   ```
+Passos:
 
-4. Reinicie o Espanso:
+1. Copie o `base.yml` do repositório para `...\espanso\match\base.yml` (substituindo o existente).
+2. Se ainda não tiver `.env` na pasta `match`, copie `.env.example` para `.env` e edite seus dados ([seção 4](#4-personalização-com-arquivo-env)).
+3. Reinicie o Espanso pela bandeja ou com `espanso restart` (se `espanso` estiver no PATH), ou usando `espansod.exe` em `%LOCALAPPDATA%\Programs\Espanso\`.
+4. Teste no **Bloco de Notas** ou no **Blip**: `/dia` + Espaço/Enter → deve aparecer **“Sou … e darei sequência…”** com o nome do `.env`.
 
-   ```powershell
-   espanso start
-   ```
+Exemplo rápido no PowerShell (ajuste o caminho da pasta do projeto):
 
-5. Teste: digite `/dia` — deve aparecer **Sou [seu nome]** conforme o `.env`.
+```powershell
+$repo = "C:\CAMINHO\para\wall-e"
+$match = "$env:APPDATA\espanso\match"
+Copy-Item "$repo\base.yml" "$match\base.yml" -Force
+if (-not (Test-Path "$match\.env")) {
+  Copy-Item "$repo\.env.example" "$match\.env"
+  notepad "$match\.env"
+}
+```
 
-> Detalhes completos do `.env`: veja a [seção 4](#4-personalização-com-arquivo-env).
+### 3.2 Sincronização automática *(opcional, se existir `scripts/sync-to-espanso.ps1`)*
 
-### 3.2 Editar os atalhos
+Se o seu clone incluir `scripts\sync-to-espanso.ps1`, você pode usar:
 
-**Opção A — pelo terminal (abre o Notepad por padrão):**
+```powershell
+.\sync.ps1
+```
+
+```powershell
+.\sync.ps1 -Watch
+```
+
+Parâmetros úteis: `-NoRestart`, `-AtualizarEnv` (consulte o próprio script).
+
+| Origem típica | Destino |
+|---------------|---------|
+| `base.yml` | `%AppData%\espanso\match\base.yml` |
+| `.env` *(primeira cópia, conforme flags do script)* | `%AppData%\espanso\match\.env` |
+
+**CLI fora do PATH:** muitos PCs usam apenas `espansod.exe`; um script bem configurado pode apontar para `%LOCALAPPDATA%\Programs\Espanso\espansod.exe`. O daemon costuma também **detectar alteração** no `base.yml` e recarregar.
+
+### 3.3 Editar os atalhos
+
+**Opção A — pelo terminal do Espanso (se estiver no PATH):**
 
 ```powershell
 espanso edit
 ```
 
-**Opção B — editar este repositório e copiar de novo:**
+**Opção B — editar na pasta do repositório e copiar manualmente:**
 
-Edite `base.yml` aqui no projeto, salve e repita o `Copy-Item` do passo 3.1.
+Edite `base.yml` no projeto, salve e copie de novo para `%AppData%\espanso\match\base.yml` (vide [3.1](#31-instalação-manual-copiar-arquivo-na-pasta-do-espanso)).
 
 **Opção C — abrir arquivo específico:**
 
@@ -148,158 +168,122 @@ Após salvar, o Espanso recarrega a configuração automaticamente. Se não reca
 espanso restart
 ```
 
-### 3.3 Como disparar um atalho no dia a dia
+### 3.4 Como disparar um atalho no dia a dia
 
 1. Certifique-se de que o Espanso está **ativo** (ícone na bandeja).
 2. Clique no campo de texto (Blip, e-mail, ticket, etc.).
 3. Digite o trigger **exatamente** como está no YAML (ex.: `/unblock`).
 4. Pressione **Espaço** ou **Enter** (comportamento padrão) para expandir.
 
-**Dica:** triggers que usam **clipboard** (`/proto`) exigem que você copie o texto antes (Ctrl+C).
+**Dica:** atalhos com **formulário** (`/proto`, `/seg`, `/bloqueado`, `/desbloq`) abrem uma janela: preencha **só** o que o texto pede (ex.: **`/proto`** → **somente o número do protocolo**).
 
-**Dica:** triggers com **formulário** (`/seg`, `/desbloq`) abrem uma janela para preencher campos antes de inserir o texto.
+**Dica:** em vários aplicativos, testar primeiro no **Bloco de Notas** evita dúvidas se o problema é o Espanso ou o chat.
 
-### 3.4 Estrutura esperada da pasta Espanso
+### 3.5 Estrutura mínima da pasta do Espanso
 
 ```text
 %AppData%\espanso\
 ├── config\
-│   └── default.yml      ← comportamento global (velocidade, undo, etc.)
+│   └── default.yml      ← comportamento global (opcionalmente ajuste backend, etc.)
 └── match\
     ├── base.yml         ← atalhos (este projeto)
-    ├── .env             ← seu nome, empresa e e-mail
-    └── scripts\
-        └── read-env.ps1 ← leitor do .env
+    └── .env             ← opcional mas recomendado: nome / empresa / e-mail
 ```
+
+Pacotes do Hub ficam em `match\packages\` se você instalar algo extra.
 
 ---
 
 ## 4. Personalização com arquivo `.env`
 
-O projeto permite trocar **nome do atendente**, **empresa** e **e-mail** sem editar o `base.yml`. Basta alterar o arquivo `.env`.
+O projeto permite trocar **nome do atendente**, **empresa** e **e-mail** sem alterar cada mensagem dentro do YAML: isso vai no arquivo `match\.env`.
 
 ### 4.1 Como funciona
 
-O Espanso **não lê `.env` nativamente**. O fluxo é:
+O Espanso **não lê `.env` nativamente**. Neste projeto, cada valor é obtido assim:
 
-1. Você define valores em `match\.env` (pasta do Espanso).
-2. O script `match\scripts\read-env.ps1` lê a chave solicitada.
-3. O `base.yml` declara **variáveis globais** (`global_vars`) que chamam esse script via PowerShell.
-4. Os atalhos usam placeholders como `{{atendente_nome}}`, `{{empresa_nome}}` e `{{email_atendimento}}`.
+1. Você mantém um arquivo **`.env`** na pasta **`match`** (ao lado do `base.yml`).
+2. No topo do `base.yml`, há três **`global_vars`** do tipo **`shell`** (PowerShell) que **leem o arquivo** `match\.env` e extraem linhas como `CHAVE=valor`.
+3. Os triggers usam `{{atendente_nome}}`, `{{empresa_nome}}` e `{{email_atendimento}}` no texto expandido.
+4. Onde não houver arquivo ou não houver a linha da chave, entram os **valores padrão** definidos dentro do próprio script (na prática: `Bruno`, `COM4`, `atendimento@com4.com.br`).
 
 ```text
-.env  →  read-env.ps1  →  global_vars no base.yml  →  texto expandido
+match\.env  →  PowerShell em global_vars  →  {{...}} nos textos
 ```
+
+**Implementação atual:** não é necessário arquivo `scripts\read-env.ps1`; tudo está embutido nos blocos `cmd:` sob `global_vars`.
 
 ### 4.2 Onde fica o arquivo
 
 | Local | Caminho | Observação |
 |-------|---------|------------|
-| **Em uso pelo Espanso** | `%AppData%\espanso\match\.env` | Este é o arquivo que importa no dia a dia |
+| **Em uso pelo Espanso** | `%AppData%\espanso\match\.env` | Arquivo que vale no dia a dia |
 | **No repositório (modelo)** | `.env.example` | Copie para criar seu `.env` |
-| **No repositório (pessoal)** | `.env` | Ignorado pelo Git; só para desenvolvimento local |
+| **No repositório (pessoal)** | `.env` | Opcional para backup local; pode estar no `.gitignore` |
 
-O `.env` **deve ficar na mesma pasta** que o `base.yml` e a pasta `scripts\`.
+O `.env` deve ficar **na mesma pasta** que `base.yml` dentro de `match\`.
 
 ### 4.3 Variáveis disponíveis
 
-| Variável | Obrigatória | Valor padrão* | Descrição |
-|----------|-------------|---------------|-----------|
-| `ATENDENTE_NOME` | Não | `Bruno` | Nome exibido na abertura do atendimento |
-| `EMPRESA_NOME` | Não | `COM4` | Nome da empresa nas mensagens ao cliente |
-| `EMAIL_ATENDIMENTO` | Não | `atendimento@com4.com.br` | E-mail para solicitações formais (cPanel) |
+| Variável no `.env` | Obrigatória | Padrão se ausente | Onde aparece nos atalhos |
+|--------------------|-------------|-------------------|---------------------------|
+| `ATENDENTE_NOME` | Não | `Bruno` | `/dia` (“Sou … e darei sequência…”); é referenciado via variável global |
+| `EMPRESA_NOME` | Não | `COM4` | `/tchau`, `/loss` |
+| `EMAIL_ATENDIMENTO` | Não | `atendimento@com4.com.br` | `/cpanel` |
 
-\*Usados apenas se a chave estiver ausente no `.env` ou se o arquivo não existir.
-
-**Formato do arquivo:**
+### 4.4 Formato do `.env`
 
 ```env
-ATENDENTE_NOME=Seu Nome
+ATENDENTE_NOME=Seu nome
 EMPRESA_NOME=COM4
 EMAIL_ATENDIMENTO=atendimento@com4.com.br
 ```
 
-- Uma variável por linha: `CHAVE=valor`
-- Linhas em branco e linhas que começam com `#` são ignoradas
-- Não use espaços antes do nome da chave
-- Aspas em volta do valor são opcionais (`"Maria"` ou `Maria`)
+Regras práticas:
 
-### 4.4 Atalhos que usam o `.env`
+- Uma variável por linha: `CHAVE=valor`.
+- Linhas iniciadas por `#` costumam ser ignoradas porque **não** batem no padrão `CHAVE=valor` usado no script.
+- Evite espaço antes da chave. Aspas ao redor do valor são opcionais.
 
-| Trigger | Variável `.env` | Trecho gerado (exemplo) |
-|---------|-----------------|-------------------------|
-| `/dia` | `ATENDENTE_NOME` | `Sou Maria e vou prosseguir com o seu atendimento.` |
-| `/tchau` | `EMPRESA_NOME` | `A COM4 agradece o seu contato!...` |
-| `/cpanel` | `EMAIL_ATENDIMENTO` | `...envio de um e-mail para atendimento@com4.com.br...` |
-| `/loss` | `EMPRESA_NOME` | `...modem COM4 (aquele branco com o logo da COM4)...` |
+### 4.5 Matches que devem usar `type: global` para o nome/empresa
 
-Os demais atalhos **não** dependem do `.env` (texto fixo, formulário, clipboard ou datas).
+No Espanso, variáveis globais às vezes precisam ser **declaradas de novo no bloco `vars`** do match com **`type: global`** para garantir que sejam avaliadas na expansão — isso já está feito onde necessário (`/dia`, `/tchau`, `/cpanel`, `/loss`).
 
-### 4.5 Configurar pela primeira vez
+### 4.6 Configurar pela primeira vez no PC
 
 ```powershell
-# 1. Copiar o modelo (se ainda não existir)
 $match = "$env:APPDATA\espanso\match"
 if (-not (Test-Path "$match\.env")) {
-  Copy-Item ".\.env.example" "$match\.env"
+  Copy-Item ".\.env.example" "$match\.env"   # ajuste o caminho de origem ao repo
 }
-
-# 2. Editar com seus dados
 notepad "$match\.env"
-
-# 3. Aplicar
-espanso restart
+espanso restart   # ou reinicie pela bandeja / espansod.exe
 ```
 
-### 4.6 Trocar de atendente ou empresa
+### 4.7 Trocar de atendente
 
-1. Abra `%AppData%\espanso\match\.env`.
-2. Altere apenas as linhas desejadas (ex.: `ATENDENTE_NOME=Ana`).
-3. Salve o arquivo.
-4. Execute `espanso restart`.
-5. Teste com `/dia` ou `/tchau`.
+1. Edite `%AppData%\espanso\match\.env` (linha `ATENDENTE_NOME=…`).
+2. Salve e reinicie o Espanso (ou aguarde o recarregamento automático ao salvar arquivo, conforme versão/comportamento).
+3. Teste com `/dia`.
 
-Não é necessário editar o `base.yml` nem copiar arquivos de novo — só o `.env`.
+### 4.8 Adicionar nova variável
 
-### 4.7 Arquivos do repositório relacionados
-
-| Arquivo | Função |
-|---------|--------|
-| `.env.example` | Modelo versionado no Git; copie para `.env` |
-| `.env` | Sua configuração local (ignorada pelo `.gitignore`) |
-| `scripts/read-env.ps1` | Script que lê uma chave do `.env` |
-| `base.yml` | Define `global_vars` e referências `{{...}}` |
-
-Trecho relevante no `base.yml`:
-
-```yaml
-global_vars:
-  - name: atendente_nome
-    type: shell
-    params:
-      shell: powershell
-      cmd: '& "$env:CONFIG\match\scripts\read-env.ps1" -Key ATENDENTE_NOME -Default "Bruno"'
-  # ... empresa_nome, email_atendimento
-```
-
-### 4.8 Adicionar uma nova variável ao `.env`
-
-1. Inclua a chave em `.env.example` e no seu `.env`.
-2. Adicione um bloco em `global_vars` no `base.yml` (copie o padrão de `atendente_nome`).
-3. Use `{{nome_da_variavel}}` no `replace` do atalho desejado.
-4. Copie `scripts\` e `base.yml` para `%AppData%\espanso\match\` e rode `espanso restart`.
+1. Crie uma linha em `.env.example` e no seu `.env`.
+2. Copie um bloco existente em `global_vars:` (mesmo padrão de `ATENDENTE_NOME`), ajustando o nome da variável Espanso e o regex na linha `$_ -match '^\s*NOME_DA_CHAVE\s*='`.
+3. Use `{{nome_da_variavel}}` no `replace`; se for global derivada disso, adicione `vars` com `- type: global` no match onde precisar.
+4. Recarregue o Espanso.
 
 ### 4.9 Git e compartilhamento
 
-- **Commit:** apenas `.env.example` (sem dados pessoais).
-- **Não commitar:** `.env` (está no `.gitignore`).
-- Cada atendente mantém seu próprio `.env` na máquina local.
+**Commit:** apenas `.env.example` (sem dados pessoais).  
+**Evite commitar:** `.env` com nome real ou e-mails internos — use `.gitignore` conforme combinado pela equipe.  
+Quem clonar só precisa **`base.yml` + `.env` criado a partir do exemplo**.
 
 ---
 
 ## 5. Comandos do Espanso por categoria
 
-Todos os comandos abaixo são executados no **PowerShell**, **CMD** ou **Terminal**, com o Espanso no PATH.
+Na linha de comando, o projeto costuma aparecer como **`espansod.exe`** ou pelo atalho **`espanso.cmd`** dentro de `%LOCALAPPDATA%\Programs\Espanso\`. Se `espanso` não resolver no PATH, use o caminho completo ao executável (ex.: `& "$env:LOCALAPPDATA\Programs\Espanso\espansod.exe" status`).
 
 ### 5.1 Serviço (iniciar / parar / status)
 
@@ -372,152 +356,109 @@ Todos os triggers começam com **`/`**. Digite o comando e confirme com Espaço/
 
 ### 6.1 Abertura e protocolo
 
-| Trigger | Nome | O que faz | Observação |
-|---------|------|-----------|------------|
-| `/dia` | Saudação dinâmica | Abre atendimento com bom dia / boa tarde / boa noite conforme horário | Usa `.env` (`ATENDENTE_NOME`) + PowerShell |
-| `/proto` | Protocolo | Insere: `O número do protocolo...` + conteúdo da área de transferência | Copie o protocolo antes (Ctrl+C) |
+| Trigger | Função breve | Detalhes |
+|---------|----------------|----------|
+| `/dia` | Saudação com horário (`bom dia` / `boa tarde` / `boa noite`) 😊 | Corpo em parágrafos; nome vem do `.env` (`ATENDENTE_NOME`); fecha pedindo dados (nome / telefone / e-mail). |
+| `/proto` | Frase padronizada com **nº do protocolo** | Formulário: **informe apenas o dígito/código do protocolo** (evita colar texto errado da área de transferência). |
 
 ### 6.2 Financeiro — desbloqueio e boletos
 
-| Trigger | Nome | O que faz | Observação |
-|---------|------|-----------|------------|
-| `/unblock` | Desbloqueio em acordo | Mensagem ao cliente com prazo D+2 dias úteis | Data calculada automaticamente |
-| `/seg` | 2ª via de boleto | Texto de envio da 2ª via | Abre formulário: informe o **vencimento** |
-| `/desbloq` | Registro interno — desbloqueio | Nota interna com canal, nome, telefone e prazo D+2 | Formulário: Blip ou Ligação |
-| `/baixa` | Registro interno — comprovante | Nota de compensação prevista D+1 dia útil | Formulário: canal Blip, E-mail ou Ligação |
-| `/norm` | Normalização | Confirma que desbloqueio foi concluído | Texto fixo |
-| `/comp` | Comprovante recebido | Confirma recebimento do comprovante | Texto fixo |
-| `/bloqueado` | Serviço suspenso | Informa bloqueio por fatura em aberto | Formulário: data de **vencimento** |
-| `/pagou` | Pagamento confirmado | Registro interno: compensado no sistema | Texto fixo |
-| `/calote` | Acordo quebrado | Registro interno: suspensão retomada | Texto fixo |
+| Trigger | Função breve |
+|---------|----------------|
+| `/unblock` | Desbloqueio em acordo + aviso sobre possível novo bloqueio até data **D+2 úteis** |
+| `/seg` | Texto da 2ª via + formulário **[[vencimento]]** |
+| `/desbloq` | 📌 Nota interna (canal + solicitante + D+2) |
+| `/baixa` | 📌 Nota interna (canal + comprovante + D+1) |
+| `/norm` | Confirmar normalização da conexão após desbloqueio |
+| `/comp` | Confirmação de comprovante recebido ✅ |
+| `/bloqueado` | Suspensão por fatura; formulário **[[vencimento]]** |
+| `/pagou` / `/calote` | Registros internos de compensação / retomada de suspensão |
 
 ### 6.3 Inatividade e encerramento (cliente)
 
-| Trigger | Nome | O que faz | `.env` |
-|---------|------|-----------|--------|
-| `/alerta` | Alerta de inatividade | Avisa encerramento em 30 min sem resposta | — |
-| `/final` | Encerramento por inatividade | Mensagem de encerramento ao cliente | — |
-| `/aux` | Oferta de ajuda extra | Pergunta se pode ajudar em mais algo | — |
-| `/tchau` | Despedida | Agradecimento e encerramento cordial | `EMPRESA_NOME` |
-| `/cha` | Encerramento simples | Texto curto: `chamado encerrado` | — |
+| Trigger | Função breve |
+|---------|----------------|
+| `/alerta` | Lembrete de inatividade (30 min) 😊 |
+| `/final` | Encerramento por falta de resposta 🤝 |
+| `/aux` | Convite para nova demanda 😊 |
+| `/tchau` | Despedida com nome da empresa (`EMPRESA_NOME` no `.env`) 😊 |
+| `/cha` | “Chamado encerrado.” (curto) |
 
 ### 6.4 Registros internos (NOC / Gateway / timeout)
 
-| Trigger | Nome | O que faz | Observação |
-|---------|------|-----------|------------|
-| `/instruir` | Orientação Gateway Antispam | Registro de instrução técnica ao cliente | Formulário: canal |
-| `/timeout` | Encerramento por timeout | Registro longo de inatividade no Blip | Texto fixo |
-| `/nada` | Encerramento interno | `Nada mais a mim cabia auxiliar` | Uso interno |
+| Trigger | Função breve |
+|---------|----------------|
+| `/instruir` | 📌 Registro sobre orientação gateway antispam |
+| `/timeout` | 📌 Timeout Blip sem incidentes novos |
+| `/nada` | Frase interna de escopo (“Nada mais coube…” ) |
 
 ### 6.5 PMG / Antispam (cliente)
 
-| Trigger | Nome | O que faz |
-|---------|------|-----------|
-| `/pmg` | Relatório PMG | Texto completo sobre relatório, quarentena, Whitelist/Blacklist e PDF de apoio |
+| Trigger | Função breve |
+|---------|----------------|
+| `/pmg` | Explica relatório PMG, link “web”, opções do painel (✅ ❌ 📨 🗑️), riscos ao desativar filtro + PDF 😊 |
 
 ### 6.6 Credenciais (cPanel)
 
-| Trigger | Nome | O que faz | `.env` |
-|---------|------|-----------|--------|
-| `/cpanel` | Solicitação formal cPanel | Pedido de e-mail com dados obrigatórios para envio de credenciais | `EMAIL_ATENDIMENTO` |
+| Trigger | Função breve |
+|---------|----------------|
+| `/cpanel` | Pedido formal de dados por e-mail para `{{email_atendimento}}` (⚠️ e-mail corporativo) |
 
-### 6.7 Suporte técnico — fibra e modem
+### 6.7 Suporte — fibra, visita e N2
 
-| Trigger | Nome | O que faz | `.env` |
-|---------|------|-----------|--------|
-| `/fibra` | Verificação do cabo drop | Orientação para checar conexão da fibra sem remover o cabo | — |
-| `/loss` | LED LOS vermelho | Explica perda de sinal e encaminhamento à manutenção | `EMPRESA_NOME` |
-| `/visita` | Agendamento de visita | Solicita endereço e disponibilidade com avisos importantes | — |
-| `/eng` | Escalonamento N2 | Informa escalonamento para Engenharia | — |
+| Trigger | Função breve |
+|---------|----------------|
+| `/fibra` | Passo a passo da fibra física ✅ |
+| `/loss` | LOS / luz vermelha + Modem `{{empresa_nome}}` |
+| `/visita` | Coleta endereço/horários + avisos de visita |
+| `/eng` | Escalonamento para Engenharia N2 |
+
+> Os **emojis** e as **linhas em branco** fazem parte do texto final onde estão no `base.yml` — ajudam leitura no chat.
 
 ---
 
 ## 7. Recursos avançados usados neste arquivo
 
-O `base.yml` usa três tipos de extensão do Espanso além do texto fixo.
+Combinamos **substituição longa**, **variáveis** e **PowerShell**.
 
-### 7.1 Variáveis globais e `.env`
+### 7.1 `global_vars` + `.env` (PowerShell inline)
 
-Definidas no topo do `base.yml` em `global_vars`. São carregadas pelo script `read-env.ps1` a partir de `match\.env`.
-
-Variáveis expostas nos atalhos:
+Os três campos vindos do `.env` são variáveis **globais** definidas como `shell: powershell` no topo do arquivo. Elas leem `Join-Path $env:CONFIG 'match\.env'` e localizam linhas como `CHAVE=valor`:
 
 - `{{atendente_nome}}` ← `ATENDENTE_NOME`
 - `{{empresa_nome}}` ← `EMPRESA_NOME`
 - `{{email_atendimento}}` ← `EMAIL_ATENDIMENTO`
 
-### 7.2 Variável `shell` (PowerShell)
+Em vários triggers, aparece também `vars: - type: global` para garantir que o Espanso avalie esse valor antes de montar o texto.
 
-Usada em `/dia`, `/unblock`, `/desbloq` e `/baixa` para calcular datas ou saudação.
+### 7.2 Blocos `replace: |` (parágrafos e espaço vertical)
 
-**Exemplo — saudação por horário (`/dia`):**
+Trechos corridos foram **quebrados em parágrafos** usando `|` (literal block scalar) no YAML, com linhas em branco onde o chat precisa respirar. Isso aparece forte em `/pmg`, `/fibra`, `/visita`, etc.
 
-```yaml
-vars:
-  - name: saudacao
-    type: shell
-    params:
-      cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'bom dia' } elseif ($h -lt 18) { 'boa tarde' } else { 'boa noite' }"
-      shell: powershell
-```
+### 7.3 Variável local `shell` (datas e saudação)
 
-**Exemplo — D+2 dias úteis (`/unblock`, `/desbloq`):**
+No `/dia`, a saudação `{{saudacao}}` usa um `shell` curto pela hora do sistema. Nos financeiros `/unblock`, `/desbloq` e `/baixa`, outro `shell` calcula **D+N dias úteis** (pulando fins de semana).
 
-O script avança a data pulando sábado e domingo até contar 2 dias úteis.
+### 7.4 Formulários
 
-### 7.3 Variável `clipboard`
+- **`form:` com `[[campo]]`** — usado em `/proto`, `/seg`, `/bloqueado` para preencher protocolo ou vencimento.
+- **`type: form` em `vars`** — usado quando o texto final referencia campos estruturados (`{{formulario.canal}}`, etc.), como `/desbloq`, `/baixa`, `/instruir`.
 
-Usada em `/proto`:
+### 7.5 Dica de edição YAML
 
-1. Copie o número do protocolo (Ctrl+C).
-2. Digite `/proto` e confirme.
-3. O Espanso cola o texto copiado no lugar de `{{clipboard}}`.
+Ao alterar só textos dentro de um `replace: |`, **não** recoloque `vars:` no meio do parágrafo (isso quebra o parse e faz **sumirem todos** os triggers). Liste `vars` **depois** de fechar o bloco da mensagem.
 
-### 7.4 Formulários (`form` e `type: form`)
-
-**Formulário simples** — campo `[[nome]]` na própria linha `form:`:
+### 7.6 Adicionar um novo atalho
 
 ```yaml
-- trigger: "/seg"
-  form: |
-    ... vencimento em [[vencimento]] ...
+  - trigger: "/novo"
+    replace: |
+      Primeira linha.
+
+      Segunda linha — mantenha emojis 😊 quando fizer sentido.
 ```
 
-**Formulário com campos estruturados** — usado em `/desbloq`, `/baixa`, `/instruir`:
-
-```yaml
-- name: formulario
-  type: form
-  params:
-    layout: |
-      Canal: [[canal]]
-      Nome: [[nome]]
-    fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-```
-
-No texto final, use `{{formulario.canal}}`, `{{formulario.nome}}`, etc.
-
-### 7.5 Como adicionar um novo atalho
-
-Adicione um bloco dentro de `matches:` no `base.yml`:
-
-```yaml
-  - trigger: "/meuatalho"
-    replace: "Texto que será inserido."
-```
-
-Salve, reinicie se necessário (`espanso restart`) e teste.
-
-**Regras importantes:**
-
-- Use **espaços** para indentação (2 espaços por nível), não tabs.
-- Cada item em `matches:` começa com `- trigger:`.
-- Comentários no YAML usam `#`.
+Salve, recarregue o Espanso e teste. Use **indentação por espaços** (2 espaços por nível).
 
 ---
 
@@ -537,36 +478,28 @@ Na Search Bar, comandos que começam com `>` mostram opções de controle do Esp
 
 | Problema | Solução |
 |----------|---------|
-| Atalho não expande | Verifique `espanso status`; use `espanso restart` |
+| Atalho não expande | Confirme ícone Espanso ativo na bandeja; `espanso status`/reinício. Teste primeiro no Bloco de Notas. |
 | Ícone não aparece na bandeja | Inicie pelo Menu Iniciar; reinstale se persistir |
-| `/proto` vem vazio | Copie o texto (Ctrl+C) **antes** de disparar o trigger |
-| Data ou saudação errada | Confirme que PowerShell funciona: `powershell -Command "Get-Date"` |
-| Erro ao salvar YAML | Revise indentação; valide em [yamllint.com](https://www.yamllint.com/) |
-| Espanso não recarrega após editar | `espanso restart` |
-| Conflito em um app específico | Crie `config/nome-do-app.yml` com filtros — ver [documentação app-specific](https://espanso.org/docs/configuration/app-specific-configurations/) |
-| Debug de scripts | Adicione `debug: true` em `params` do shell e rode `espanso log` |
-| `/dia` ainda mostra "Bruno" (ou nome antigo) | Confira se editou `%AppData%\espanso\match\.env` (não só o `.env` do repositório); rode `espanso restart` |
-| Variável `.env` não aparece no texto | Verifique se `match\scripts\read-env.ps1` existe; teste manualmente (veja abaixo) |
-| Aparece `{{atendente_nome}}` literal | Pasta `scripts` ausente ou erro no PowerShell; veja `espanso log` |
-| `.env` ignorado | Arquivo deve estar em `match\.env`, não na raiz de `espanso\` |
+| Saudação/Data errada nos financeiros (`/dia`, D+N útil) | Powershell deve executar comandos rápidos: `powershell -Command "Get-Date"` |
+| `/proto` traz texto errado (nome, trecho anterior, etc.) | O campo deve receber **só** o código do protocolo. Se você colar outro texto, o Espanso insere esse texto mesmo. |
+| Mensagem aparece como `{{nome}}` sem expandir | Erro ao renderizar: veja **`espanso log`**. Às vezes é YAML inválido (por exemplo **`vars:` colado no meio** de um texto em `replace` com bloco YAML `|`). |
+| Variáveis `.env` não refletidas (ex.: sempre “Bruno”) | Use `%AppData%\espanso\match\.env` (ação no PC), não apenas `.env` da pasta do repositório, salvo que você sempre copie os dois arquivos juntos |
+| `.env` ignorado ou placeholders estranhos | Arquivo deve estar em `match\.env`, **mesma pasta** do `base.yml` |
+| Espanso não recarrega após editar | `espanso restart` *(ou pare/inicie pela bandeja)* |
+| `espanso` não reconhecido no terminal | Use `espansod.exe` ou `espanso.cmd` sob `%LOCALAPPDATA%\Programs\Espanso\` |
+| Conflitos só em um app (Blip x outro) | Considere [configurações por aplicativo](https://espanso.org/docs/configuration/app-specific-configurations/) |
+| Scripts shell lentos ou falhos | Use `debug: true` dentro de `params` do shell e `espanso log` |
 
-**Testar leitura do `.env` manualmente:**
+**YAML inválido (erro grave):** valide com [yamllint.com](https://www.yamllint.com/) — um arquivo quebrado impede todos os triggers de carregar.
 
-```powershell
-$env:CONFIG = "$env:APPDATA\espanso"
-& "$env:CONFIG\match\scripts\read-env.ps1" -Key ATENDENTE_NOME -Default Bruno
-```
-
-Deve retornar o valor definido no seu `.env`.
-
-**Validar sintaxe após copiar o arquivo:**
+**Diagnosticar problema de YAML após edição:**
 
 ```powershell
-espanso restart
-espanso log
+espanso restart    # ou equivalente via espansod.exe
+espanso log        # procure por "failed to parse" ou erro no base.yml
 ```
 
-Digite um trigger com shell (`/dia`) e observe se há erros no log.
+Dispare `/dia` e observe mensagens relacionadas ao **rendering**.
 
 ---
 
