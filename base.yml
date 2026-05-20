@@ -374,3 +374,36 @@ matches:
       Ela já recebe o histórico do que fizemos até aqui e dará sequência ao caso.
 
       Você receberá retorno **neste mesmo chamado** quando a intervenção terminar ou se a Engenharia precisar de mais algum detalhe.
+
+
+  # ==========================================
+  # REGISTRO INTERNO: ABERTURA DE O.S. (LOS / SEM CONEXÃO)
+  # ==========================================
+
+  - trigger: "/loglos"
+    form: |
+      Abertura de O.S. para Visita Técnica (Equipe de Campo)
+      
+      Motivo da Visita: Sem conexão (Luz LOS ativa / Possível rompimento)
+      Endereço Confirmado: [[endereco]]
+      Contato no Local: [[contato]]
+      Disponibilidade do Cliente: [[horario]]
+      
+      Testes/Ações Prévias Realizadas pelo Suporte:
+      - Cliente entrou em contato informando que está sem conexão.
+      - Realizadas orientações de verificação visual do cabo drop interno, confirmando que não há dobras, rompimentos ou objetos pressionando a fibra.
+      - Cliente confirmou que o conector está corretamente encaixado na ONU e que a luz LOS permanece ativa.
+      - Verificadas as condições da região/CTO sem identificar solução remota.
+      - Solicito o envio de técnico ao local para verificação presencial.
+      
+      * Cliente orientado que a visita deve ser acompanhada por um maior de 18 anos.
+
+  # ==========================================
+  # REGISTRO FINANCEIRO: SEGUNDA VIA DE BOLETO
+  # ==========================================
+
+  - trigger: "/2via"
+    form: |
+      Cliente entrou em contato solicitando a 2ª via de boleto em aberto.
+      Foi gerada uma nova fatura atualizada para o vencimento em [[vencimento]].
+      A linha digitável e/ou PDF foram encaminhados ao cliente via Blip.
