@@ -1,0 +1,376 @@
+# Variáveis globais carregadas de match\.env
+global_vars:
+  - name: atendente_nome
+    type: shell
+    params:
+      shell: powershell
+      cmd: |
+        $p = Join-Path $env:CONFIG 'match\.env'
+        if (Test-Path $p) {
+          $l = Get-Content $p | Where-Object { $_ -match '^\s*ATENDENTE_NOME\s*=' } | Select-Object -First 1
+          if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { 'Bruno' }
+        } else { 'Bruno' }
+  - name: empresa_nome
+    type: shell
+    params:
+      shell: powershell
+      cmd: |
+        $p = Join-Path $env:CONFIG 'match\.env'
+        if (Test-Path $p) {
+          $l = Get-Content $p | Where-Object { $_ -match '^\s*EMPRESA_NOME\s*=' } | Select-Object -First 1
+          if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { 'COM4' }
+        } else { 'COM4' }
+  - name: email_atendimento
+    type: shell
+    params:
+      shell: powershell
+      cmd: |
+        $p = Join-Path $env:CONFIG 'match\.env'
+        if (Test-Path $p) {
+          $l = Get-Content $p | Where-Object { $_ -match '^\s*EMAIL_ATENDIMENTO\s*=' } | Select-Object -First 1
+          if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { 'atendimento@com4.com.br' }
+        } else { 'atendimento@com4.com.br' }
+
+matches:
+  # 1. Saudação Dinâmica (Verifica a hora do sistema via PowerShell)
+  - trigger: "/ola"
+    replace: |
+      Olá, {{saudacao}}! Tudo bem? 😊
+
+      Sou {{atendente_nome}} e darei sequência ao seu atendimento.
+
+      Para continuarmos, confirme, por gentileza, os seguintes dados:
+
+      Nome:
+      Telefone:
+      E-mail:
+    vars:
+      - name: atendente_nome
+        type: global
+      - name: saudacao
+        type: shell
+        params:
+          cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'bom dia' } elseif ($h -lt 18) { 'boa tarde' } else { 'boa noite' }"
+          shell: powershell
+
+  # 2. Protocolo (entrada manual — informe apenas o número)
+  - trigger: "/proto"
+    form: |
+      📋 Digite somente o número do protocolo (sem nome ou outros dados).
+
+      O número do protocolo referente a este atendimento é: [[protocolo]]
+
+  # 3. Desbloqueio D+2 úteis (nome distinto de /desbloq para não haver prefixo comum)
+  - trigger: "/acordo"
+    replace: |
+      Certo! Concluí o desbloqueio em acordo dos seus serviços nesta data.
+
+      Caso o pagamento não seja compensado até o final do dia {{data_2d_uteis}}, o sistema poderá aplicar um novo bloqueio automaticamente.
+    vars:
+      - name: data_2d_uteis
+        type: shell
+        params:
+          cmd: "$d = Get-Date; $c = 2; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
+          shell: powershell
+
+  # 4. Envio de 2ª Via (Abre formulário para digitar o vencimento)
+  - trigger: "/seg"
+    form: |
+      Conforme solicitado, segue em anexo a segunda via do boleto, com vencimento em [[vencimento]].
+
+      Por gentileza, revise os dados antes de pagar.
+
+      Se possível, envie o comprovante por aqui para agilizarmos a baixa no sistema.
+
+  # 5. Registro interno desbloqueio (/baixa é outro fluxo — sem prefixo compartilhado)
+  - trigger: "/desbloq"
+    replace: |
+      Contato via: {{formulario.canal}}
+      Solicitante: {{formulario.nome}} — {{formulario.telefone}}
+
+      Ação: desbloqueio em acordo realizado.
+      Prazo estendido até: {{data_2d_uteis}}.
+
+      Status: aguardando confirmação da baixa bancária no sistema.
+    vars:
+      - name: data_2d_uteis
+        type: shell
+        params:
+          cmd: "$d = Get-Date; $c = 2; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
+          shell: powershell
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Nome: [[nome]]
+            Telefone: [[telefone]]
+          fields:
+            canal:
+              type: choice
+              values:
+                - Blip
+                - Ligação
+
+  # 6. Registro interno baixa (antes /compro — conflitava como prefixo com /comp)
+  - trigger: "/baixa"
+    replace: |
+      Contato via: {{formulario.canal}}
+      Cliente enviou comprovante de pagamento (em anexo).
+
+      Chamado em aguardo de compensação bancária prevista para {{data_1d_util}}.
+    vars:
+      - name: data_1d_util
+        type: shell
+        params:
+          cmd: "$d = Get-Date; $c = 1; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
+          shell: powershell
+      - name: formulario
+        type: form
+        params:
+          layout: "Canal: [[canal]]"
+          fields:
+            canal:
+              type: choice
+              values:
+                - Blip
+                - E-mail
+                - Ligação
+
+# ==========================================
+  # TEXTOS COMPLEMENTARES: FINANCEIRO E DESBLOQUEIO
+  # ==========================================
+  - trigger: "/norm"
+    replace: |
+      O desbloqueio dos seus serviços foi concluído.
+
+      Sua conexão deve voltar ao normal em instantes.
+
+  - trigger: "/comp"
+    replace: |
+      Recebemos seu comprovante! ✅
+
+      Ele já foi anexado ao seu cadastro financeiro.
+      Muito obrigado!
+
+  # ==========================================
+  # INATIVIDADE E ENCERRAMENTO (CLIENTE)
+  # ==========================================
+  - trigger: "/alerta"
+    replace: |
+      Olá! 😊
+
+      Você ainda precisa da nossa ajuda?
+
+      Estamos há algum tempo sem resposta sua; por isso, este atendimento será encerrado automaticamente em 30 minutos.
+
+      Quando precisar, é só responder por aqui!
+
+  - trigger: "/final"
+    replace: |
+      Como não recebemos mais retorno, encerro este atendimento por inatividade.
+
+      Se precisar de ajuda novamente, fale com a gente por aqui.
+      Estamos à disposição! 🤝
+
+  - trigger: "/aux"
+    replace: "Posso ajudar com mais alguma solicitação hoje? 😊"
+
+  - trigger: "/tchau"
+    replace: |
+      A {{empresa_nome}} agradece pelo contato! 😊
+
+      Tenha um excelente dia e conte sempre conosco.
+    vars:
+      - name: empresa_nome
+        type: global
+
+  # ==========================================
+  # REGISTROS INTERNOS DE CHAMADO (FINANCEIRO/NOC)
+  # ==========================================
+  - trigger: "/pagou"
+    replace: |
+      Pagamento compensado e confirmado no sistema.
+
+      Chamado finalizado.
+
+  - trigger: "/calote"
+    replace: |
+      Suspensão retomada.
+
+      Acordo de desbloqueio encerrado por falta de pagamento.
+    # ==========================================
+  # REGISTROS TÉCNICOS (NOC / GATEWAY)
+  # ==========================================
+  
+# Registro de orientação sobre Gateway Antispam (Formulário Variável)
+  - trigger: "/instruir"
+    replace: |
+      Registro interno — gateway antispam
+
+      • O cliente entrou em contato via {{formulario.canal}}, solicitando orientações técnicas sobre o funcionamento do gateway antispam.
+      • Orientação prestada conforme procedimentos internos.
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: "Canal: [[canal]]"
+          fields:
+            canal:
+              type: choice
+              values:
+                - Blip
+                - E-mail
+                - Ligação
+
+  # Registro de encerramento por inatividade (Timeout)
+  - trigger: "/timeout"
+    replace: |
+      Encerramento por timeout (inatividade)
+
+      Atendimento encerrado automaticamente por ausência de interação por parte do usuário.
+
+      Não foram registradas novas solicitações ou incidentes após esse período.
+
+      Chamado encerrado por timeout — sem intervenção técnica ou troubleshooting adicional até o momento.
+
+  # Frase de encerramento padrão (Uso Interno)
+  - trigger: "/nada"
+    replace: "Nada mais coube ao meu escopo neste atendimento."
+
+  # ==========================================
+  # RESPOSTAS AO CLIENTE (PMG / RELATÓRIO)
+  # ==========================================
+
+  # Explicação detalhada sobre o Relatório do PMG
+  - trigger: "/pmg"
+    replace: |
+      Acabamos de enviar para a sua caixa de entrada o relatório atualizado do Gateway Antispam (PMG), com os e-mails retidos em quarentena.
+
+      Para consultar em tempo real, abra o e-mail até o rodapé. Clique na palavra em destaque "web" nesta parte da mensagem:
+
+      "Por favor use a interface web para gerenciar os spams de sua caixa de e-mail".
+
+      Observamos que esses remetentes ainda não aparecem na sua lista de confiança. O filtro atua de forma automática com base na pontuação de risco (Spam Score).
+
+      No painel, você pode usar as opções abaixo:
+
+      ✅ **Whitelist:** libera aquele e-mail na quarentena e adiciona o remetente à lista de confiança (mensagens futuras tendem a ser liberadas).
+
+      ❌ **Blacklist:** bloqueia novas mensagens desse remetente.
+
+      📨 **Entregar (Deliver):** entrega somente aquele e-mail para a sua caixa, sem cadastrar o remetente como confiável.
+
+      🗑️ **Deletar (Delete):** remove o e-mail da quarentena de forma permanente.
+
+      **Atenção:** é possível desativar o antispam do domínio, se desejado — porém isso retira uma camada importante de segurança e pode aumentar o volume de spam, lixo eletrônico e riscos de malware na caixa de entrada.
+
+      Em apoio, segue também um PDF com o passo a passo ilustrado em anexo.
+
+      Qualquer dúvida, seguimos à disposição! 😊
+
+  # ==========================================
+  # CREDENCIAIS E ACESSOS (CPANEL)
+  # ==========================================
+
+  # Solicitação de e-mail formal para envio de credenciais cPanel
+  - trigger: "/cpanel"
+    replace: |
+      Para enviarmos os dados de acesso ao cPanel, pedimos um e-mail para {{email_atendimento}} contendo os itens listados.
+
+      ⚠️ **Importante (segurança):** o envio deve ser feito obrigatoriamente a partir de um endereço de e-mail corporativo (domínio da empresa).
+
+      Inclua, por gentileza:
+
+      • CPF ou CNPJ do cadastro
+      • Nome completo do solicitante
+      • Razão social
+      • Endereço físico da empresa
+      • Motivo da solicitação
+    vars:
+      - name: email_atendimento
+        type: global
+
+  # ==========================================
+  # ENCERRAMENTO SIMPLES
+  # ==========================================
+
+  - trigger: "/cha"
+    replace: "Chamado encerrado."
+    
+# ==========================================
+  # VERIFICAÇÃO FÍSICA E TROUBLESHOOTING
+  # ==========================================
+
+  # Orientação de verificação do cabo Drop/Fibra
+  - trigger: "/fibra"
+    replace: |
+      Verifique, por favor, se o cabo de fibra óptica está bem encaixado no equipamento.
+
+      Não é necessário tirar nem limpar o conector da fibra: ele é delicado — apenas confira se está firme na porta.
+
+      Olhe o cabo pela parte visível (sem forçá-lo): dobras marcadas, torções ou rupturas podem indicar problema físico na conexão.
+
+      Esses cuidados ajudam bastante na análise do caso. ✅
+      
+# ==========================================
+  # DIAGNÓSTICO DE SINAL (MODEM)
+  # ==========================================
+
+  # Explicação sobre LED de LOS (Luz Vermelha)
+  - trigger: "/loss"
+    replace: |
+      Entendo a sua preocupação.
+
+      A luz vermelha no modem {{empresa_nome}} (modelo branco com o logo {{empresa_nome}}) indica **perda de sinal (LOS)** — ou seja, interrupção no trecho da fibra entre o seu equipamento e a rede.
+
+      Para seguir com a correção, vou registrar o seu caso com a equipe de manutenção de fibra óptica, para que realizem os procedimentos e restabeleçam a sua conexão o mais rápido possível.
+    vars:
+      - name: empresa_nome
+        type: global
+      
+# ==========================================
+  # AGENDAMENTO DE VISITA TÉCNICA (FIBRA/CAMPO)
+  # ==========================================
+
+  - trigger: "/visita"
+    replace: |
+      Para continuarmos com o **agendamento da visita técnica no local**, confirme, por gentileza, as informações abaixo:
+
+      📍 **Endereço completo:**
+      🕒 **Melhores dias e horários** para receber a equipe:
+
+      ⚠️ **Avisos importantes**
+
+      1. A presença de um responsável **maior de 18 anos** é obrigatória durante a visita.
+
+      2. A formalização será feita pela equipe técnica de fibra, que deve retornar neste mesmo contato para informar **data e horário exatos** da visita.
+# ==========================================
+  # INFORMATIVO DE SUSPENSÃO (FINANCEIRO)
+  # ==========================================
+
+  # Informar bloqueio por falta de pagamento
+  - trigger: "/bloqueado"
+    form: |
+      Ao consultar seu cadastro, identifiquei que os serviços estão temporariamente suspensos por causa de uma fatura com vencimento em [[vencimento]] que aparece como em aberto no nosso sistema.
+
+      Para restaurar o seu acesso, envie por aqui o comprovante, caso o pagamento já tenha sido feito.
+
+      Ou, se preferir, posso emitir a 2ª via atualizada agora mesmo.
+
+      Como você deseja seguir?
+  # ==========================================
+  # ESCALONAMENTO DE CHAMADOS (N2)
+  # ==========================================
+
+  # Informar o cliente sobre escalonamento para a Engenharia
+  - trigger: "/eng"
+    replace: |
+      Realizamos testes e diagnósticos iniciais.
+
+      Porém, para concluir a sua solicitação, será preciso uma intervenção mais ampla na infraestrutura do servidor.
+
+      Por isso, estou escalando este chamado para a **Equipe de Engenharia (Nível 2)**.
+      Ela já recebe o histórico do que fizemos até aqui e dará sequência ao caso.
+
+      Você receberá retorno **neste mesmo chamado** quando a intervenção terminar ou se a Engenharia precisar de mais algum detalhe.
