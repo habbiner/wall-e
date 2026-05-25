@@ -21,7 +21,7 @@ global_vars:
     params:
       shell: powershell
       cmd: |
-        $p = Join-Path $env:CONFIG 'match.env'
+        $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
           $l = Get-Content $p | Where-Object { $_ -match '^\s*ATENDENTE_NOME\s*=' } | Select-Object -First 1
           if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { 'Bruno' }
@@ -32,7 +32,7 @@ global_vars:
     params:
       shell: powershell
       cmd: |
-        $p = Join-Path $env:CONFIG 'match.env'
+        $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
           $l = Get-Content $p | Where-Object { $_ -match '^\s*EMPRESA_NOME\s*=' } | Select-Object -First 1
           if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { 'COM4' }
@@ -43,7 +43,7 @@ global_vars:
     params:
       shell: powershell
       cmd: |
-        $p = Join-Path $env:CONFIG 'match.env'
+        $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
           $l = Get-Content $p | Where-Object { $_ -match '^\s*EMAIL_ATENDIMENTO\s*=' } | Select-Object -First 1
           if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { 'atendimento@com4.com.br' }
