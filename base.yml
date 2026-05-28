@@ -3,9 +3,9 @@
 # Organizado por contexto · Saudação dinâmica · force_clipboard em replace multilinha
 # 
 # SEÇÕES:
-#   1. Saudação, Identificação e Encerramento  (chat com cliente)
+#   1. Saudação, Identificação e Encerramento  (chat e voz com cliente)
 #   2. Financeiro — Cliente                    (boletos, desbloqueios, comprovantes)
-#   3. Suporte Técnico — Cliente               (fibra, LOS, instab, fast, reset, visita, eng)
+#   3. Suporte Técnico — Cliente               (fibra, LOS, diagnósticos, escalonamento)
 #   4. E-mail — Hospedagem e Migração          (templates com saudação dinâmica)
 #   5. Registros Internos — Financeiro         (logs para o sistema de tickets)
 #   6. Registros Internos — NOC / Técnico      (logs para o sistema de tickets)
@@ -49,13 +49,15 @@ global_vars:
           if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { 'atendimento@com4.com.br' }
         } else { 'atendimento@com4.com.br' }
 
+
 matches:
 
 # =============================================================================
 # 1. SAUDAÇÃO, IDENTIFICAÇÃO E ENCERRAMENTO
+# Triggers de abertura, espera, encerramento e transferência no chat (Blip) e voz.
 # =============================================================================
 
-  # Saudação de abertura com horário dinâmico e coleta de dados do cliente
+  # Saudação de abertura com horário dinâmico e coleta de dados do cliente (Exigência Monitoria)
   - trigger: "/ola"
     force_clipboard: true
     replace: |-
@@ -65,7 +67,8 @@ matches:
 
       Para continuarmos, confirme, por gentileza, os seguintes dados:
 
-      Nome Completo:
+      Seu Nome Completo:
+      CPF ou CNPJ:
       Telefone:
       E-mail:
     vars:
@@ -82,9 +85,35 @@ matches:
     form: |
       O número do protocolo referente a este atendimento é: [[protocolo]]
 
+  # Script de retorno ativo de chamado — voz ou contato ativo no chat
+  - trigger: "/retorno"
+    force_clipboard: true
+    replace: |-
+      {{saudacao}}! Aqui é o {{atendente_nome}}, do suporte da Com4. Estou retornando o contato referente ao chamado em aberto. Podemos prosseguir?
+    vars:
+      - name: atendente_nome
+        type: global
+      - name: saudacao
+        type: shell
+        params:
+          shell: powershell
+          cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'Bom dia' } elseif ($h -lt 18) { 'Boa tarde' } else { 'Boa noite' }"
+
+  # Solicita pausa breve para verificação — uso obrigatório antes de consultar o sistema
+  - trigger: "/espera"
+    replace: "Só um momento, por gentileza, enquanto verifico as informações. ⏱️"
+
+  # Agradecimento após pausa — obrigatório ao retornar com o cliente
+  - trigger: "/obg"
+    replace: "Obrigado por aguardar! Peço desculpas pela demora. 😊"
+
+  # Informa ao cliente sobre transferência para o setor responsável
+  - trigger: "/transfere"
+    replace: "Vou encaminhar o seu atendimento para o setor responsável, que dará continuidade à sua solicitação. Peço que aguarde um momento, por gentileza."
+
   # Pergunta se o cliente precisa de mais alguma ajuda antes de encerrar
   - trigger: "/aux"
-    replace: "Posso ajudar com mais alguma solicitação hoje? 😊"
+    replace: "Posso ajudar em algo mais? 😊"
 
   # Alerta de inatividade — aviso de encerramento automático em 30 minutos
   - trigger: "/alerta"
@@ -107,22 +136,22 @@ matches:
       Se precisar de ajuda novamente, fale com a gente por aqui.
       Estamos à disposição! 🤝
 
-  # Despedida padrão com o nome da empresa vindo do match.env
+  # Despedida padrão de encerramento com nome da empresa vindo do match.env
   - trigger: "/tchau"
     force_clipboard: true
     replace: |-
-      A {{empresa_nome}} agradece pelo contato! 😊
+      Caso tenha qualquer outra dúvida, estamos à disposição! 😊
 
-      Tenha um excelente dia e conte sempre conosco.
+      A {{empresa_nome}} agradece o seu contato. Tenha um ótimo dia!
     vars:
       - name: empresa_nome
         type: global
 
-  # Declara que nenhuma ação adicional coube ao escopo do atendimento
+  # Declara que nenhuma ação adicional coube ao escopo do atendimento (uso interno)
   - trigger: "/nada"
     replace: "Sem mais ações para o meu escopo neste atendimento."
 
-  # Encerramento simples de chamado sem texto adicional
+  # Encerramento simples de chamado sem texto adicional (uso interno)
   - trigger: "/enc"
     replace: "Chamado encerrado."
 
@@ -134,7 +163,7 @@ matches:
   # Informa suspensão por fatura em aberto; oferece 2ª via ou aguarda comprovante
   - trigger: "/bloqueado"
     form: |
-      Ao consultar seu cadastro, identifiquei que os serviços estão temporariamente suspensos devido a uma fatura com vencimento em [[vencimento]] que consta em aberto no nosso sistema.
+      Ao consultar seu cadastro, identifiquei que os serviços estão temporariamente suspensos devido a uma fatura com vencimento em [[vencimento]] que consta em aberto em nosso sistema.
 
       Para restaurarmos o seu acesso, envie por aqui o comprovante, caso o pagamento já tenha sido realizado.
 
@@ -149,13 +178,25 @@ matches:
 
       Por gentileza, revise os dados antes de pagar.
 
-      Se possível, envie o comprovante por aqui para agilizarmos a baixa no sistema.
+      Se possível, envie o comprovante por aqui para agilizarmos a baixa em nosso sistema.
+
+  # Informa que o documento enviado é um agendamento e solicita o comprovante efetivado
+  - trigger: "/agendamento"
+    force_clipboard: true
+    replace: |-
+      Analisamos o documento enviado, mas verificamos que se trata de um comprovante de **agendamento**.
+
+      Para conseguirmos prosseguir com a baixa no sistema e a liberação dos seus serviços, precisamos do comprovante de **pagamento efetivado**.
+
+      Por gentileza, assim que a transação for concluída pelo seu banco, nos envie o comprovante definitivo por aqui.
 
   # Confirma desbloqueio em acordo e informa prazo limite de compensação (D+2 úteis)
   - trigger: "/acordo"
     force_clipboard: true
     replace: |-
       Certo! Concluí o desbloqueio em acordo dos seus serviços nesta data.
+
+      Em até cinco minutos o seu serviço deverá normalizar.
 
       Caso o pagamento não seja compensado até o final do dia {{data_2d_uteis}}, o sistema poderá aplicar um novo bloqueio automaticamente.
     vars:
@@ -207,7 +248,7 @@ matches:
 
       A luz vermelha no seu modem {{empresa_nome}} (modelo branco com o logo da {{empresa_nome}}) indica perda de sinal (LOS) — ou seja, interrupção no trecho da fibra entre o seu equipamento e a nossa rede.
 
-      Para solucionar isso, vou registrar o seu caso com a equipe de manutenção de fibra óptica, para que realizem os procedimentos e restabeleçam a sua conexão o mais rápido possível.
+      Para solucionar isso, vou registrar o seu caso com a equipe de manutenção de fibra óptica, para que restabeleçam sua conexão no menor prazo possível.
     vars:
       - name: empresa_nome
         type: global
@@ -224,7 +265,7 @@ matches:
       ⚠️ Avisos importantes:
 
       1. A presença de um responsável maior de 18 anos é obrigatória durante a visita.
-      2. A formalização será feita pela nossa equipe técnica de fibra, que deve retornar neste mesmo contato para informar a data e o horário exatos da visita.
+      2. A confirmação de data e horário será feita pela equipe técnica de fibra diretamente neste canal.
 
   # Questionário de diagnóstico de instabilidade — coleta informações do cliente
   - trigger: "/instab"
@@ -286,7 +327,7 @@ matches:
     replace: |-
       Enviamos para a sua caixa de entrada o relatório atualizado do Gateway Antispam (PMG), contendo os e-mails retidos em quarentena.
 
-      Para consultá-lo em tempo real, abra o e-mail até o rodapé. Clique na palavra em destaque "web" nesta parte da mensagem:
+      Para consultá-lo em tempo real, abra o e-mail e vá até o rodapé. Localize e clique no link "web" destacado nesta parte da mensagem:
 
       "Por favor use a interface web para gerenciar os spams de sua caixa de e-mail".
 
@@ -308,7 +349,7 @@ matches:
   - trigger: "/cpanel"
     force_clipboard: true
     replace: |-
-      Para que possamos enviar os dados de acesso ao cPanel, pedimos o envio de um e-mail para {{email_atendimento}} contendo os itens listados.
+      Para que possamos enviar os dados de acesso ao cPanel, pedimos que formalize a solicitação e realize o envio de um e-mail para {{email_atendimento}} contendo os itens listados.
 
       ⚠️ Importante (Segurança): o envio deve ser feito obrigatoriamente a partir de um endereço de e-mail corporativo (domínio da empresa).
 
@@ -317,6 +358,8 @@ matches:
       • CPF ou CNPJ do titular
       • Nome completo ou Razão Social
       • Endereço de cadastro
+      • Motivo da solicitação
+
     vars:
       - name: email_atendimento
         type: global
@@ -390,7 +433,7 @@ matches:
 
       Conforme solicitado, seguem os dados de acesso ao painel de controle da hospedagem do domínio {{formulario.dominio}}:
 
-      Painel Administrativo Cpanel:
+      Painel Administrativo cPanel:
       Endereço: https://cpanel.{{formulario.dominio}}/ ou https://189.90.130.{{formulario.ip}}:2083/
       Usuário: {{formulario.user}}
       Senha: {{formulario.senha}}
@@ -528,6 +571,43 @@ matches:
 
       Obrigado pelo contato. Conte sempre conosco!
 
+  # Orientações de DNS para Site em outro provedor e E-mail na Com4
+  - trigger: "/dnsemail"
+    force_clipboard: true
+    replace: |-
+      Para que o seu site funcione no provedor externo e os seus e-mails continuem operando perfeitamente conosco, será necessário configurar os apontamentos DNS abaixo na zona de DNS do seu provedor de site atual.
+
+      1. Apontamentos MX (Recebimento de E-mails via PMG Antispam)
+      Estes são obrigatórios para que o domínio receba e-mails passando pelo nosso filtro de segurança padrão.
+      • Tipo: MX | Nome: {{formulario.dominio}} (ou @) | Prioridade: 10 | Destino: mx1.com4datacenter.com.br
+      • Tipo: MX | Nome: {{formulario.dominio}} (ou @) | Prioridade: 10 | Destino: mx2.com4datacenter.com.br
+
+      2. Apontamentos de Autenticação TXT (Segurança contra Spam)
+      Estes garantem que os e-mails enviados pela Com4 não caiam na caixa de spam dos destinatários.
+      • Tipo: TXT | Nome: {{formulario.dominio}} (ou @) | Destino: v=spf1 +a +mx +ip4:189.90.130.0/23 -all
+      • Tipo: TXT | Nome: _dmarc.{{formulario.dominio}} | Destino: v=DMARC1; p=none; fo=0; adkim=r; aspf=r; pct=100; rf=afrf; ri=86400; sp=none
+      • Tipo: TXT | Nome: default._domainkey.{{formulario.dominio}} | Destino: {{formulario.dkim}}
+
+      3. Apontamentos de Serviço E-mail (Tipo A)
+      Para garantir o acesso ao painel e a comunicação dos gerenciadores (como Outlook).
+      • Tipo: A | Nome: mail.{{formulario.dominio}} | Destino: 189.90.130.{{formulario.ip}}
+      • Tipo: A | Nome: webmail.{{formulario.dominio}} | Destino: 189.90.130.{{formulario.ip}}
+      • Tipo: A | Nome: pop.{{formulario.dominio}} | Destino: 189.90.130.{{formulario.ip}}
+      • Tipo: A | Nome: imap.{{formulario.dominio}} | Destino: 189.90.130.{{formulario.ip}}
+      • Tipo: A | Nome: smtp.{{formulario.dominio}} | Destino: 189.90.130.{{formulario.ip}}
+      • Tipo: A | Nome: cpanel.{{formulario.dominio}} | Destino: 189.90.130.{{formulario.ip}}
+
+      Após realizar essas configurações, o tempo de propagação DNS pode levar de 2 a 24 horas.
+      Qualquer dúvida durante o processo, sigo à disposição!
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Domínio: [[dominio]]
+            Chave DKIM completa: [[dkim]]
+            Final do IP (ex: 200): [[ip]]
+
 
 # =============================================================================
 # 5. REGISTROS INTERNOS — FINANCEIRO
@@ -543,7 +623,7 @@ matches:
       Ação: Desbloqueio em acordo realizado.
       Prazo estendido até: {{data_2d_uteis}}.
 
-      Status: Aguardando confirmação da baixa bancária no sistema.
+      Status: Aguardando confirmação da baixa bancária em nosso sistema.
     vars:
       - name: data_2d_uteis
         type: shell
@@ -595,7 +675,7 @@ matches:
   - trigger: "/pagou"
     force_clipboard: true
     replace: |-
-      Pagamento compensado e confirmado no sistema.
+      Pagamento compensado e confirmado em nosso sistema.
 
       Chamado finalizado.
 
@@ -679,6 +759,7 @@ matches:
       FINANCEIRO
       • Tempo de Contrato: [[tempo]]
       • Multa de Fidelidade: [[multa]]
+      • Boletos em Aberto: [[boletos]]
       • Faturamento: [[faturamento]]
 
       LOGÍSTICA (APENAS FIBRA)
@@ -699,6 +780,12 @@ matches:
         values:
           - Irreversível
           - Reversível
+      multa:
+        type: choice
+        values:
+          - Sim
+          - Não
+          - Não se aplica
       equipamento:
         type: choice
         values:
@@ -803,69 +890,23 @@ matches:
           - Não constam bloqueios
           - IP Bloqueado pelo Firewall
 
-  # Log de visita técnica de fibra com diagnóstico de sinal e dados de recepção
+  # Log de visita técnica de fibra (Luz LOS) - Formato otimizado para Equipe de Campo
   - trigger: "/loglos"
     form: |
-      Visita Técnica de Fibra
-      SOLICITAÇÃO DO CLIENTE
-      • Canal de Atendimento: [[canal]]
-      • Problema Relatado: [[problema]]
-
-      VERIFICAÇÕES FEITAS
-      • Status no Nagios/Leeloo: [[status]]
-      • dBm: [[dbm]]
-      • Consumo: [[consumo]]
-      • Configuração: [[router]]
-      • Autenticada: [[autenticada]]
-      • Porta LAN: [[lan]]
-      • Logs: [[logs]]
-      • CTO/Região: [[cto]]
+      Motivo da Visita: [[problema]]
 
       PROCEDIMENTOS REALIZADOS
       • Orientações Passadas: Realizada orientação para verificação visual do cabo drop interno, confirmando a ausência de dobras, rompimentos ou objetos pressionando a fibra.
-      • Retorno do Cliente: Confirmou que o conector está devidamente encaixado na ONU e a luz LOS permanece ativa. Solicito o envio de técnico ao local para verificação presencial.
+      • Retorno do Cliente: Confirmou que o conector está devidamente encaixado na ONU e a falha persiste. Solicito o envio de técnico ao local para verificação presencial.
 
-      RECEPÇÃO
-      • Disponibilidade: [[disponibilidade]]
-      • Quem Acompanhará a Visita: [[acompanhante]]
-      • Observações de Acesso: [[obs]]
-      • Endereço: [[endereco]]
-
-      * Cliente ciente de que a visita deve ser obrigatoriamente acompanhada por um maior de 18 anos.
+      Endereço Confirmado: [[endereco]]
+      Disponibilidade: [[disponibilidade]]
     form_fields:
-      canal:
+      problema:
         type: choice
         values:
-          - Blip
-          - E-mail
-          - Ligação
-      status:
-        type: choice
-        values:
-          - Ligado
-          - Desligado
-          - Bloqueado
-      consumo:
-        type: choice
-        values:
-          - Sim
-          - Não
-      router:
-        type: choice
-        values:
-          - Router
-          - Bridge
-      autenticada:
-        type: choice
-        values:
-          - Sim
-          - Não
-      lan:
-        type: choice
-        values:
-          - Equipamento Fast
-          - Equipamento Giga
-          - Nenhum Equipamento Conectado
+          - LOS ativo
+          - Fibra Atenuada
 
   # Log de suporte a servidor virtual (VPS) com testes e autorização de reinicialização
   - trigger: "/logvps"
@@ -1102,3 +1143,88 @@ matches:
     replace: |-
       Atendimento encerrado automaticamente por timeout (inatividade do usuário no Blip).
       Não houve o reporte de incidentes ou solicitações adicionais, resultando na finalização do ticket sem a necessidade de intervenção técnica ou aplicação de procedimentos de troubleshooting.
+
+  # Log de suspensão de domínio por inadimplência (Chamado Automático concluído)
+  - trigger: "/logbloq"
+    form: |
+      Suspensão de Serviço (Bloqueio Automático)
+      INFORMAÇÕES
+      • Domínio: [[dominio]]
+      • Final do IP do Servidor: |.[[ip_servidor]]
+
+      PROCEDIMENTOS REALIZADOS
+      • Ação Realizada: Conta suspensa com sucesso no servidor.
+      • Status Atual: Bloqueado.
+      
+      Chamado finalizado.
+
+  # Log de liberação/desbloqueio de hospedagem no servidor
+  - trigger: "/logdesbloq"
+    form: |
+      Desbloqueio de Serviço
+      INFORMAÇÕES
+      • Domínio: [[dominio]]
+      • Final do IP do Servidor: |.[[ip_servidor]]
+
+      PROCEDIMENTOS REALIZADOS
+      • Ação Realizada: Conta desbloqueada com sucesso no servidor.
+      • Status Atual: Ativo.
+
+      Chamado finalizado.
+
+  # Log de análise de bloqueio não realizado com escalonamento para o Financeiro
+  - trigger: "/logfin"
+    form: |
+      Análise de Suspensão de Serviço
+      INFORMAÇÕES
+      • Domínio: [[dominio]]
+      • Final do IP do Servidor: [[ip_servidor]]
+      • Origem: Chamado automático de inadimplência.
+
+      PROCEDIMENTOS REALIZADOS
+      • Ação Realizada: Bloqueio não efetuado.
+      • Motivo da Retenção: [[motivo]]
+
+      ESCALONAMENTO
+      • Chamado transferido para a fila do Financeiro para validação de pendências, status do contrato e definição sobre a suspensão do serviço.
+
+  # Log de solicitação de mudança de endereço (Encaminhar para fila Fibra Ativação)
+  - trigger: "/logmudanca"
+    form: |
+      Mudança de Endereço
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Solicitante: [[nome]]
+      • CPF / CNPJ: [[doc]]
+      • Telefone: [[telefone]]
+
+      DADOS DA MUDANÇA
+      • Endereço Antigo: [[end_antigo]]
+      • Endereço Novo (com CEP e Referência): [[end_novo]]
+      • Tipo de Imóvel: [[tipo_imovel]]
+      • Previsão: [[status_mudanca]]
+
+      VERIFICAÇÕES E PROCEDIMENTOS
+      • Viabilidade Técnica: Confirmada no Ozmap/Google Maps.
+      • Equipamentos: Cliente devidamente orientado a levar o modem da Com4 e a fonte de alimentação para o novo endereço.
+      
+      SOLUÇÃO
+      • Chamado encaminhado para a fila Fibra Ativação para contato e agendamento da instalação.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - E-mail
+          - Ligação
+      tipo_imovel:
+        type: choice
+        values:
+          - Residência
+          - Comércio
+          - Prédio/Condomínio
+      status_mudanca:
+        type: choice
+        values:
+          - Cliente já se mudou
+          - Cliente ainda vai se mudar
