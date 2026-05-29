@@ -1228,3 +1228,35 @@ matches:
         values:
           - Cliente já se mudou
           - Cliente ainda vai se mudar
+
+# Informa o cliente sobre a transferência de boleto protestado para o Financeiro
+  - trigger: "/protesto"
+    force_clipboard: true
+    replace: |-
+      Compreendo a solicitação referente ao título protestado.
+
+      Como este procedimento exige a emissão de um boleto atualizado e a posterior liberação da carta de anuência, vou encaminhar o seu atendimento diretamente para o nosso setor Financeiro.
+
+      A equipe assumirá o caso e enviará a documentação necessária por aqui mesmo. Peço que aguarde um momento, por gentileza.
+
+# Log de escalonamento para o Financeiro (Boleto Protestado / Carta de Anuência)
+  - trigger: "/logprotesto"
+    form: |
+      Tratativa de Boleto Protestado
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Solicitante: [[nome]]
+      • Contrato / CPF ou CNPJ: [[doc]]
+
+      SOLICITAÇÃO
+      • Cliente entrou em contato solicitando a regularização de título protestado e a emissão de carta de anuência.
+
+      ESCALONAMENTO
+      • Chamado transferido para a fila do Financeiro para negociação, emissão do boleto atualizado e tratativas de cartório.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - E-mail
+          - Ligação
