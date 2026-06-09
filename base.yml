@@ -54,6 +54,7 @@ matches:
 # 1. SAUDAÇÃO, IDENTIFICAÇÃO E ENCERRAMENTO
 # =============================================================================
 
+  # Saudação inicial com coleta de dados obrigatórios (Exigência Monitoria)
   - trigger: "/ola"
     force_clipboard: true
     replace: |-
@@ -76,10 +77,12 @@ matches:
           shell: powershell
           cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'bom dia' } elseif ($h -lt 18) { 'boa tarde' } else { 'boa noite' }"
 
+  # Envia o protocolo do atendimento ao cliente
   - trigger: "/proto"
     form: |
       O número do protocolo referente a este atendimento é: [[protocolo]]
 
+  # Retorno ativo padrão para o cliente (chat ou ligação)
   - trigger: "/retorno"
     force_clipboard: true
     replace: |-
@@ -93,6 +96,7 @@ matches:
           shell: powershell
           cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'Bom dia' } elseif ($h -lt 18) { 'Boa tarde' } else { 'Boa noite' }"
 
+  # Retorno ativo de chamado transferido pelo Comercial
   - trigger: "/retornocom"
     force_clipboard: true
     replace: |-
@@ -111,6 +115,7 @@ matches:
           shell: powershell
           cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'bom dia' } elseif ($h -lt 18) { 'boa tarde' } else { 'boa noite' }"
 
+  # Pedido de desculpas por fila no atendimento (Alta demanda no plantão)
   - trigger: "/atraso"
     force_clipboard: true
     replace: |-
@@ -124,18 +129,27 @@ matches:
           shell: powershell
           cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'bom dia' } elseif ($h -lt 18) { 'boa tarde' } else { 'boa noite' }"
 
+  # Solicita pausa breve para verificação (Exigência Monitoria)
   - trigger: "/espera"
     replace: "Só um momento, por gentileza, enquanto verifico as informações. ⏱️"
 
+  # Solicita pausa longa para análise técnica profunda
+  - trigger: "/analise"
+    replace: "Vou precisar realizar uma análise mais detalhada nos logs do servidor para identificar a causa raiz. Isso pode levar alguns minutos. Assim que eu tiver o diagnóstico, retorno aqui, combinado? ⏱️"
+
+  # Agradecimento após retorno de pausa (Exigência Monitoria)
   - trigger: "/obg"
     replace: "Obrigado por aguardar! Peço desculpas pela demora. 😊"
 
+  # Informa ao cliente transferência para outro setor
   - trigger: "/transfere"
     replace: "Vou encaminhar o seu atendimento para o setor responsável, que dará continuidade à sua solicitação. Peço que aguarde um momento, por gentileza."
 
+  # Proatividade antes do encerramento (Exigência Monitoria)
   - trigger: "/aux"
     replace: "Posso ajudar em algo mais? 😊"
 
+  # Aviso de inatividade (timeout) e encerramento em 30 min
   - trigger: "/alerta"
     force_clipboard: true
     replace: |-
@@ -147,6 +161,7 @@ matches:
 
       Quando precisar, é só responder por aqui!
 
+  # Encerramento de atendimento por falta de interação do cliente
   - trigger: "/final"
     force_clipboard: true
     replace: |-
@@ -155,6 +170,7 @@ matches:
       Se precisar de ajuda novamente, fale com a gente por aqui.
       Estamos à disposição! 🤝
 
+  # Despedida padrão do atendimento (chat/voz)
   - trigger: "/tchau"
     force_clipboard: true
     replace: |-
@@ -165,10 +181,12 @@ matches:
       - name: empresa_nome
         type: global
 
-  - trigger: "/nada"
+  # Log rápido: Nenhuma ação efetuada pelo analista no escopo técnico
+  - trigger: "/lognada"
     replace: "Sem mais ações para o meu escopo neste atendimento."
 
-  - trigger: "/enc"
+  # Log rápido: Encerramento simples de chamado
+  - trigger: "/logenc"
     replace: "Chamado encerrado."
 
 
@@ -176,6 +194,7 @@ matches:
 # 2. FINANCEIRO — CLIENTE
 # =============================================================================
 
+  # Informa suspensão financeira e pede comprovante ou oferece 2ª via
   - trigger: "/bloqueado"
     form: |
       Ao consultar seu cadastro, identifiquei que os serviços estão temporariamente suspensos devido a uma fatura com vencimento em [[vencimento]] que consta em aberto em nosso sistema.
@@ -186,6 +205,7 @@ matches:
 
       Como deseja seguir?
 
+  # Envia 2ª via de boleto solicitada
   - trigger: "/seg"
     form: |
       Conforme solicitado, segue em anexo a segunda via do boleto, com vencimento em [[vencimento]].
@@ -194,6 +214,7 @@ matches:
 
       Se possível, envie o comprovante por aqui para agilizarmos a baixa em nosso sistema.
 
+  # Retorno informando que o documento enviado é apenas agendamento
   - trigger: "/agendamento"
     force_clipboard: true
     replace: |-
@@ -203,6 +224,7 @@ matches:
 
       Por gentileza, assim que a transação for concluída pelo seu banco, nos envie o comprovante definitivo por aqui.
 
+  # Envia Chave PIX e Linha Digitável do boleto
   - trigger: "/pix"
     force_clipboard: true
     replace: |-
@@ -223,6 +245,7 @@ matches:
             Chave PIX: [[chave]]
             Linha Digitável do Boleto: [[boleto]]
 
+  # Oferece o acordo de desbloqueio financeiro (+2 dias úteis)
   - trigger: "/ofer"
     force_clipboard: true
     replace: |-
@@ -238,6 +261,7 @@ matches:
           shell: powershell
           cmd: "$d = Get-Date; $c = 2; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
 
+  # Confirma ativação do acordo de desbloqueio
   - trigger: "/acordo"
     force_clipboard: true
     replace: |-
@@ -253,6 +277,7 @@ matches:
           shell: powershell
           cmd: "$d = Get-Date; $c = 2; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
 
+  # Confirma desbloqueio/normalização de serviço (Baixa financeira realizada)
   - trigger: "/norm"
     force_clipboard: true
     replace: |-
@@ -260,6 +285,7 @@ matches:
 
       Sua conexão deve retornar à normalidade em instantes.
 
+  # Agradecimento pelo envio de comprovante financeiro
   - trigger: "/comp"
     force_clipboard: true
     replace: |-
@@ -268,6 +294,7 @@ matches:
       Ele já foi anexado ao seu cadastro financeiro.
       Muito obrigado!
 
+  # Tratar título protestado: encaminha ao Financeiro para Carta de Anuência
   - trigger: "/protesto"
     force_clipboard: true
     replace: |-
@@ -277,6 +304,7 @@ matches:
 
       A equipe assumirá o caso e enviará a documentação necessária por aqui mesmo. Peço que aguarde um momento, por gentileza.
 
+  # Informa regra de devolução de Comodato/Extravio no cancelamento
   - trigger: "/comodato"
     force_clipboard: true
     replace: |-
@@ -286,6 +314,7 @@ matches:
       
       Como prefere organizar a devolução? Podemos agendar a retirada pela nossa equipe técnica ou você prefere entregar diretamente em nossa sede?
 
+  # Solicita documentos de PF ou PJ para transferência de titularidade
   - trigger: "/doctroca"
     form: |
       Para darmos andamento à troca de titularidade, por gentileza, nos envie os seguintes dados e documentos do **novo titular**:
@@ -300,6 +329,7 @@ matches:
           - "• Documento com foto (RG ou CNH)\n• CPF\n• Data de nascimento\n• E-mail\n• Endereço completo"
           - "• Cartão CNPJ\n• Razão social\n• Comprovante de inscrição e situação cadastral\n• E-mail\n• Endereço completo"
 
+  # Aviso sobre vigência e aplicação de multa rescisória (Fidelidade)
   - trigger: "/fidelidade"
     form: |
       Verifiquei em nosso sistema e o seu contrato foi ativado há [[meses]] meses. 
@@ -308,6 +338,7 @@ matches:
       
       O valor atualizado da multa rescisória é de R$ [[valor_multa]]. Você está de acordo com esta cobrança para prosseguirmos com o cancelamento?
 
+  # Questiona melhor data para agendamento de recolha (Cancelamento)
   - trigger: "/retirada"
     force_clipboard: true
     replace: |-
@@ -317,6 +348,7 @@ matches:
       
       Lembramos que é necessária a presença de um responsável maior de 18 anos no local.
 
+  # Informa valor proporcional para faturamento de rescisão
   - trigger: "/faturacanc"
     form: |
       Verifiquei o seu cadastro e o processo de cancelamento do serviço foi iniciado.
@@ -325,6 +357,7 @@ matches:
       
       O boleto atualizado com o valor de rescisão será enviado pelo nosso setor Financeiro. Você prefere receber esta última fatura por e-mail ou aqui mesmo pelo WhatsApp?
 
+  # Aviso ativo/proativo de cobrança em aberto antes do bloqueio
   - trigger: "/lembretefatura"
     form: |
       Aproveitando o nosso contato, notei ao consultar o seu cadastro que a fatura com vencimento em [[vencimento]] consta como pendente em nosso sistema.
@@ -338,6 +371,7 @@ matches:
 # 3. SUPORTE TÉCNICO — CLIENTE
 # =============================================================================
 
+  # Troubleshooting: Validação física do conector/cabo óptico
   - trigger: "/fibra"
     force_clipboard: true
     replace: |-
@@ -349,6 +383,7 @@ matches:
 
       Esses cuidados ajudam bastante na análise do caso. ✅
 
+  # Reporte de falha na fibra: Explica luz LOS vermelha
   - trigger: "/loss"
     force_clipboard: true
     replace: |-
@@ -361,6 +396,7 @@ matches:
       - name: empresa_nome
         type: global
 
+  # Confirmação de manutenção / Rompimento massivo em área
   - trigger: "/massivo"
     force_clipboard: true
     replace: |-
@@ -370,6 +406,7 @@ matches:
 
       Assim que houver atualização, retornaremos por aqui. Pedimos desculpas pelo transtorno e agradecemos pela compreensão. 🙏
 
+  # Troubleshooting de lentidão: Isolar Wi-Fi de cabeado
   - trigger: "/wifi"
     force_clipboard: true
     replace: |-
@@ -387,6 +424,7 @@ matches:
 
       Com essas informações, consigo indicar o próximo passo com mais precisão. ✅
 
+  # Coleta informações para agendar visita técnica no local
   - trigger: "/visita"
     force_clipboard: true
     replace: |-
@@ -400,6 +438,7 @@ matches:
       1. A presença de um responsável maior de 18 anos é obrigatória durante a visita.
       2. A confirmação de data e horário será feita pela equipe técnica de fibra diretamente neste canal.
 
+  # Questionário de instabilidade (Lentidão/Queda isolada ou geral)
   - trigger: "/instab"
     force_clipboard: true
     replace: |-
@@ -412,6 +451,7 @@ matches:
 
       Com essas informações, consigo isolar o foco do problema e aplicar a correção mais rapidamente.
 
+  # Diagnóstico Comercial: Sugere troca de roteador 10/100 (Fast) para Gigabit
   - trigger: "/fast"
     form: |
       Realizei uma análise detalhada da sua conexão e confirmo que os serviços até o modem da Com4 estão operando com total normalidade. O sinal da fibra óptica encontra-se excelente e dentro dos padrões ideais de operação, com consumo regular de banda larga. O seu modem, inclusive, está ativo e sem quedas há [[uptime]].
@@ -426,6 +466,7 @@ matches:
 
       Se tiver qualquer dúvida sobre os modelos, sigo à disposição!
 
+  # Propõe reset ou reconfiguração remota em casos de porta travada
   - trigger: "/reset"
     form: |
       Realizei uma análise detalhada da sua conexão e confirmo que os serviços até o modem da Com4 estão operando com total normalidade.
@@ -438,6 +479,7 @@ matches:
 
       Deseja que eu realize essa reconfiguração?
 
+  # Informa escalonamento para Nível 2 / Engenharia (Datacenter)
   - trigger: "/eng"
     force_clipboard: true
     replace: |-
@@ -450,6 +492,7 @@ matches:
 
       Você receberá retorno neste mesmo chamado quando a intervenção terminar ou se a Engenharia precisar de mais algum detalhe.
 
+  # Painel de quarentena PMG - Instrução de operação (Deliver/Whitelist)
   - trigger: "/pmg"
     force_clipboard: true
     replace: |-
@@ -473,6 +516,7 @@ matches:
       Em apoio, segue também um PDF com o passo a passo ilustrado em anexo.
       Qualquer dúvida, seguimos à disposição! 😊
 
+  # Solicitação de e-mail formal corporativo para envio de credenciais (Segurança)
   - trigger: "/cpanel"
     force_clipboard: true
     replace: |-
@@ -490,6 +534,7 @@ matches:
       - name: email_atendimento
         type: global
 
+  # Aviso sobre propagação de emissão de certificado SSL
   - trigger: "/ssl"
     force_clipboard: true
     replace: |-
@@ -503,6 +548,7 @@ matches:
 
       Assim que a propagação for concluída, o cadeado de segurança voltará a aparecer no navegador. Qualquer dúvida, sigo à disposição! 😊
 
+  # Limitação de escopo da infraestrutura vs aplicação (TI externa)
   - trigger: "/escopo"
     force_clipboard: true
     replace: |-
@@ -512,6 +558,7 @@ matches:
       
       Recomendamos que acione o desenvolvedor responsável pela sua aplicação ou o seu suporte de TI local para analisar os logs do software.
 
+  # Alerta de limite CloudLinux atingido (Upgrade para VPS necessário)
   - trigger: "/recursos"
     force_clipboard: true
     replace: |-
@@ -521,6 +568,7 @@ matches:
       
       Caso o seu projeto tenha crescido e exija mais processamento constante, a solução técnica definitiva é a migração para um Servidor Virtual (VPS) dedicado. Deseja que eu encaminhe o atendimento ao Comercial para um orçamento?
 
+  # Trata conta de e-mail violada disparando vírus/malware (Outbound block)
   - trigger: "/spamout"
     force_clipboard: true
     replace: |-
@@ -534,6 +582,7 @@ matches:
       
       Assim que a senha for alterada, nos avise para realizarmos a liberação.
 
+  # Falha de conectividade ou rede externa justificada pelo clima (Defesa civil)
   - trigger: "/clima"
     force_clipboard: true
     replace: |-
@@ -543,6 +592,7 @@ matches:
       
       Pedimos desculpas pelo transtorno e agradecemos a compreensão!
 
+  # Notificação de encerramento da falha massiva
   - trigger: "/massivoresolvido"
     force_clipboard: true
     replace: |-
@@ -552,6 +602,7 @@ matches:
       
       Por gentileza, confirme se o seu acesso normalizou!
 
+  # Tratar rompimento grave (Ruptura em cabo óptico regional)
   - trigger: "/romp"
     form: |
       Pedimos sinceras desculpas pela paralisação dos serviços de internet ocorrida hoje.
@@ -562,6 +613,7 @@ matches:
 
       Lamentamos os transtornos causados e agradecemos pela compreensão e paciência durante este período. Continuaremos acompanhando a situação e informaremos qualquer atualização relevante.
 
+  # Confirmação técnica visual do serviço normalizado (Monitoramento)
   - trigger: "/online"
     force_clipboard: true
     replace: |-
@@ -576,6 +628,7 @@ matches:
 # 4. E-MAIL — HOSPEDAGEM, MIGRAÇÃO E CREDENCIAIS
 # =============================================================================
 
+  # Envio de dados vitais para painel cPanel (Hospedagem, FTP, DNS)
   - trigger: "/ativhosp"
     force_clipboard: true
     replace: |-
@@ -631,6 +684,7 @@ matches:
                 - ian.ns.cloudflare.com e melinda.ns.cloudflare.com
                 - coco.ns.cloudflare.com e lamar.ns.cloudflare.com
 
+  # Informa URLs e senhas redefinidas dos painéis cPanel / Plesk
   - trigger: "/dadospainel"
     force_clipboard: true
     replace: |-
@@ -664,6 +718,7 @@ matches:
             Usuário Plesk: [[user_plesk]]
             Senha Plesk: [[senha_plesk]]
 
+  # Envio de dados e portas criptografadas para clientes de E-mail
   - trigger: "/ativemail"
     force_clipboard: true
     replace: |-
@@ -697,6 +752,7 @@ matches:
             E-mail do cliente: [[email_cliente]]
             Senha: [[senha]]
 
+  # Procedimento de migração de zona DNS externa para a Com4
   - trigger: "/migraaponta"
     force_clipboard: true
     replace: |-
@@ -734,6 +790,7 @@ matches:
             Plataforma de DNS (ex: Cloudflare): [[plataforma]]
             Novo IP do servidor: [[novo_ip]]
 
+  # Requisita autorização de contato técnico no registro.br (Migrações e Deploy)
   - trigger: "/migracontato"
     force_clipboard: true
     replace: |-
@@ -761,6 +818,7 @@ matches:
           layout: |
             Domínio: [[dominio]]
 
+  # Envio de boleto emitido para Renovação de Domínio (Registro.br / Internacional)
   - trigger: "/renova"
     form: |
       Olá,
@@ -772,6 +830,7 @@ matches:
 
       Obrigado pelo contato. Conte sempre conosco!
 
+  # Parâmetros de apontamento DNS p/ uso exclusivo de E-mail (A, MX e TXT/SPF)
   - trigger: "/dnsemail"
     force_clipboard: true
     replace: |-
@@ -808,6 +867,7 @@ matches:
             Chave DKIM completa: [[dkim]]
             Final do IP (ex: 200): [[ip]]
 
+  # Pedido de autorização do titular para migração de hospedagem
   - trigger: "/autormigra"
     force_clipboard: true
     replace: |-
@@ -817,6 +877,7 @@ matches:
       
       Você autoriza a execução desta migração? Se sim, por favor, confirme o melhor dia e horário para realizarmos o procedimento (recomendamos a execução fora do horário comercial para minimizar impactos).
 
+  # Envio de Host e Porta (21) para conexão via FileZilla (FTP)
   - trigger: "/ftp"
     force_clipboard: true
     replace: |-
@@ -840,7 +901,8 @@ matches:
 # 5. REGISTROS INTERNOS — FINANCEIRO
 # =============================================================================
 
-  - trigger: "/desbloq"
+  # Log interno de liberação / Acordo em confiança (D+2)
+  - trigger: "/logacordo"
     force_clipboard: true
     replace: |-
       Contato via: {{formulario.canal}}
@@ -871,7 +933,8 @@ matches:
                 - E-mail
                 - Ligação
 
-  - trigger: "/baixa"
+  # Log interno de comprovante recolhido no atendimento
+  - trigger: "/logbaixa"
     force_clipboard: true
     replace: |-
       Contato via: {{formulario.canal}}
@@ -896,20 +959,23 @@ matches:
                 - E-mail
                 - Ligação
 
-  - trigger: "/pagou"
+  # Log interno de pagamento já confirmado e baixado
+  - trigger: "/logpagou"
     force_clipboard: true
     replace: |-
       Pagamento compensado e confirmado em nosso sistema.
 
       Chamado finalizado.
 
-  - trigger: "/calote"
+  # Log interno de retomada de bloqueio por ausência de pagamento pós-acordo
+  - trigger: "/logcalote"
     force_clipboard: true
     replace: |-
       Suspensão retomada.
 
       Acordo de desbloqueio encerrado por falta de pagamento.
 
+  # Log interno de emissão e envio de 2ª via atualizada
   - trigger: "/log2via"
     form: |
       Segunda Via de Boleto
@@ -953,6 +1019,7 @@ matches:
           - Blip
           - E-mail
 
+  # Log interno de pedido de alteração no ciclo/vencimento da fatura
   - trigger: "/logvenc"
     form: |
       Cliente entrou em contato solicitando a alteração da data de vencimento dos seus boletos do dia [[dia_antigo]] para todo dia [[dia_novo]].
@@ -963,6 +1030,7 @@ matches:
 
       Por gentileza, verificar a possibilidade.
 
+  # Log interno completo de pedido de cancelamento e retenção
   - trigger: "/logcanc"
     form: |
       Solicitação de Cancelamento
@@ -1017,6 +1085,7 @@ matches:
           - Ativo
           - Bloqueado
 
+  # Log interno repassando tratativa de cartório (Título protestado)
   - trigger: "/logprotesto"
     form: |
       Tratativa de Boleto Protestado
@@ -1038,6 +1107,7 @@ matches:
           - E-mail
           - Ligação
 
+  # Log interno repassando venda (Lead) para o setor Comercial
   - trigger: "/loglead"
     form: |
       Oportunidade Comercial Identificada
@@ -1069,6 +1139,7 @@ matches:
 # 6. REGISTROS INTERNOS — NOC / TÉCNICO
 # =============================================================================
 
+  # Log interno de análise de domínio com status "Congelado" no Registro.br
   - trigger: "/logcong"
     form: |
       Domínio Congelado
@@ -1089,7 +1160,8 @@ matches:
       • E-mail: [[email]]
 
       SOLUÇÃO
-      • Ação Realizada: [[acao]]
+      • Ações e Orientações Realizadas: 
+      [[acao]]
     form_fields:
       canal:
         type: choice
@@ -1109,11 +1181,9 @@ matches:
           - Sim
           - Não
       acao:
-        type: choice
-        values:
-          - Solicitante devidamente instruído
-          - Renovação realizada, boleto emitido
+        type: multiline
 
+  # Log interno de diagnóstico em falhas de DNS ou bloqueios de IP (Imunify360)
   - trigger: "/logfalha"
     form: |
       Sem Acesso aos Serviços Com4
@@ -1131,7 +1201,8 @@ matches:
       • Verificação de Bloqueios Imunify360: [[bloqueios]]
 
       SOLUÇÃO
-      • Ação Realizada: [[acao]]
+      • Ação Realizada e Diagnóstico Final: 
+      [[acao]]
     form_fields:
       canal:
         type: choice
@@ -1154,7 +1225,10 @@ matches:
         values:
           - Não constam bloqueios
           - IP Bloqueado pelo Firewall
+      acao:
+        type: multiline
 
+  # Log interno de envio da equipe técnica para verificar cabo/conector/LOS
   - trigger: "/loglos"
     form: |
       Motivo da Visita: [[problema]]
@@ -1172,6 +1246,7 @@ matches:
           - LOS ativo
           - Fibra Atenuada
 
+  # Log interno registrando cliente anexado à ocorrência em andamento
   - trigger: "/logmassivo"
     form: |
       Evento Massivo — Ocorrência em Área
@@ -1184,7 +1259,8 @@ matches:
       • Clientes atendidos orientados sobre a ocorrência massiva e prazo de normalização.
 
       SOLUÇÃO
-      • Ação Realizada: [[acao]]
+      • Resposta do Cliente / Ação: 
+      [[acao]]
     form_fields:
       canal:
         type: choice
@@ -1192,8 +1268,11 @@ matches:
           - Blip
           - E-mail
           - Ligação
+      acao:
+        type: multiline
 
-  - trigger: "/semretorno"
+  # Log interno confirmando tentativa telefônica ativa com cliente ausente
+  - trigger: "/logsemretorno"
     force_clipboard: true
     replace: |-
       Contato via: {{formulario.canal}}
@@ -1220,6 +1299,7 @@ matches:
                 - Blip
                 - E-mail
 
+  # Log interno de suporte e intervenção técnica aplicada em CloudLinux/VPS
   - trigger: "/logvps"
     form: |
       Suporte a Servidor Virtual (VPS)
@@ -1239,6 +1319,10 @@ matches:
 
       AUTORIZAÇÃO
       • Cliente autoriza reiniciar a máquina se necessário? [[autorizacao]]
+
+      SOLUÇÃO E AÇÕES EXECUTADAS
+      • Procedimentos realizados pelo NOC no servidor:
+      [[acao]]
     form_fields:
       ping:
         type: choice
@@ -1255,7 +1339,10 @@ matches:
         values:
           - Sim
           - Não
+      acao:
+        type: multiline
 
+  # Log interno de troubleshooting em Hospedagem (Banco de Dados/Código 500)
   - trigger: "/logsite"
     form: |
       Suporte a Site
@@ -1279,7 +1366,8 @@ matches:
       • Senha: [[senha]]
 
       SOLUÇÃO
-      • Ação Realizada: [[acao]]
+      • Tratativa Realizada pelo Suporte: 
+      [[acao]]
     form_fields:
       canal:
         type: choice
@@ -1308,7 +1396,10 @@ matches:
         values:
           - Regular
           - Irregular
+      acao:
+        type: multiline
 
+  # Log interno de diagnóstico em falhas de autenticação de IMAP/POP/SMTP
   - trigger: "/logemail"
     form: |
       Suporte a E-mail
@@ -1336,7 +1427,8 @@ matches:
       • Senha: [[senha_acesso]]
 
       SOLUÇÃO
-      • Ação Realizada: [[acao]]
+      • Ações e Configurações Ajustadas: 
+      [[acao]]
     form_fields:
       canal:
         type: choice
@@ -1349,6 +1441,7 @@ matches:
         values:
           - POP3
           - IMAP
+          - Apenas Webmail
       whois:
         type: choice
         values:
@@ -1375,7 +1468,10 @@ matches:
         values:
           - Regular
           - Irregular
+      acao:
+        type: multiline
 
+  # Log interno encaminhando formulários e RGs coletados para Troca de Titularidade
   - trigger: "/logtroca"
     form: |
       Troca de Titularidade
@@ -1401,8 +1497,9 @@ matches:
       • Análise de Restrição: [[restricao]]
       • Documentos Anexados: [[docs_anexos]]
 
-      SOLUÇÃO
-      • Ação Realizada: [[acao]]
+      SOLUÇÃO E ENCAMINHAMENTO
+      • Parecer e Setor de Destino: 
+      [[acao]]
     form_fields:
       canal:
         type: choice
@@ -1425,57 +1522,161 @@ matches:
         values:
           - Sem Restrição
           - Com Restrição
+      acao:
+        type: multiline
 
-  - trigger: "/instruir"
-    force_clipboard: true
-    replace: |-
-      • O cliente entrou em contato via {{formulario.canal}}, solicitando orientações técnicas sobre o funcionamento do gateway antispam.
-      • Orientação prestada conforme os procedimentos internos.
-    vars:
-      - name: formulario
-        type: form
-        params:
-          layout: "Canal: [[canal]]"
-          fields:
-            canal:
-              type: choice
-              values:
-                - Blip
-                - E-mail
-                - Ligação
+  # Registra orientação técnica do Gateway Antispam PMG com detalhamento de ações (Monitoria)
+  - trigger: "/loginstruir"
+    form: |
+      Orientação Técnica — Gateway Antispam (PMG)
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Solicitação: Cliente com dúvidas sobre retenção de mensagens e uso do filtro Antispam. O solicitante afirma ter e-mails retidos na quarentena.
+      • E-mail do Solicitante: [[email]]
 
-  - trigger: "/timeout"
+      PROCEDIMENTOS E ORIENTAÇÕES
+      • O solicitante foi devidamente instruído sobre o funcionamento do Gateway Antispam PMG (Whitelist, Blacklist, Deliver, Delete) e demais funcionalidades do sistema.
+      • [[orientacao]]
+      
+      AÇÕES EXECUTADAS
+      • Encaminhado e-mail com o relatório atualizado de quarentena para o cliente.
+      • [[acoes]]
+
+      SOLUÇÃO
+      • Atendimento concluído. Cliente ciente dos procedimentos de gestão da quarentena (Whitelist/Blacklist).
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - E-mail
+          - Ligação
+      email:
+        type: text
+      orientacao:
+        type: multiline
+      acoes:
+        type: multiline
+
+  # Log interno de desativação do Gateway Antispam (PMG)
+  - trigger: "/logpmgoff"
+    form: |
+      Desativação de Gateway Antispam (PMG)
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Domínio / E-mail Afetado: [[dominio]]
+      • Solicitante: [[solicitante]]
+
+      PROCEDIMENTOS 
+      • Método de desativação utilizado: [[metodo]]
+      • Solicitante foi formalmente alertado sobre os riscos de segurança (aumento de spam e malwares).
+
+      SOLUÇÃO
+      • Filtro antispam desativado com sucesso conforme solicitação. Chamado encerrado.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - E-mail
+          - Ligação
+      dominio:
+        type: text
+      solicitante:
+        type: text
+      metodo:
+        type: choice
+        values:
+          - Adição da regra global *@* na Whitelist do PMG
+          - Alteração dos apontamentos MX (Bypass direto para a hospedagem)
+
+  # Log interno de reativação do Gateway Antispam (PMG)
+  - trigger: "/logpmgon"
+    form: |
+      Reativação de Gateway Antispam (PMG)
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Domínio / E-mail Afetado: [[dominio]]
+      • Solicitante: [[solicitante]]
+
+      PROCEDIMENTOS 
+      • Método de reativação utilizado: [[metodo]]
+      • Solicitante instruído de que as políticas de segurança e a retenção de mensagens em quarentena voltaram a atuar ativamente no domínio.
+
+      SOLUÇÃO
+      • Filtro antispam reativado com sucesso conforme solicitação. Chamado encerrado.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - E-mail
+          - Ligação
+      dominio:
+        type: text
+      solicitante:
+        type: text
+      metodo:
+        type: choice
+        values:
+          - Remoção da regra global *@* da Whitelist do PMG
+          - Restauração dos apontamentos MX para o Gateway Antispam (mx1/mx2)
+
+  # Log interno justificando encerramento sem solução por ausência de interação
+  - trigger: "/logtimeout"
     force_clipboard: true
     replace: |-
       Atendimento encerrado automaticamente por timeout (inatividade do usuário no Blip).
       Não houve o reporte de incidentes ou solicitações adicionais, resultando na finalização do ticket sem a necessidade de intervenção técnica ou aplicação de procedimentos de troubleshooting.
 
+  # Log interno de bloqueio manual ou automatizado realizado na hospedagem
   - trigger: "/logbloq"
     form: |
       Suspensão de Serviço (Bloqueio Automático)
       INFORMAÇÕES
-      • Domínio: [[dominio]]
+      • Domínio/Serviço: [[dominio]]
       • Final do IP do Servidor: |.[[ip_servidor]]
+      • Plataforma: [[plataforma]]
 
       PROCEDIMENTOS REALIZADOS
       • Ação Realizada: Conta suspensa com sucesso no servidor.
       • Status Atual: Bloqueado.
 
       Chamado finalizado.
+    form_fields:
+      plataforma:
+        type: choice
+        values:
+          - cPanel / WHM
+          - Plesk
+          - Proxmox (VPS)
 
+  # Log interno de liberação manual após regularização de Hospedagem / VPS
   - trigger: "/logdesbloq"
     form: |
       Desbloqueio de Serviço
       INFORMAÇÕES
-      • Domínio: [[dominio]]
+      • Domínio/Serviço: [[dominio]]
       • Final do IP do Servidor: |.[[ip_servidor]]
+      • Plataforma: [[plataforma]]
 
       PROCEDIMENTOS REALIZADOS
       • Ação Realizada: Conta desbloqueada com sucesso no servidor.
       • Status Atual: Ativo.
 
       Chamado finalizado.
+    form_fields:
+      plataforma:
+        type: choice
+        values:
+          - cPanel / WHM
+          - Plesk
+          - Proxmox (VPS)
 
+  # Log interno de análise de erro de conciliação / Transferência ao Financeiro
   - trigger: "/logfin"
     form: |
       Análise de Suspensão de Serviço
@@ -1486,11 +1687,16 @@ matches:
 
       PROCEDIMENTOS REALIZADOS
       • Ação Realizada: Bloqueio não efetuado.
-      • Motivo da Retenção: [[motivo]]
+      • Motivo da Retenção: 
+      [[motivo]]
 
       ESCALONAMENTO
       • Chamado transferido para a fila do Financeiro para validação de pendências, status do contrato e definição sobre a suspensão do serviço.
+    form_fields:
+      motivo:
+        type: multiline
 
+  # Log interno passando a coleta de endereço novo para a Ativação da Fibra
   - trigger: "/logmudanca"
     form: |
       Mudança de Endereço
@@ -1531,6 +1737,7 @@ matches:
           - Cliente já se mudou
           - Cliente ainda vai se mudar
 
+  # Log interno de pré-viabilidade técnica usando Coordenadas / CTO no Ozmap
   - trigger: "/logozmap"
     form: |
       Análise de Viabilidade Técnica (Ozmap)
@@ -1551,6 +1758,7 @@ matches:
           - Inviável (Fora da área de cobertura)
           - Necessita ampliação de rede (Caixa lotada)
 
+  # Log interno padronizado de recepção de cliente afetado por ruptura de cabo
   - trigger: "/logromp"
     form: |
       Atendimento de Incidente Massivo (Rompimento)
@@ -1572,6 +1780,7 @@ matches:
           - Ligação
           - E-mail
 
+  # Log interno da baixa de manutenção (Restabelecimento Óptico)
   - trigger: "/logfimromp"
     form: |
       • Incidente: Rompimento de fibra óptica na região.
@@ -1581,3 +1790,39 @@ matches:
       • Sistema de monitoramento confirmou o retorno do link (Sinal óptico normalizado / ONU online).
 
       Ação: Conexão normalizada com sucesso. Chamado encerrado.
+
+  # Log de Inviabilidade Técnica e Solicitação de Expansão de Rede (Projetos)
+  - trigger: "/loginviavel"
+    form: |
+      Estudo de Expansão de Rede - Inviabilidade Técnica
+
+      INFORMAÇÕES OBRIGATÓRIAS DO LEAD
+      • Canal de Atendimento: [[canal]]
+      • ID do Lead Criado: [[id_cliente]]
+      • Nome do cliente: [[nome]]
+      • Telefone de contato: [[telefone]]
+      • Endereço completo (rua, nº, bairro, cidade e referência): [[endereco]]
+      • Coordenadas exatas (Google Maps): [[coordenadas]]
+      • CTO mais próxima: [[cto]]
+      • Distância aproximada: [[distancia]] metros
+      • Tipo de imóvel: [[tipo_imovel]]
+      
+      • Observações Adicionais: 
+      [[obs]]
+
+      Ação: A equipe de Projetos receberá este chamado e fará o estudo de expansão de rede para a região.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      tipo_imovel:
+        type: choice
+        values:
+          - Residência
+          - Comércio
+          - Prédio
+      obs:
+        type: multiline
