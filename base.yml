@@ -188,12 +188,20 @@ global_vars:
       shell: powershell
       cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'Bom dia' } elseif ($h -lt 18) { 'Boa tarde' } else { 'Boa noite' }"
 
-  # Despedida dinâmica — uso em /tchau
+# Despedida dinâmica — uso em /tchau (inline, sem .ps1 — evita ExecutionPolicy)
   - name: despedida
     type: shell
     params:
       shell: powershell
-      cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'Tenha um ótimo dia' } elseif ($h -lt 18) { 'Tenha uma ótima tarde' } else { 'Tenha uma ótima noite' }"
+      cmd: |
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+        $p = Join-Path $env:CONFIG 'match\.env'
+        $h = (Get-Date).Hour
+        if ($h -lt 12) { $key = 'DESPEDIDA_MANHA'; $fb = 'Tenha um ótimo dia' } elseif ($h -lt 18) { $key = 'DESPEDIDA_TARDE'; $fb = 'Tenha uma ótima tarde' } else { $key = 'DESPEDIDA_NOITE'; $fb = 'Tenha uma ótima noite' }
+        if (Test-Path $p) {
+          $l = Get-Content $p -Encoding UTF8 | Where-Object { $_ -match ('^\s*' + $key + '\s*=') } | Select-Object -First 1
+          if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim([char]39) } else { $fb }
+        } else { $fb }
 
   - name: data_hoje
     type: shell
