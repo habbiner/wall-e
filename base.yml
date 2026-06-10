@@ -42,6 +42,8 @@
 #   /negado       Informa que o comprovante está ilegível ou incompleto
 #   /duplicata    Informa que o comprovante já consta registrado no sistema
 #   /pixrapido    Envia PIX (chave do .env) + linha digitável — só pede o boleto
+#   /cancelapf      Informa prazo de 1 dia útil do Financeiro para cancelamento PF
+#   /cancelapj      Solicita formalização por e-mail para cancelamento PJ
 #
 # 3 · Suporte Técnico — Cliente
 #   /fibra        Orienta verificação visual do cabo de fibra e do conector
@@ -617,7 +619,28 @@ matches:
         params:
           layout: "Linha Digitável do Boleto: [[boleto]]"
 
+# /cancelapf — Informa prazo de 1 dia útil do Financeiro para cancelamento PF
+  - trigger: "/cancelapf"
+    force_clipboard: true
+    replace: |-
+      Compreendo a sua solicitação de cancelamento. 
 
+      Estou abrindo um chamado interno e encaminhando o seu caso para o nosso setor Financeiro. Dentro de 1 dia útil, a equipe entrará em contato com você para repassar todas as informações necessárias (como faturas proporcionais e devolução de equipamentos) e finalizar o processo.
+      
+      Posso confirmar a abertura do chamado?
+
+  # /cancelapj — Solicita formalização por e-mail para cancelamento PJ
+  - trigger: "/cancelapj"
+    force_clipboard: true
+    replace: |-
+      Compreendo a sua solicitação de cancelamento. 
+
+      Como o seu cadastro é empresarial (Pessoa Jurídica), por questões de segurança corporativa, precisamos que o pedido seja formalizado por e-mail.
+      
+      Por gentileza, envie um e-mail para {{email_atendimento}} informando o CNPJ e o motivo do cancelamento. Assim que recebermos, o nosso setor Financeiro entrará em contato em até 1 dia útil para dar andamento e finalizar o processo.
+    vars:
+      - name: email_atendimento
+        type: global
 # =============================================================================
 # 3 · Suporte Técnico — Cliente
 # =============================================================================
@@ -913,6 +936,22 @@ matches:
 
       Recomendamos aguardar a conclusão da propagação antes de novos testes. Qualquer dúvida, sigo à disposição!
 
+# /roteadores — Envia o PDF de recomendação de roteadores Giga e reforça a visita gratuita
+  - trigger: "/roteadores"
+    force_clipboard: true
+    replace: |-
+      Conforme conversamos, segue em anexo o PDF com a nossa lista atualizada de roteadores Gigabit recomendados. 📄
+
+      Todos os modelos listados possuem tecnologia avançada (Wi-Fi 6) e excelente custo-benefício, garantindo que você consiga utilizar 100% da velocidade do plano contratado sem gargalos na rede.
+
+      Lembrando que a {{empresa_nome}} não comercializa esses aparelhos, mas você pode encontrá-los facilmente na internet (clicando no nome deles no PDF) ou em lojas de informática da região.
+
+      E a melhor parte: assim que você adquirir o novo equipamento, basta nos avisar! Enviaremos um técnico até o local para instalar e configurar o seu novo roteador na rede sem nenhum custo adicional. 🛠️
+
+      Se tiver dúvidas sobre algum modelo específico antes de comprar, sigo à disposição!
+    vars:
+      - name: empresa_nome
+        type: global
 
 # =============================================================================
 # 4 · E-mail, Hospedagem e Migração
@@ -1322,32 +1361,24 @@ matches:
 
       Por gentileza, verificar a possibilidade.
 
-  # /logcanc — Log completo de cancelamento: motivo, retenção, multa, equipamento e bloqueio
+# /logcanc — Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
   - trigger: "/logcanc"
     form: |
-      Solicitação de Cancelamento
-      INFORMAÇÕES GERAIS
+      Solicitação de Cancelamento (Repasse Financeiro)
+      
+      INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Solicitante: [[solicitante]]
-      • Tipo de Serviço: [[tipo_servico]]
-      • Contrato: [[contrato]]
+      • Perfil: [[perfil]]
+      • Motivo Alegado: 
+      [[motivo]]
 
-      MOTIVO E RETENÇÃO
-      • Motivo do Cancelamento: [[motivo]]
-      • Status da Reversão: [[status_rev]]
+      PROCEDIMENTOS E ORIENTAÇÕES
+      • Cliente orientado conforme o novo fluxo de cancelamento (Prazo de 1 dia útil para retorno do setor responsável).
+      • Formalização PJ: [[formalizacao_pj]]
 
-      FINANCEIRO
-      • Tempo de Contrato: [[tempo]]
-      • Multa de Fidelidade: [[multa]]
-      • Boletos em Aberto: [[boletos]]
-      • Faturamento: [[faturamento]]
-
-      LOGÍSTICA (APENAS FIBRA)
-      • Equipamento: [[equipamento]]
-      • Disponibilidade/Agendamento: [[disponibilidade]]
-
-      STATUS DO SERVIÇO
-      • Bloqueio Eletrônico: [[bloqueio]]
+      ESCALONAMENTO
+      • Ação: Chamado encaminhado para a fila do Financeiro.
     form_fields:
       canal:
         type: choice
@@ -1355,27 +1386,19 @@ matches:
           - Blip
           - E-mail
           - Ligação
-      status_rev:
+      perfil:
         type: choice
         values:
-          - Irreversível
-          - Reversível
-      multa:
+          - Pessoa Física (PF)
+          - Pessoa Jurídica (PJ)
+      motivo:
+        type: multiline
+      formalizacao_pj:
         type: choice
         values:
-          - Sim
-          - Não
-          - Não se aplica
-      equipamento:
-        type: choice
-        values:
-          - Necessária a retirada
-          - Cliente realizará a devolução
-      bloqueio:
-        type: choice
-        values:
-          - Ativo
-          - Bloqueado
+          - Não se aplica (Cliente é PF)
+          - Cliente orientado a enviar e-mail
+          - E-mail de formalização já recebido
 
   # /logprotesto — Log de encaminhamento de título protestado ao Financeiro (carta de anuência)
   - trigger: "/logprotesto"
@@ -2156,3 +2179,43 @@ matches:
         values:
           - Serviço normalizado
           - Falha persiste — escalonado
+
+# Log interno de diagnóstico de roteador FAST (Limitação física) com orientação de troca
+  - trigger: "/logfast"
+    form: |
+      Diagnóstico de Equipamento Particular — Roteador Fast
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Sintoma Relatado: [[sintoma]]
+
+      TESTES E PROCEDIMENTOS
+      • Análise: Link com parâmetros normais até a ONU da Com4. Identificado via monitoramento (Nagios) que o roteador do cliente está negociando a 100 Mbps (tecnologia Fast), o que causa gargalo na banda e quedas na rede local.
+      
+      • Ações Executadas no Suporte:
+      [[acoes]]
+
+      ORIENTAÇÕES REPASSADAS AO CLIENTE
+      • Reforçada a normalidade e estabilidade dos serviços até o modem da Com4.
+      • Explicado que a instabilidade/limitação ocorre devido à capacidade física do roteador atual.
+      • Orientada a troca por um roteador de padrão Gigabit (Giga).
+      • Cliente informado de que a Com4 não comercializa o aparelho; enviada a lista em PDF com sugestões de modelos.
+      • Avisado que, mediante a aquisição, a visita técnica para configuração do novo roteador será isenta de custos.
+
+      SOLUÇÃO
+      • Chamado encerrado. Cliente ciente da necessidade de upgrade do equipamento particular para normalização definitiva.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      sintoma:
+        type: choice
+        values:
+          - Quedas frequentes / Instabilidade
+          - Sem acesso à internet
+          - Lentidão / Não atinge a velocidade do plano
+      acoes:
+        type: multiline
