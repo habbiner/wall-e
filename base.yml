@@ -698,7 +698,7 @@ matches:
 
       Com essas informações, consigo indicar o próximo passo com mais precisão. ✅
 
-  # /visita — Coleta endereço e disponibilidade para agendar visita técnica presencial
+# /visita — Coleta endereço e disponibilidade para agendar visita técnica presencial
   - trigger: "/visita"
     force_clipboard: true
     replace: |-
@@ -709,8 +709,9 @@ matches:
 
       ⚠️ Avisos importantes:
 
-      1. A presença de um responsável maior de 18 anos é obrigatória durante a visita.
-      2. A confirmação de data e horário será feita pela equipe técnica de fibra diretamente neste canal.
+      1. Nossos técnicos de campo atuam em horário comercial: de segunda a sexta-feira, das 08:00 às 18:00, e aos sábados, das 08:00 às 12:00.
+      2. A presença de um responsável maior de 18 anos é obrigatória no local durante o atendimento.
+      3. A confirmação exata da data e horário será feita pela equipe técnica diretamente neste canal.
 
   # /instab — Questionário de diagnóstico de instabilidade (lentidão, queda, falha específica)
   - trigger: "/instab"
@@ -1558,7 +1559,7 @@ matches:
       problema:
         type: choice
         values:
-          - LOS ativo
+          - Luz LOS 
           - Fibra Atenuada
 
   # /logmassivo — Log de cliente atendido durante ocorrência massiva em área
@@ -2219,3 +2220,101 @@ matches:
           - Lentidão / Não atinge a velocidade do plano
       acoes:
         type: multiline
+
+# /logvisitarot — Log de abertura de visita técnica para configuração de novo roteador
+  - trigger: "/logvisitarot"
+    form: |
+      Agendamento de Visita Técnica — Configuração de Roteador
+      
+      MOTIVO DA VISITA
+      • Instalação e configuração de novo roteador particular (Padrão Gigabit).
+
+      PROCEDIMENTOS E INFORMAÇÕES
+      • Histórico: Cliente adquiriu um novo equipamento para substituir o antigo (Fast), conforme orientação técnica prévia para sanar gargalo/limitação de banda.
+      • Equipamento Adquirido (Modelo): [[modelo]]
+      • Ação: Solicito o envio da equipe técnica ao local para realizar a instalação física e a configuração lógica (PPPoE/IP/Wi-Fi) do novo roteador. 
+      • Faturamento: Visita isenta de taxa de configuração, conforme padrão de upgrade.
+
+      AGENDAMENTO E LOCAL
+      • Endereço Confirmado: [[endereco]]
+      • Disponibilidade do Cliente: [[disponibilidade]]
+      
+      • Observações Adicionais: 
+      [[obs]]
+    form_fields:
+      modelo:
+        type: text
+      endereco:
+        type: text
+      disponibilidade:
+        type: text
+      obs:
+        type: multiline
+
+# /emailcomp — Confirmação formal de recebimento de comprovante via e-mail (Padrão BDC)
+  - trigger: "/emailcomp"
+    form: |
+      Olá, [[nome]], {{saudacao}}!
+
+      Informamos que o comprovante foi verificado e você já pode voltar a utilizar os nossos serviços.
+      Lembramos que, caso o pagamento não seja processado pelo banco dentro de 24 horas, o serviço poderá ser suspenso automaticamente.
+
+      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Atenciosamente,
+    vars:
+      - name: saudacao
+        type: global
+      - name: empresa_nome
+        type: global
+
+  # /faltadados — Solicita CPF/CNPJ de comprovante recebido sem identificação via e-mail (Padrão BDC)
+  - trigger: "/faltadados"
+    form: |
+      Olá, [[nome]], {{saudacao}}!
+
+      Recebemos o comprovante de pagamento, no entanto, para que possamos localizar seu cadastro e anexá-lo corretamente, por gentileza, nos informe o CPF ou CNPJ vinculado.
+
+      Fico no aguardo do seu retorno.
+
+      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Atenciosamente,
+    vars:
+      - name: saudacao
+        type: global
+      - name: empresa_nome
+        type: global
+
+  # /viabilidade — Informa cliente (Lead) que há viabilidade de fibra no endereço (Padrão BDC)
+  - trigger: "/viabilidade"
+    form: |
+      Olá, [[nome]], {{saudacao}}!
+
+      Temos uma ótima notícia: o endereço que você nos informou possui viabilidade para instalação com fibra óptica! Isso significa que conseguimos te atender com a nossa internet de alta qualidade.
+      Se tiver interesse, já podemos seguir com os próximos passos para a contratação.
+
+      Para dar continuidade, você pode nos chamar no WhatsApp: (16) 3706-8000 ou, se preferir, é só responder por aqui com seu nome e número de telefone, que um de nossos consultores entrará em contato com você.
+
+      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Atenciosamente,
+    vars:
+      - name: saudacao
+        type: global
+      - name: empresa_nome
+        type: global
+
+  # /semviabilidade — Informa cliente (Lead) sobre falta de viabilidade de fibra no endereço (Padrão BDC)
+  - trigger: "/semviabilidade"
+    form: |
+      Olá, [[nome]], {{saudacao}}!
+
+      Agradecemos o seu interesse em contratar nossos serviços. No momento, ainda não temos viabilidade técnica para atender no seu endereço.
+
+      Mas fique tranquilo: assim que ampliarmos nossa infraestrutura na sua região, entraremos em contato com você.
+
+      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Atenciosamente,
+    vars:
+      - name: saudacao
+        type: global
+      - name: empresa_nome
+        type: global
