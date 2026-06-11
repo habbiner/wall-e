@@ -14,6 +14,7 @@
 #   /analise      Informa pausa longa para análise técnica aprofundada nos logs
 #   /obg          Agradece ao cliente após retorno de pausa (obrigatório monitoria)
 #   /transfere    Informa ao cliente a transferência para outro setor
+#   /prazo        Informa SLA de retorno (Novo)
 #   /aux          Pergunta se precisa de mais alguma ajuda antes de encerrar
 #   /alerta       Avisa sobre inatividade e encerramento automático em 30 min
 #   /final        Encerra o atendimento por falta de resposta do cliente
@@ -32,29 +33,36 @@
 #   /acordo       Confirma que o desbloqueio em acordo foi realizado + prazo D+2
 #   /norm         Confirma desbloqueio concluído após baixa bancária confirmada
 #   /comp         Confirma recebimento e registro do comprovante de pagamento
+#   /emailcomp    Confirmação formal de recebimento de comprovante via e-mail
+#   /faltadados   Solicita CPF/CNPJ de comprovante recebido sem identificação via e-mail
+#   /boletoinvertido Informa pagamento de mês incorreto/posterior (Novo)
+#   /vencimento   Resposta sobre alteração de vencimento (Novo)
 #   /protesto     Explica o processo e encaminha título protestado ao Financeiro
 #   /comodato     Informa regras de devolução do equipamento e multa por extravio
 #   /doctroca     Solicita documentos (PF ou PJ) para iniciar troca de titularidade
 #   /fidelidade   Explica cláusula de fidelidade e valor da multa rescisória
 #   /retirada     Agenda recolha do modem após cancelamento
 #   /faturacanc   Informa valor proporcional da última fatura durante cancelamento
-#   /lembretefatura  Lembrete proativo de fatura em aberto antes do bloqueio ocorrer
+#   /lembretefatura Lembrete proativo de fatura em aberto antes do bloqueio ocorrer
 #   /negado       Informa que o comprovante está ilegível ou incompleto
 #   /duplicata    Informa que o comprovante já consta registrado no sistema
 #   /pixrapido    Envia PIX (chave do .env) + linha digitável — só pede o boleto
-#   /cancelapf      Informa prazo de 1 dia útil do Financeiro para cancelamento PF
-#   /cancelapj      Solicita formalização por e-mail para cancelamento PJ
+#   /cancelapf    Informa prazo de 1 dia útil do Financeiro para cancelamento PF
+#   /cancelapj    Solicita formalização por e-mail para cancelamento PJ
 #
 # 3 · Suporte Técnico — Cliente
 #   /fibra        Orienta verificação visual do cabo de fibra e do conector
 #   /loss         Explica luz LOS (vermelha) e abre chamado para equipe de campo
 #   /massivo      Informa ao cliente que há uma ocorrência massiva em andamento na região
 #   /wifi         Diagnóstico de instabilidade: isola problemas no Wi-Fi vs. fibra
+#   /speedwifi    Explica perda de Wi-Fi e exige teste via cabo (Proposto)
 #   /visita       Coleta endereço e disponibilidade para agendar visita técnica presencial
 #   /instab       Questionário de diagnóstico de instabilidade (lentidão, queda, falha específica)
 #   /fast         Explica limitação do roteador Fast (100Mbps) e sugere troca por Gigabit
+#   /roteadores   Envia PDF de recomendação de roteadores Giga e reforça visita gratuita
 #   /reset        Confirma sinal normal e propõe reconfiguração lógica remota do modem
 #   /eng          Informa escalonamento do chamado para a Engenharia (Nível 2)
+#   /domcong      Explica bloqueio por domínio congelado no Registro.br (Novo)
 #   /pmg          Explica o painel PMG de quarentena antispam e as ações disponíveis
 #   /cpanel       Solicita e-mail corporativo formal para envio seguro de credenciais cPanel
 #   /ssl          Informa sobre propagação normal do certificado SSL recém-instalado
@@ -62,12 +70,14 @@
 #   /recursos     Alerta sobre limite de CPU/RAM no plano compartilhado e sugere VPS
 #   /spamout      Trata conta de e-mail bloqueada por disparo de spam (conta comprometida)
 #   /clima        Informa interrupção causada por condições climáticas severas na área
-#   /massivoresolvido  Notifica o cliente que a falha massiva foi resolvida pela equipe de campo
+#   /massivoresolvido Notifica o cliente que a falha massiva foi resolvida pela equipe de campo
 #   /romp         Informa rompimento grave de fibra óptica na região (acidente/evento externo)
 #   /online       Confirma que o monitoramento detectou o sinal restaurado; pede teste
 #   /reinicia     Orienta reinício do modem/roteador (1 minuto na tomada)
 #   /speedtest    Orienta teste de velocidade via cabo de rede
 #   /dnsprop      Explica propagação DNS ao cliente (2 a 24 horas)
+#   /viabilidade  Informa cliente (Lead) que há viabilidade de fibra no endereço
+#   /semviabilidade Informa cliente (Lead) sobre falta de viabilidade de fibra no endereço
 #
 # 4 · E-mail, Hospedagem e Migração
 #   /ativhosp     Envia dados de acesso ao cPanel, FTP, Webmail e DNS (ativação de hospedagem)
@@ -88,7 +98,8 @@
 #   /logcalote    Registra retomada da suspensão por falta de pagamento pós-acordo
 #   /log2via      Log completo de atendimento de emissão de 2ª via de boleto
 #   /logvenc      Log de solicitação de alteração da data de vencimento mensal
-#   /logcanc      Log completo de cancelamento: motivo, retenção, multa, equipamento e bloqueio
+#   /logboletoinvertido Log de pagamento de fatura em mês incorreto (Novo)
+#   /logcanc      Log completo de cancelamento (repassado ao Financeiro)
 #   /logprotesto  Log de encaminhamento de título protestado ao Financeiro (carta de anuência)
 #   /loglead      Log de oportunidade comercial identificada; encaminha lead ao Comercial
 #
@@ -97,7 +108,7 @@
 #   /logfalha     Log de falha de acesso aos serviços Com4 com testes de DNS e Imunify360
 #   /loglos       Log de abertura de visita técnica de fibra (LOS ou atenuação)
 #   /logmassivo   Log de cliente atendido durante ocorrência massiva em área
-#   /logsemretorno  Log de tentativa de retorno telefônico sem resposta do cliente
+#   /logsemretorno Log de tentativa de retorno telefônico sem resposta do cliente
 #   /logvps       Log de suporte a servidor VPS com testes, acesso e autorização de reinício
 #   /logsite      Log de suporte a site com diagnóstico de DNS, disco e banco de dados
 #   /logemail     Log de suporte a e-mail com testes de webmail, DNS e configuração IMAP/POP
@@ -115,6 +126,8 @@
 #   /logfimromp   Log de encerramento de chamado após reparo do rompimento concluído
 #   /loginviavel  Log de inviabilidade técnica; encaminha estudo de expansão para Projetos
 #   /logreinicia  Log de reinício remoto de servidor ou serviço solicitado pelo cliente
+#   /logfast      Log de diagnóstico de roteador Fast (100Mbps) com orientação de troca
+#   /logvisitarot Log de abertura de visita técnica para configuração de novo roteador
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -190,7 +203,7 @@ global_vars:
       shell: powershell
       cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'Bom dia' } elseif ($h -lt 18) { 'Boa tarde' } else { 'Boa noite' }"
 
-# Despedida dinâmica — uso em /tchau (inline, sem .ps1 — evita ExecutionPolicy)
+  # Despedida dinâmica — uso em /tchau (inline, sem .ps1 — evita ExecutionPolicy)
   - name: despedida
     type: shell
     params:
@@ -345,6 +358,16 @@ matches:
                 - Engenharia (Nível 2)
                 - Ativação da Fibra
                 - Projetos / Expansão
+
+  # /prazo — Informa SLA de retorno
+  - trigger: "/prazo"
+    form: |
+      A sua solicitação foi registrada com sucesso. O nosso prazo de retorno para este tipo de atendimento é de até [[horas]] horas úteis.
+      
+      Assim que tivermos uma atualização, entraremos em contato por aqui.
+    form_fields:
+      horas:
+        type: text
 
   # /aux — Pergunta se precisa de mais alguma ajuda antes de encerrar
   - trigger: "/aux"
@@ -508,6 +531,71 @@ matches:
       Ele já foi anexado ao seu cadastro financeiro.
       Muito obrigado!
 
+  # /emailcomp — Confirmação formal de recebimento de comprovante via e-mail
+  - trigger: "/emailcomp"
+    form: |
+      Olá, [[nome]], {{saudacao}}!
+
+      Informamos que o comprovante foi verificado e você já pode voltar a utilizar os nossos serviços.
+      Lembramos que, caso o pagamento não seja processado pelo banco dentro de 24 horas, o serviço poderá ser suspenso automaticamente.
+
+      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Atenciosamente,
+    vars:
+      - name: saudacao
+        type: global
+      - name: empresa_nome
+        type: global
+
+  # /faltadados — Solicita CPF/CNPJ de comprovante recebido sem identificação via e-mail
+  - trigger: "/faltadados"
+    form: |
+      Olá, [[nome]], {{saudacao}}!
+
+      Recebemos o comprovante de pagamento, no entanto, para que possamos localizar seu cadastro e anexá-lo corretamente, por gentileza, nos informe o CPF ou CNPJ vinculado.
+
+      Fico no aguardo do seu retorno.
+
+      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Atenciosamente,
+    vars:
+      - name: saudacao
+        type: global
+      - name: empresa_nome
+        type: global
+
+  # /boletoinvertido — Cliente pagou boleto do mês posterior em vez do vigente
+  - trigger: "/boletoinvertido"
+    force_clipboard: true
+    replace: |-
+      Identificamos no sistema que o pagamento realizado foi referente à fatura do próximo mês, e não ao boleto que está vencido/vigente.
+      
+      Como a fatura deste mês continua em aberto, o sistema não retira o bloqueio automaticamente. Para normalizarmos o seu serviço, é necessário realizar o pagamento do boleto correto.
+      
+      Deseja que eu envie a 2ª via atualizada da fatura pendente?
+
+  # /vencimento — Resposta ao cliente sobre alteração de vencimento
+  - trigger: "/vencimento"
+    form: |
+      Compreendo a solicitação para alterar a data de vencimento dos seus boletos para o dia [[dia_novo]].
+      
+      Para alinharmos, o cenário atual é o seguinte:
+      • Último boleto gerado: vencimento em [[ultimo_gerado]] (referente ao mês de [[mes_ultimo]]).
+      • Próximo boleto a faturar: vencimento em [[proximo_gerado]] (referente ao mês de [[mes_proximo]]).
+      
+      Vou encaminhar este pedido para o nosso setor Financeiro verificar a viabilidade da alteração no sistema. Em breve retornarão o contato por aqui.
+    form_fields:
+      dia_novo:
+        type: text
+      ultimo_gerado:
+        type: text
+      mes_ultimo:
+        type: text
+      proximo_gerado:
+        type: text
+      mes_proximo:
+        type: text
+
   # /protesto — Explica o processo e encaminha título protestado ao Financeiro
   - trigger: "/protesto"
     force_clipboard: true
@@ -619,7 +707,7 @@ matches:
         params:
           layout: "Linha Digitável do Boleto: [[boleto]]"
 
-# /cancelapf — Informa prazo de 1 dia útil do Financeiro para cancelamento PF
+  # /cancelapf — Informa prazo de 1 dia útil do Financeiro para cancelamento PF
   - trigger: "/cancelapf"
     force_clipboard: true
     replace: |-
@@ -641,6 +729,8 @@ matches:
     vars:
       - name: email_atendimento
         type: global
+
+
 # =============================================================================
 # 3 · Suporte Técnico — Cliente
 # =============================================================================
@@ -698,7 +788,17 @@ matches:
 
       Com essas informações, consigo indicar o próximo passo com mais precisão. ✅
 
-# /visita — Coleta endereço e disponibilidade para agendar visita técnica presencial
+  # /speedwifi — Explica a limitação de velocidade via Wi-Fi e pede teste via cabo (Proposto)
+  - trigger: "/speedwifi"
+    force_clipboard: true
+    replace: |-
+      Notamos que o teste de velocidade foi realizado através da rede Wi-Fi. 
+      
+      O sinal sem fio sofre perda natural de pacotes e interferências do ambiente (paredes, espelhos, outros eletrônicos), não conseguindo transmitir a velocidade total da fibra ótica.
+      
+      Para atestarmos a real capacidade que está a chegar ao seu equipamento, é fundamental realizar o teste com um computador conectado diretamente ao modem através de um cabo de rede. Consegue realizar este teste e enviar-nos o resultado?
+
+  # /visita — Coleta endereço e disponibilidade para agendar visita técnica presencial
   - trigger: "/visita"
     force_clipboard: true
     replace: |-
@@ -712,7 +812,7 @@ matches:
       1. Nossos técnicos de campo atuam em horário comercial: de segunda a sexta-feira, das 08:00 às 18:00, e aos sábados, das 08:00 às 12:00.
       2. A presença de um responsável maior de 18 anos é obrigatória no local durante o atendimento.
       3. A confirmação exata da data e horário será feita pela equipe técnica diretamente neste canal.
-
+      
   # /instab — Questionário de diagnóstico de instabilidade (lentidão, queda, falha específica)
   - trigger: "/instab"
     force_clipboard: true
@@ -741,6 +841,23 @@ matches:
 
       Se tiver qualquer dúvida sobre os modelos, sigo à disposição!
 
+  # /roteadores — Envia o PDF de recomendação de roteadores Giga e reforça a visita gratuita
+  - trigger: "/roteadores"
+    force_clipboard: true
+    replace: |-
+      Conforme conversamos, segue em anexo o PDF com a nossa lista atualizada de roteadores Gigabit recomendados. 📄
+
+      Todos os modelos listados possuem tecnologia avançada (Wi-Fi 6) e excelente custo-benefício, garantindo que você consiga utilizar 100% da velocidade do plano contratado sem gargalos na rede.
+
+      Lembrando que a {{empresa_nome}} não comercializa esses aparelhos, mas você pode encontrá-los facilmente na internet (clicando no nome deles no PDF) ou em lojas de informática da região.
+
+      E a melhor parte: assim que você adquirir o novo equipamento, basta nos avisar! Enviaremos um técnico até o local para instalar e configurar o seu novo roteador na rede sem nenhum custo adicional. 🛠️
+
+      Se tiver dúvidas sobre algum modelo específico antes de comprar, sigo à disposição!
+    vars:
+      - name: empresa_nome
+        type: global
+
   # /reset — Confirma sinal normal e propõe reconfiguração lógica remota do modem
   - trigger: "/reset"
     form: |
@@ -766,6 +883,21 @@ matches:
       Eles já receberam o histórico detalhado do que fizemos até aqui e darão sequência ao caso.
 
       Você receberá retorno neste mesmo chamado quando a intervenção terminar ou se a Engenharia precisar de mais algum detalhe.
+
+  # /domcong — Explica bloqueio por domínio congelado no Registro.br
+  - trigger: "/domcong"
+    force_clipboard: true
+    replace: |-
+      Ao analisar a sua conexão, verificamos que o seu domínio ({{formulario.dominio}}) encontra-se com o status "Congelado" no Registro.br, o órgão que regula os domínios nacionais.
+      
+      Isso geralmente ocorre devido a uma pendência na taxa anual de renovação, fazendo com que o site e os e-mails parem de funcionar.
+      
+      Como a gestão do domínio é externa, é necessário acessar o portal do Registro.br (ou contactar o responsável pelo registro) para regularizar a situação. Após a compensação, os serviços voltarão ao normal de forma automática.
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: "Domínio afetado: [[dominio]]"
 
   # /pmg — Explica o painel PMG de quarentena antispam e as ações disponíveis
   - trigger: "/pmg"
@@ -937,22 +1069,41 @@ matches:
 
       Recomendamos aguardar a conclusão da propagação antes de novos testes. Qualquer dúvida, sigo à disposição!
 
-# /roteadores — Envia o PDF de recomendação de roteadores Giga e reforça a visita gratuita
-  - trigger: "/roteadores"
-    force_clipboard: true
-    replace: |-
-      Conforme conversamos, segue em anexo o PDF com a nossa lista atualizada de roteadores Gigabit recomendados. 📄
+  # /viabilidade — Informa cliente (Lead) que há viabilidade de fibra no endereço (Padrão BDC)
+  - trigger: "/viabilidade"
+    form: |
+      Olá, [[nome]], {{saudacao}}!
 
-      Todos os modelos listados possuem tecnologia avançada (Wi-Fi 6) e excelente custo-benefício, garantindo que você consiga utilizar 100% da velocidade do plano contratado sem gargalos na rede.
+      Temos uma ótima notícia: o endereço que você nos informou possui viabilidade para instalação com fibra óptica! Isso significa que conseguimos te atender com a nossa internet de alta qualidade.
+      Se tiver interesse, já podemos seguir com os próximos passos para a contratação.
 
-      Lembrando que a {{empresa_nome}} não comercializa esses aparelhos, mas você pode encontrá-los facilmente na internet (clicando no nome deles no PDF) ou em lojas de informática da região.
+      Para dar continuidade, você pode nos chamar no WhatsApp: (16) 3706-8000 ou, se preferir, é só responder por aqui com seu nome e número de telefone, que um de nossos consultores entrará em contato com você.
 
-      E a melhor parte: assim que você adquirir o novo equipamento, basta nos avisar! Enviaremos um técnico até o local para instalar e configurar o seu novo roteador na rede sem nenhum custo adicional. 🛠️
-
-      Se tiver dúvidas sobre algum modelo específico antes de comprar, sigo à disposição!
+      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Atenciosamente,
     vars:
+      - name: saudacao
+        type: global
       - name: empresa_nome
         type: global
+
+  # /semviabilidade — Informa cliente (Lead) sobre falta de viabilidade de fibra no endereço (Padrão BDC)
+  - trigger: "/semviabilidade"
+    form: |
+      Olá, [[nome]], {{saudacao}}!
+
+      Agradecemos o seu interesse em contratar nossos serviços. No momento, ainda não temos viabilidade técnica para atender no seu endereço.
+
+      Mas fique tranquilo: assim que ampliarmos nossa infraestrutura na sua região, entraremos em contato com você.
+
+      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Atenciosamente,
+    vars:
+      - name: saudacao
+        type: global
+      - name: empresa_nome
+        type: global
+
 
 # =============================================================================
 # 4 · E-mail, Hospedagem e Migração
@@ -1354,15 +1505,55 @@ matches:
   # /logvenc — Log de solicitação de alteração da data de vencimento mensal
   - trigger: "/logvenc"
     form: |
-      Cliente entrou em contato solicitando a alteração da data de vencimento dos seus boletos do dia [[dia_antigo]] para todo dia [[dia_novo]].
+      Alteração Data Vencimento
+      
+      Cliente entrou em contato solicitando para alterar a data de vencimento de seus boletos do dia [[dia_antigo]] para todo dia [[dia_novo]].
 
-      Foram repassadas as seguintes informações ao cliente:
+      Foram passadas as seguintes informações ao cliente:
       Último boleto gerado: [[ultimo_gerado]] - Referente ao mês de [[mes_ultimo]]
       Próximo boleto gerado: [[proximo_gerado]] - Referente ao mês de [[mes_proximo]]
 
-      Por gentileza, verificar a possibilidade.
+      Por gentileza, verificar.
+    form_fields:
+      dia_antigo:
+        type: text
+      dia_novo:
+        type: text
+      ultimo_gerado:
+        type: text
+      mes_ultimo:
+        type: text
+      proximo_gerado:
+        type: text
+      mes_proximo:
+        type: text
 
-# /logcanc — Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
+  # /logboletoinvertido — Log interno de pagamento de fatura do mês incorreto
+  - trigger: "/logboletoinvertido"
+    form: |
+      Pagamento Invertido de Fatura
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Solicitante: [[nome]]
+      
+      OCORRÊNCIA
+      • O cliente efetuou o pagamento da fatura com vencimento em [[vencimento_pago]] (mês posterior) em vez da fatura pendente com vencimento em [[vencimento_atual]].
+      
+      PROCEDIMENTOS
+      • Cliente orientado de que a fatura atual continua em aberto e requer pagamento para evitar a suspensão dos serviços.
+      
+      AÇÃO
+      • Chamado mantido na fila do Financeiro aguardando a baixa bancária do boleto pago e a regularização do boleto pendente.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - E-mail
+          - Ligação
+
+  # /logcanc — Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
   - trigger: "/logcanc"
     form: |
       Solicitação de Cancelamento (Repasse Financeiro)
@@ -1542,6 +1733,46 @@ matches:
           - Não constam bloqueios
           - IP Bloqueado pelo Firewall
       acao:
+        type: multiline
+
+  # /logfast — Log de diagnóstico de roteador Fast (100Mbps) com orientação de troca
+  - trigger: "/logfast"
+    form: |
+      Diagnóstico de Equipamento Particular — Roteador Fast
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Sintoma Relatado: [[sintoma]]
+
+      TESTES E PROCEDIMENTOS
+      • Análise: Link com parâmetros normais até a ONU da Com4. Identificado via monitoramento (Nagios) que o roteador do cliente está negociando a 100 Mbps (tecnologia Fast), o que causa gargalo na banda e quedas na rede local.
+      
+      • Ações Executadas no Suporte:
+      [[acoes]]
+
+      ORIENTAÇÕES REPASSADAS AO CLIENTE
+      • Reforçada a normalidade e estabilidade dos serviços até o modem da Com4.
+      • Explicado que a instabilidade/limitação ocorre devido à capacidade física do roteador atual.
+      • Orientada a troca por um roteador de padrão Gigabit (Giga).
+      • Cliente informado de que a Com4 não comercializa o aparelho; enviada a lista em PDF com sugestões de modelos.
+      • Avisado que, mediante a aquisição, a visita técnica para configuração do novo roteador será isenta de custos.
+
+      SOLUÇÃO
+      • Chamado encerrado. Cliente ciente da necessidade de upgrade do equipamento particular para normalização definitiva.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      sintoma:
+        type: choice
+        values:
+          - Quedas frequentes / Instabilidade
+          - Sem acesso à internet
+          - Lentidão / Não atinge a velocidade do plano
+      acoes:
         type: multiline
 
   # /loglos — Log de abertura de visita técnica de fibra (LOS ou atenuação)
@@ -2181,47 +2412,7 @@ matches:
           - Serviço normalizado
           - Falha persiste — escalonado
 
-# Log interno de diagnóstico de roteador FAST (Limitação física) com orientação de troca
-  - trigger: "/logfast"
-    form: |
-      Diagnóstico de Equipamento Particular — Roteador Fast
-      
-      INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Sintoma Relatado: [[sintoma]]
-
-      TESTES E PROCEDIMENTOS
-      • Análise: Link com parâmetros normais até a ONU da Com4. Identificado via monitoramento (Nagios) que o roteador do cliente está negociando a 100 Mbps (tecnologia Fast), o que causa gargalo na banda e quedas na rede local.
-      
-      • Ações Executadas no Suporte:
-      [[acoes]]
-
-      ORIENTAÇÕES REPASSADAS AO CLIENTE
-      • Reforçada a normalidade e estabilidade dos serviços até o modem da Com4.
-      • Explicado que a instabilidade/limitação ocorre devido à capacidade física do roteador atual.
-      • Orientada a troca por um roteador de padrão Gigabit (Giga).
-      • Cliente informado de que a Com4 não comercializa o aparelho; enviada a lista em PDF com sugestões de modelos.
-      • Avisado que, mediante a aquisição, a visita técnica para configuração do novo roteador será isenta de custos.
-
-      SOLUÇÃO
-      • Chamado encerrado. Cliente ciente da necessidade de upgrade do equipamento particular para normalização definitiva.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      sintoma:
-        type: choice
-        values:
-          - Quedas frequentes / Instabilidade
-          - Sem acesso à internet
-          - Lentidão / Não atinge a velocidade do plano
-      acoes:
-        type: multiline
-
-# /logvisitarot — Log de abertura de visita técnica para configuração de novo roteador
+  # /logvisitarot — Log de abertura de visita técnica para configuração de novo roteador
   - trigger: "/logvisitarot"
     form: |
       Agendamento de Visita Técnica — Configuração de Roteador
@@ -2250,71 +2441,3 @@ matches:
         type: text
       obs:
         type: multiline
-
-# /emailcomp — Confirmação formal de recebimento de comprovante via e-mail (Padrão BDC)
-  - trigger: "/emailcomp"
-    form: |
-      Olá, [[nome]], {{saudacao}}!
-
-      Informamos que o comprovante foi verificado e você já pode voltar a utilizar os nossos serviços.
-      Lembramos que, caso o pagamento não seja processado pelo banco dentro de 24 horas, o serviço poderá ser suspenso automaticamente.
-
-      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
-      Atenciosamente,
-    vars:
-      - name: saudacao
-        type: global
-      - name: empresa_nome
-        type: global
-
-  # /faltadados — Solicita CPF/CNPJ de comprovante recebido sem identificação via e-mail (Padrão BDC)
-  - trigger: "/faltadados"
-    form: |
-      Olá, [[nome]], {{saudacao}}!
-
-      Recebemos o comprovante de pagamento, no entanto, para que possamos localizar seu cadastro e anexá-lo corretamente, por gentileza, nos informe o CPF ou CNPJ vinculado.
-
-      Fico no aguardo do seu retorno.
-
-      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
-      Atenciosamente,
-    vars:
-      - name: saudacao
-        type: global
-      - name: empresa_nome
-        type: global
-
-  # /viabilidade — Informa cliente (Lead) que há viabilidade de fibra no endereço (Padrão BDC)
-  - trigger: "/viabilidade"
-    form: |
-      Olá, [[nome]], {{saudacao}}!
-
-      Temos uma ótima notícia: o endereço que você nos informou possui viabilidade para instalação com fibra óptica! Isso significa que conseguimos te atender com a nossa internet de alta qualidade.
-      Se tiver interesse, já podemos seguir com os próximos passos para a contratação.
-
-      Para dar continuidade, você pode nos chamar no WhatsApp: (16) 3706-8000 ou, se preferir, é só responder por aqui com seu nome e número de telefone, que um de nossos consultores entrará em contato com você.
-
-      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
-      Atenciosamente,
-    vars:
-      - name: saudacao
-        type: global
-      - name: empresa_nome
-        type: global
-
-  # /semviabilidade — Informa cliente (Lead) sobre falta de viabilidade de fibra no endereço (Padrão BDC)
-  - trigger: "/semviabilidade"
-    form: |
-      Olá, [[nome]], {{saudacao}}!
-
-      Agradecemos o seu interesse em contratar nossos serviços. No momento, ainda não temos viabilidade técnica para atender no seu endereço.
-
-      Mas fique tranquilo: assim que ampliarmos nossa infraestrutura na sua região, entraremos em contato com você.
-
-      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
-      Atenciosamente,
-    vars:
-      - name: saudacao
-        type: global
-      - name: empresa_nome
-        type: global
