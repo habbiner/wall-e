@@ -2441,3 +2441,138 @@ matches:
         type: text
       obs:
         type: multiline
+
+# /pppoe — Envia as credenciais de discagem (PPPoE) para configuração de roteador próprio
+  - trigger: "/pppoe"
+    force_clipboard: true
+    replace: |-
+      Conforme solicitado, seguem os dados de autenticação (PPPoE) da sua conexão, necessários para a configuração do seu roteador particular:
+
+      👤 Usuário: {{formulario.user}}
+      🔑 Senha: {{formulario.senha}}
+
+      ⚠️ Importante: Resguarde estes dados com segurança. Eles são exclusivos da sua assinatura e autorizam o acesso do seu equipamento à nossa rede.
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Usuário PPPoE: [[user]]
+            Senha PPPoE: [[senha]]
+
+# /logpppoe — Log de envio de credenciais PPPoE ao cliente
+  - trigger: "/logpppoe"
+    form: |
+      Envio de Credenciais PPPoE
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Solicitante: [[solicitante]]
+      • Validação de Segurança: Dados cadastrais/titularidade confirmados com sucesso.
+
+      PROCEDIMENTOS E ORIENTAÇÕES
+      • Motivo da solicitação: [[motivo]]
+      • Cliente instruído sobre o uso seguro das credenciais PPPoE para discagem/autenticação em seu equipamento.
+      
+      SOLUÇÃO
+      • Dados de acesso (Usuário e Senha) repassados ao cliente com sucesso. Chamado encerrado.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      solicitante:
+        type: text
+      motivo:
+        type: choice
+        values:
+          - Configuração de roteador próprio (Bridge)
+          - Reset acidental do equipamento particular
+          - Troca de roteador (Upgrade)
+
+   # /avalie — Solicita avaliação no Google de forma isolada (Chat/Blip)
+  - trigger: "/avalie"
+    force_clipboard: true
+    replace: |-
+      Fico feliz que conseguimos resolver a sua solicitação! 😊
+      
+      A sua opinião é muito importante para nós. Se o atendimento foi satisfatório, você poderia nos deixar uma avaliação no Google? Leva menos de um minuto e nos ajuda a continuar melhorando.
+      
+      Basta acessar este link: https://g.page/r/CdBIvBOvM7UBEAE/review
+      
+      A {{empresa_nome}} agradece!
+    vars:
+      - name: empresa_nome
+        type: global
+
+  # /avaliemail — Bloco para adicionar no final de tratativas por E-mail
+  - trigger: "/avaliemail"
+    force_clipboard: true
+    replace: |-
+      Obrigado pelo seu contato hoje. A sua avaliação nos ajuda a melhorar e atender mais clientes. 
+      
+      Seu feedback é muito importante para a {{empresa_nome}}. Por gentileza, poste uma avaliação no nosso perfil através do link abaixo:
+      https://g.page/r/CdBIvBOvM7UBEAE/review
+    vars:
+      - name: empresa_nome
+        type: global
+
+  # /tchaug — Encerramento de chat com o pedido de avaliação do Google embutido
+  - trigger: "/tchaug"
+    force_clipboard: true
+    replace: |-
+      Fico feliz que a solicitação foi resolvida! Caso tenha qualquer outra dúvida, estamos à disposição. 😊
+      
+      A sua opinião é muito importante para nós. Se o atendimento foi satisfatório, poderia nos avaliar no Google? Leva menos de um minuto:
+      👉 https://g.page/r/CdBIvBOvM7UBEAE/review
+      
+      A {{empresa_nome}} agradece o seu contato. {{despedida}}!
+    vars:
+      - name: empresa_nome
+        type: global
+      - name: despedida
+        type: global
+
+# /logreset — Log interno de reconfiguração lógica / reset remoto da ONU
+  - trigger: "/logreset"
+    form: |
+      Reconfiguração Lógica / Reset de Equipamento
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Sintoma Relatado: [[sintoma]]
+
+      DIAGNÓSTICO E VERIFICAÇÕES
+      • Sinal Óptico: Dentro dos padrões ideais.
+      • Uptime da ONU: [[uptime]]
+      • Análise: Link físico estável. Sintoma relatado apontava para travamento lógico ou falha de roteamento no equipamento da Com4.
+
+      PROCEDIMENTOS REALIZADOS
+      • Autorização: Cliente devidamente orientado e autorizou a queda momentânea do link.
+      • Ações executadas: Realizado o reboot remoto da ONU e a recriação das configurações lógicas (regras de roteamento/bridge).
+
+      SOLUÇÃO
+      • Status após reconfiguração: [[status]]
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      sintoma:
+        type: choice
+        values:
+          - Lentidão
+          - Quedas frequentes / Instabilidade
+          - Sem navegação (mas com equipamento online)
+      uptime:
+        type: text
+      status:
+        type: choice
+        values:
+          - Conexão normalizada com sucesso. Chamado encerrado.
+          - Falha persiste — Aberta visita técnica para verificação/troca no local.
+          - Falha persiste — Chamado escalonado para a Engenharia.
