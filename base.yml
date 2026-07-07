@@ -41,7 +41,7 @@
 #   /emailcomp        Confirmação formal de recebimento de comprovante via e-mail
 #   /faltadados       Solicita CPF/CNPJ de comprovante recebido sem identificação via e-mail
 #   /boletoinvertido  Cliente pagou boleto do mês posterior em vez do vigente
-#   /vencimento       Resposta ao cliente sobre alteração de vencimento
+#   /venc       Resposta ao cliente sobre alteração de vencimento
 #   /protesto         Explica o processo e encaminha título protestado ao Financeiro
 #   /comodato         Informa regras de devolução do equipamento e multa por extravio
 #   /doctroca         Solicita documentos (PF ou PJ) para iniciar troca de titularidade
@@ -111,7 +111,7 @@
 #   /logcalote        Registra retomada da suspensão por falta de pagamento pós-acordo
 #   /log2via          Log completo de atendimento de emissão de 2ª via de boleto
 #   /logvenc          Log de solicitação de alteração da data de vencimento mensal
-#   /logboletoinvertido Log interno de pagamento de fatura do mês incorreto
+#   /loginvertido     Log interno de pagamento de fatura do mês incorreto
 #   /logcanc          Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
 #   /logprotesto      Log de encaminhamento de título protestado ao Financeiro (carta de anuência)
 #   /loglead          Log de oportunidade comercial identificada; encaminha lead ao Comercial
