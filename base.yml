@@ -5,149 +5,149 @@
 # ÍNDICE DE TRIGGERS
 #
 # 1 · Saudação, Identificação e Encerramento
-#   /ola              Saudação inicial com horário dinâmico e coleta de dados obrigatórios
-#   /proto            Envia o número do protocolo ao cliente
-#   /retorno          Script de retorno ativo para chamados em aberto (chat ou ligação)
-#   /retornocom       Retorno ativo de chamado repassado pelo Comercial
-#   /atraso           Pede desculpas por fila alta no plantão
-#   /espera           Solicita pausa breve para consultar o sistema (obrigatório monitoria)
-#   /analise          Informa pausa longa para análise técnica aprofundada nos logs
-#   /obg              Agradece ao cliente após retorno de pausa (obrigatório monitoria)
-#   /transfere        Informa ao cliente a transferência para outro setor
-#   /prazo            Informa SLA de retorno
-#   /aux              Pergunta se precisa de mais alguma ajuda antes de encerrar
-#   /alerta           Avisa sobre inatividade e encerramento automático em 30 min
-#   /final            Encerra o atendimento por inatividade com pedido de avaliação
-#   /lognada          Log rápido: nenhuma ação no escopo do analista
-#   /logenc           Log rápido: encerramento simples do chamado
-#   /confirmo         Confirma entendimento do cliente antes de prosseguir
-#   /dados            Re-solicita dados cadastrais incompletos ou divergentes
-#   /aguarda          Informa que permanece aguardando retorno do cliente (monitoria)
-#   /horario          Informa horário comercial de atendimento presencial e telefônico
-#   /avalie           Solicita avaliação no Google (chat/Blip)
-#   /avaliemail       Bloco de avaliação Google para e-mails
-#   /tchau            Encerramento de chat com o pedido de avaliação do Google embutido
+#   /ola                Saudação inicial com horário dinâmico e coleta de dados obrigatórios
+#   /proto              Envia o número do protocolo ao cliente
+#   /retornocom         Retorno ativo de chamado repassado pelo Comercial
+#   /atraso             Pede desculpas por fila alta no plantão
+#   /espera             Solicita pausa breve para consultar o sistema (obrigatório monitoria)
+#   /analise            Informa pausa longa para análise técnica aprofundada nos logs
+#   /voltei             Agradece ao cliente após retorno de pausa (obrigatório monitoria)
+#   /transfere          Informa ao cliente a transferência para outro setor
+#   /prazo              Informa SLA de retorno
+#   /aux                Pergunta se precisa de mais alguma ajuda antes de encerrar
+#   /alerta             Avisa sobre inatividade e encerramento automático em 30 min
+#   /final              Encerra o atendimento por inatividade com pedido de avaliação
+#   /horario            Informa horário comercial de atendimento presencial e telefônico
+#   /avalie             Solicita avaliação no Google (chat/Blip)
+#   /avaliaemail        Bloco de avaliação Google para e-mails
+#   /tchau              Encerramento de chat com o pedido de avaliação do Google embutido
 #
 # 2 · Financeiro — Cliente
-#   /bloqueado        Informa suspensão por fatura em aberto; oferece 2ª via ou aguarda comprovante
-#   /seg              Envia 2ª via do boleto com data de vencimento
-#   /agendamento      Informa que o documento enviado é comprovante de agendamento, não pagamento
-#   /pix              Envia chave PIX e linha digitável do boleto
-#   /pixrapido        Envia PIX (chave do .env) + linha digitável — só pede o boleto
-#   /ofer             Oferece o desbloqueio em acordo (antes de executar); informa prazo D+2
-#   /acordo           Confirma que o desbloqueio em acordo foi realizado + prazo D+2
-#   /norm             Confirma desbloqueio concluído após baixa bancária confirmada
-#   /comp             Confirma recebimento e registro do comprovante de pagamento
-#   /emailcomp        Confirmação formal de recebimento de comprovante via e-mail
-#   /faltadados       Solicita CPF/CNPJ de comprovante recebido sem identificação via e-mail
-#   /boletoinvertido  Cliente pagou boleto do mês posterior em vez do vigente
-#   /venc       Resposta ao cliente sobre alteração de vencimento
-#   /protesto         Explica o processo e encaminha título protestado ao Financeiro
-#   /comodato         Informa regras de devolução do equipamento e multa por extravio
-#   /doctroca         Solicita documentos (PF ou PJ) para iniciar troca de titularidade
-#   /fidelidade       Explica cláusula de fidelidade e valor da multa rescisória
-#   /retirada         Agenda recolha do modem após cancelamento
-#   /faturacanc       Informa valor proporcional da última fatura durante cancelamento
-#   /lembretefatura   Lembrete proativo de fatura em aberto antes do bloqueio ocorrer
-#   /negado           Informa que o comprovante está ilegível ou incompleto
-#   /duplicata        Informa que o comprovante já consta registrado no sistema
-#   /desbloqprazo     Informa prazo de desbloqueio após compensação bancária (D+1)
-#   /correios         Explica atraso na fatura impressa e reforça canais digitais
-#   /cancelapf        Informa prazo de 1 dia útil do Financeiro para cancelamento PF
-#   /cancelapj        Solicita formalização por e-mail para cancelamento PJ
+#   /bloqueado          Informa suspensão por fatura em aberto; oferece 2ª via ou aguarda comprovante
+#   /2via               Envia 2ª via do boleto com data de vencimento
+#   /nfe                Envia a Nota Fiscal (NFe) solicitada pelo cliente
+#   /agendamento        Informa que o documento enviado é comprovante de agendamento, não pagamento
+#   /pix                Envia chave PIX e linha digitável do boleto
+#   /ofer               Oferece o desbloqueio em acordo (antes de executar); informa prazo D+2
+#   /acordo             Confirma que o desbloqueio em acordo foi realizado + prazo D+2
+#   /norm               Confirma desbloqueio concluído após baixa bancária confirmada
+#   /comp               Confirma recebimento e registro do comprovante de pagamento
+#   /emailcomp          Confirmação formal de recebimento de comprovante via e-mail
+#   /faltadados         Solicita CPF/CNPJ de comprovante recebido sem identificação via e-mail
+#   /paginvertido       Cliente pagou boleto do mês posterior em vez do vigente
+#   /venc               Alteração de vencimento com cálculo automático para o CLIENTE (BDC)
+#   /protesto           Explica o processo e encaminha título protestado ao Financeiro
+#   /comodato           Informa regras de devolução do equipamento e multa por extravio
+#   /doctroca           Solicita documentos (PF ou PJ) para iniciar troca de titularidade
+#   /fid                Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
+#   /retirada           Agenda recolha do modem após cancelamento
+#   /pague              Lembrete proativo de fatura em aberto antes do bloqueio ocorrer
+#   /negado             Informa que o comprovante está ilegível ou incompleto
+#   /duplicata          Informa que o comprovante já consta registrado no sistema
+#   /desbloqprazo       Informa prazo de desbloqueio após compensação bancária (D+1)
+#   /correios           Explica atraso na fatura impressa e reforça canais digitais
+#   /cancelapf          Informa prazo de 1 dia útil do Financeiro para cancelamento PF
+#   /cancelapj          Solicita formalização por e-mail para cancelamento PJ
+#   /solcomp            Informa que já pagou e solicita comprovante para liberação (Cliente Bloqueado)
 #
 # 3 · Suporte Técnico — Cliente
-#   /fibra            Orienta verificação visual do cabo de fibra e do conector
-#   /fotos            Solicita fotos do equipamento (painel de luzes e cabeamento)
-#   /los             Explica luz LOS (vermelha) e abre chamado para equipe de campo
-#   /massivo          Informa ao cliente que há uma ocorrência massiva em andamento na região
-#   /massivoresolvido Notifica o cliente que a falha massiva foi resolvida pela equipe de campo
-#   /romp             Informa rompimento grave de fibra óptica na região (acidente/evento externo)
-#   /clima            Informa interrupção causada por condições climáticas severas na área
-#   /online           Confirma que o monitoramento detectou o sinal restaurado; pede teste
-#   /reinicia         Orienta reinício do modem/roteador (1 minuto na tomada)
-#   /wifi             Diagnóstico de instabilidade: isola problemas no Wi-Fi vs. fibra
-#   /speedwifi        Explica a limitação de velocidade via Wi-Fi e pede teste via cabo (Proposto)
-#   /rotoff           Modem OK, mas roteador do cliente desligado ou desconectado
-#   /instab           Questionário de diagnóstico de instabilidade (lentidão, queda, falha específica)
-#   /reset            Confirma sinal normal e propõe reconfiguração lógica remota do modem
-#   /fast             Explica limitação do roteador Fast (100Mbps) e sugere troca por Gigabit
-#   /roteadores       Envia o PDF de recomendação de roteadores Giga e reforça a visita gratuita
-#   /visita           Coleta endereço e disponibilidade para agendar visita técnica presencial
-#   /bridge           Explica modo bridge e uso de roteador próprio com PPPoE
-#   /pppoe            Envia credenciais PPPoE para configuração de roteador próprio
-#   /speedtest        Orienta teste de velocidade via cabo de rede
-#   /iptv             Explica instabilidade em TV Box/IPTV por bloqueios da Anatel
-#   /eng              Informa escalonamento do chamado para a Engenharia (Nível 2)
-#   /domcong          Explica bloqueio por domínio congelado no Registro.br
-#   /pmg              Explica o painel PMG de quarentena antispam e as ações disponíveis
-#   /cpanel           Solicita e-mail corporativo formal para envio seguro de credenciais cPanel
-#   /ssl              Informa sobre propagação normal do certificado SSL recém-instalado
-#   /escopo           Delimita o escopo da Com4: infra e rede, não sistemas de terceiros
-#   /recursos         Alerta sobre limite de CPU/RAM no plano compartilhado e sugere VPS
-#   /spamout          Trata conta de e-mail bloqueada por disparo de spam (conta comprometida)
-#   /dnsprop          Explica propagação DNS ao cliente (2 a 24 horas)
-#   /viabilidade      Informa cliente (Lead) que há viabilidade de fibra no endereço (Padrão BDC)
-#   /semviabilidade   Informa cliente (Lead) sobre falta de viabilidade de fibra no endereço (Padrão BDC)
+#   /fibra              Orienta verificação visual do cabo de fibra e do conector
+#   /fotos              Solicita fotos do equipamento (painel de luzes e cabeamento)
+#   /los                Explica luz LOS (vermelha) e abre chamado para equipe de campo
+#   /romp               Informa rompimento grave de fibra óptica na região (acidente/evento externo)
+#   /resolvido          Notifica o cliente que a falha massiva foi resolvida pela equipe de campo
+#   /clima              Informa interrupção causada por condições climáticas severas na área
+#   /online             Confirma que o monitoramento detectou o sinal restaurado; pede teste
+#   /speedwifi          Explica a limitação de velocidade via Wi-Fi e pede teste via cabo
+#   /rotoff             Modem OK, mas roteador do cliente desligado ou desconectado
+#   /instab             Questionário de diagnóstico de instabilidade (lentidão, queda, falha específica)
+#   /reset              Confirma sinal normal e propõe reconfiguração lógica remota do modem
+#   /fast               Explica limitação do roteador Fast (100Mbps) e sugere troca por Gigabit
+#   /roteadores         Envia o PDF de recomendação de roteadores Giga e reforça a visita gratuita
+#   /visita             Coleta endereço e disponibilidade para agendar visita técnica presencial
+#   /pppoe              Envia credenciais PPPoE para configuração de roteador próprio
+#   /speedrouter        Orienta teste de velocidade via cabo de rede
+#   /speedbridge        Orienta teste de velocidade via cabo com modem em Bridge (Discador PPPoE)
+#   /iptv               Explica instabilidade em TV Box/IPTV por bloqueios da Anatel
+#   /eng                Informa escalonamento do chamado para a Engenharia (Nível 2)
+#   /congelado          Explica bloqueio por domínio congelado no Registro.br
+#   /pmg                Explica o painel PMG de quarentena antispam e as ações disponíveis
+#   /cpanel             Solicita e-mail corporativo formal para envio seguro de credenciais cPanel
+#   /ssl                Informa sobre propagação normal do certificado SSL recém-instalado
+#   /escopo             Delimita o escopo da Com4: infra e rede, não sistemas de terceiros
+#   /spamout            Trata conta de e-mail bloqueada por disparo de spam (conta comprometida)
+#   /dnsprop            Explica propagação DNS ao cliente (2 a 24 horas)
+#   /viabilidade        Informa cliente (Lead) que há viabilidade de fibra no endereço (Padrão BDC)
+#   /semviabilidade     Informa cliente (Lead) sobre falta de viabilidade de fibra no endereço (Padrão BDC)
+#   /power              Orienta verificação da fonte de alimentação e troca de tomada
+#   /luzpower           Explica falha elétrica/hardware e abre chamado para visita técnica
 #
 # 4 · E-mail, Hospedagem e Migração
-#   /ativhosp         Envia dados de acesso ao cPanel, FTP, Webmail e DNS (ativação de hospedagem)
-#   /dadospainel      Envia URLs e senhas dos painéis cPanel e/ou Plesk
-#   /ativemail        Envia dados de acesso e portas de configuração da conta de e-mail Com4
-#   /migraaponta      Avisa sobre migração de servidor e solicita atualização dos apontamentos DNS externos
-#   /migracontato     Propõe migração de hospedagem e solicita adição como contato técnico no Registro.br
-#   /renova           Envia boleto para renovação de registro de domínio
-#   /dnsemail         Envia todos os apontamentos DNS necessários para e-mail com site em provedor externo
-#   /autormigra       Solicita autorização formal do cliente para executar a migração de hospedagem
-#   /ftp              Envia host, usuário e porta 21 para conexão via FileZilla (FTP)
-#   /propag           Avisa sobre propagação DNS após migração ou alteração de apontamentos
-#   /senhaemail       Informa que suporte não acessa senhas de e-mail (segurança)
-#   /senhacp          Orienta redefinição de senha de e-mail via cPanel (cliente)
+#   /ativhosp           Envia dados de acesso ao cPanel, FTP, Webmail e DNS (ativação de hospedagem)
+#   /dadospainel        Envia URLs e senhas dos painéis cPanel e/ou Plesk
+#   /ativemail          Envia dados de acesso e portas de configuração da conta de e-mail Com4
+#   /migraaponta        Avisa sobre migração de servidor e solicita atualização dos apontamentos DNS externos
+#   /migracontato       Propõe migração de hospedagem e solicita adição como contato técnico no Registro.br
+#   /renova             Envia boleto para renovação de registro de domínio
+#   /dnsemail           Envia todos os apontamentos DNS necessários para e-mail com site em provedor externo
+#   /autormigra         Solicita autorização formal do cliente para executar a migração de hospedagem
+#   /ftp                Envia host, usuário e porta 21 para conexão via FileZilla (FTP)
+#   /propag             Avisa sobre propagação DNS após migração ou alteração de apontamentos
+#   /senhaemail         Informa que suporte não acessa senhas de e-mail (segurança)
+#   /senhacp            Orienta redefinição de senha de e-mail via cPanel (cliente)
 #
 # 5 · Registros Internos — Financeiro
-#   /logacordo        Registra desbloqueio em acordo com canal, solicitante e prazo D+2 úteis
-#   /logbaixa         Registra recebimento de comprovante e previsão de compensação D+1 útil
-#   /logpagou         Registra pagamento compensado e confirmado no sistema
-#   /logcalote        Registra retomada da suspensão por falta de pagamento pós-acordo
-#   /log2via          Log completo de atendimento de emissão de 2ª via de boleto
-#   /logvenc          Log de solicitação de alteração da data de vencimento mensal
-#   /loginvertido     Log interno de pagamento de fatura do mês incorreto
-#   /logcanc          Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
-#   /logprotesto      Log de encaminhamento de título protestado ao Financeiro (carta de anuência)
-#   /loglead          Log de oportunidade comercial identificada; encaminha lead ao Comercial
-#   /logcorreios      Log de orientação sobre atraso de fatura impressa (Correios)
+#   /lognada            Log rápido: nenhuma ação no escopo do analista
+#   /logenc             Log rápido: encerramento simples do chamado
+#   /logacordo          Registra desbloqueio em acordo com canal, solicitante e prazo D+2 úteis
+#   /logbaixa           Registra recebimento de comprovante e previsão de compensação D+1 útil
+#   /logpagou           Registra pagamento compensado e confirmado no sistema
+#   /logcalote          Registra retomada da suspensão por falta de pagamento pós-acordo
+#   /log2via            Log completo de atendimento de emissão de 2ª via de boleto
+#   /lognfe             Log completo de atendimento de envio de Nota Fiscal
+#   /logvenc            Log de abertura de chamado ao Financeiro (alteração de vencimento)
+#   /loginvertido       Log interno de pagamento de fatura do mês incorreto
+#   /logcanc            Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
+#   /logprotesto        Log de encaminhamento de título protestado ao Financeiro (carta de anuência)
+#   /loglead            Log de oportunidade comercial identificada; encaminha lead ao Comercial
+#   /logcorreios        Log de orientação sobre atraso de fatura impressa (Correios)
 #
 # 6 · Registros Internos — NOC / Técnico
-#   /logcong          Log de domínio congelado no Registro.br com renovação e período
-#   /logfalha         Log de falha de acesso aos serviços Com4 com testes de DNS e Imunify360
-#   /loglos           Log de abertura de visita técnica de fibra (LOS ou atenuação)
-#   /logmassivo       Log de cliente atendido durante ocorrência massiva em área
-#   /logsemretorno    Log de tentativa de retorno telefônico sem resposta do cliente
-#   /logvps           Log de suporte a servidor VPS com testes, acesso e autorização de reinício
-#   /logsite          Log de suporte a site com diagnóstico de DNS, disco e banco de dados
-#   /logemail         Log de suporte a e-mail com testes de webmail, DNS e configuração IMAP/POP
-#   /logtroca         Log de troca de titularidade com dados do titular atual e do novo
-#   /loginstruir      Log detalhado de orientação sobre o Gateway Antispam PMG
-#   /logpmgoff        Log de desativação do filtro antispam PMG para um domínio
-#   /logpmgon         Log de reativação do filtro antispam PMG para um domínio
-#   /logtimeout       Log de encerramento automático por timeout (inatividade no Blip)
-#   /logbloq          Log de bloqueio automático ou manual de conta no servidor (cPanel/Plesk/VPS)
-#   /logdesbloq       Log de desbloqueio manual de conta após regularização
-#   /logfin           Log de bloqueio não efetuado; escala para o Financeiro para validação
-#   /logmudanca       Log de mudança de endereço; encaminha para fila de Ativação da Fibra
-#   /logozmap         Log de análise de viabilidade técnica com coordenadas e CTO no Ozmap
-#   /logromp          Log padronizado de atendimento de cliente afetado por rompimento de fibra
-#   /logfimromp       Log de encerramento de chamado após reparo do rompimento concluído
-#   /loginviavel      Log de inviabilidade técnica; encaminha estudo de expansão para Projetos
-#   /logreinicia      Log de reinício remoto de servidor ou serviço solicitado pelo cliente
-#   /logfast          Log de diagnóstico de roteador Fast (100Mbps) com orientação de troca
-#   /logvisitarot     Log de abertura de visita técnica para configuração de novo roteador
-#   /logpppoe         Log de envio de credenciais PPPoE ao cliente
-#   /logreset         Log de reconfiguração lógica / reset remoto da ONU
-#   /logiptv          Log de diagnóstico de instabilidade em TV Box/IPTV
-#   /logrotoff        Log de roteador do cliente desligado/desconectado
-#   /logsenha         Log de visita técnica para alteração de senha/nome Wi-Fi
-#   /logonline        Log de confirmação de sinal restaurado após reparo
+#   /logcongelado       Log de domínio congelado no Registro.br com renovação e período
+#   /logfalha           Log de falha de acesso aos serviços Com4 com testes de DNS e Imunify360
+#   /loglos             Log de abertura de visita técnica de fibra (LOS ou atenuação)
+#   /logmassivo         Log de cliente atendido durante ocorrência massiva em área
+#   /logsemretorno      Log de tentativa de retorno telefônico sem resposta do cliente
+#   /logvps             Log de suporte a servidor VPS com testes, acesso e autorização de reinício
+#   /logsite            Log de suporte a site com diagnóstico de DNS, disco e banco de dados
+#   /logemail           Log de suporte a e-mail com testes de webmail, DNS e configuração IMAP/POP
+#   /logtroca           Log de troca de titularidade com dados do titular atual e do novo
+#   /logpmg             Log detalhado de orientação sobre o Gateway Antispam PMG
+#   /logpmgoff          Log de desativação do filtro antispam PMG para um domínio
+#   /logpmgon           Log de reativação do filtro antispam PMG para um domínio
+#   /logtimeout         Log de encerramento automático por timeout (inatividade no Blip)
+#   /logbloq            Log de bloqueio automático ou manual de conta no servidor (cPanel/Plesk/VPS)
+#   /logdesbloq         Log de desbloqueio manual de conta após regularização
+#   /logfin             Log de bloqueio não efetuado; escala para o Financeiro para validação
+#   /logmudanca         Log de mudança de endereço; encaminha para fila de Ativação da Fibra
+#   /logozmap           Log de análise de viabilidade técnica com coordenadas e CTO no Ozmap
+#   /logromp            Log padronizado de atendimento de cliente afetado por rompimento de fibra
+#   /logfimromp         Log de encerramento de chamado após reparo do rompimento concluído
+#   /loginviavel        Log de inviabilidade técnica; encaminha estudo de expansão para Projetos
+#   /logreinicia        Log de reinício remoto de servidor ou serviço solicitado pelo cliente
+#   /logfast            Log de diagnóstico de roteador Fast (100Mbps) com orientação de troca
+#   /logvisitarot       Log de abertura de visita técnica para configuração de novo roteador
+#   /logpppoe           Log de envio de credenciais PPPoE ao cliente
+#   /logreset           Log de reconfiguração lógica / reset remoto da ONU
+#   /logiptv            Log de diagnóstico de instabilidade em TV Box/IPTV
+#   /logrotoff          Log de roteador do cliente desligado/desconectado
+#   /logsenha           Log de visita técnica para alteração de senha/nome Wi-Fi
+#   /logonline          Log de confirmação de sinal restaurado após reparo
+#   /logcpfl            Log de abertura de chamado na CPFL por falta de energia
+#   /logcpanel          Log de instrução para solicitação de credenciais do cPanel
+#   /logcenvio          Log de envio das credenciais do cPanel após formalização por e-mail
+#   /logcom4email       Log de redefinição de senha para contas @com4.com.br
+#   /logpower           Log de abertura de visita técnica por falha elétrica (Luz Power / Hardware)
 #
 # =============================================================================
 
@@ -304,19 +304,6 @@ matches:
         params:
           layout: "Protocolo: [[protocolo]]"
 
-  # /retorno — Script de retorno ativo para chamados em aberto (chat ou ligação)
-  - trigger: "/retorno"
-    force_clipboard: true
-    replace: |-
-      {{saudacao_cap}}! Aqui é o {{atendente_nome}}, do suporte da {{empresa_nome}}. Estou retornando o contato referente ao chamado em aberto. Podemos prosseguir?
-    vars:
-      - name: atendente_nome
-        type: global
-      - name: empresa_nome
-        type: global
-      - name: saudacao_cap
-        type: global
-
   # /retornocom — Retorno ativo de chamado repassado pelo Comercial
   - trigger: "/retornocom"
     force_clipboard: true
@@ -354,8 +341,8 @@ matches:
   - trigger: "/analise"
     replace: "Vou precisar realizar uma análise mais detalhada nos logs do servidor para identificar a causa raiz. Isso pode levar alguns minutos. Assim que eu tiver o diagnóstico, retorno aqui, combinado? ⏱️"
 
-  # /obg — Agradece ao cliente após retorno de pausa (obrigatório monitoria)
-  - trigger: "/obg"
+  # /voltei — Agradece ao cliente após retorno de pausa (obrigatório monitoria)
+  - trigger: "/voltei"
     replace: "Obrigado por aguardar! Peço desculpas pela demora. 😊"
 
   # /transfere — Informa ao cliente a transferência para outro setor
@@ -376,9 +363,6 @@ matches:
               values:
                 - Financeiro
                 - Comercial
-                - Engenharia (Nível 2)
-                - Ativação da Fibra
-                - Projetos / Expansão
 
   # /prazo — Informa SLA de retorno
   - trigger: "/prazo"
@@ -423,35 +407,6 @@ matches:
       Seu feedback é importante para a Com4 Data Center. Poste uma avaliação no nosso perfil do Google:
       👉 https://g.page/r/CdBIvBOvM7UBEAE/review
 
-  # /lognada — Log rápido: nenhuma ação no escopo do analista
-  - trigger: "/lognada"
-    replace: "Sem mais ações para o meu escopo neste atendimento."
-
-  # /logenc — Log rápido: encerramento simples do chamado
-  - trigger: "/logenc"
-    replace: "Chamado encerrado."
-
-  # /confirmo — Confirma entendimento do cliente antes de prosseguir
-  - trigger: "/confirmo"
-    replace: "Perfeito! Só para confirmar: entendi corretamente a sua solicitação. Vou dar sequência conforme combinado. 😊"
-
-  # /dados — Re-solicita dados cadastrais incompletos ou divergentes
-  - trigger: "/dados"
-    force_clipboard: true
-    replace: |-
-      Para darmos continuidade com segurança, preciso confirmar alguns dados do cadastro:
-
-      Nome completo:
-      CPF ou CNPJ:
-      Telefone de contato:
-      E-mail:
-
-      Pode me enviar, por gentileza?
-
-  # /aguarda — Informa que permanece aguardando retorno do cliente (monitoria)
-  - trigger: "/aguarda"
-    replace: "Permaneço no aguardo do seu retorno. 😊"
-
   # /horario — Informa horário comercial de atendimento presencial e telefônico
   - trigger: "/horario"
     force_clipboard: true
@@ -479,8 +434,8 @@ matches:
       - name: empresa_nome
         type: global
 
-  # /avaliemail — Bloco para adicionar no final de tratativas por E-mail
-  - trigger: "/avaliemail"
+  # /avaliaemail — Bloco para adicionar no final de tratativas por E-mail
+  - trigger: "/avaliaemail"
     force_clipboard: true
     replace: |-
       Obrigado pelo seu contato hoje. A sua avaliação nos ajuda a melhorar e atender mais clientes. 
@@ -523,14 +478,21 @@ matches:
 
       Como deseja seguir?
 
-  # /seg — Envia 2ª via do boleto com data de vencimento
-  - trigger: "/seg"
+  # /2via — Envia 2ª via do boleto com data de vencimento
+  - trigger: "/2via"
     form: |
       Conforme solicitado, segue em anexo a segunda via do boleto, com vencimento em [[vencimento]].
 
       Por gentileza, revise os dados antes de pagar.
 
       Se possível, envie o comprovante por aqui para agilizarmos a baixa em nosso sistema.
+
+  # /nfe — Envia a Nota Fiscal (NFe) solicitada pelo cliente
+  - trigger: "/nfe"
+    form: |
+      Conforme solicitado, segue em anexo a sua Nota Fiscal referente ao mês de [[mes_referencia]].
+      
+      Qualquer dúvida, sigo à disposição!
 
   # /agendamento — Informa que o documento enviado é comprovante de agendamento, não pagamento
   - trigger: "/agendamento"
@@ -562,27 +524,6 @@ matches:
           layout: |
             Chave PIX: [[chave]]
             Linha Digitável do Boleto: [[boleto]]
-
-  # /pixrapido — Envia PIX (chave do .env) + linha digitável — só pede o boleto
-  - trigger: "/pixrapido"
-    force_clipboard: true
-    replace: |-
-      Para agilizar o pagamento, segue abaixo a nossa chave PIX:
-
-      🔑 Chave PIX (CNPJ): {{chave_pix}}
-
-      👤 Linha Digitável do Boleto: {{formulario.boleto}}
-
-      Após realizar o pagamento, envie o comprovante por aqui para que possamos dar continuidade ao seu atendimento.
-
-      ⚠️ Atenção: confirme os dados do favorecido antes de concluir a transação.
-    vars:
-      - name: chave_pix
-        type: global
-      - name: formulario
-        type: form
-        params:
-          layout: "Linha Digitável do Boleto: [[boleto]]"
 
   # /ofer — Oferece o desbloqueio em acordo (antes de executar); informa prazo D+2
   - trigger: "/ofer"
@@ -660,17 +601,26 @@ matches:
       - name: empresa_nome
         type: global
 
-  # /boletoinvertido — Cliente pagou boleto do mês posterior em vez do vigente
-  - trigger: "/boletoinvertido"
+  # /paginvertido — Cliente pagou boleto do mês posterior em vez do vigente
+  - trigger: "/paginvertido"
     force_clipboard: true
     replace: |-
-      Identificamos no sistema que o pagamento realizado foi referente à fatura do próximo mês, e não ao boleto que está vencido/vigente.
+      Identificamos no sistema que o pagamento realizado foi referente à fatura do próximo mês (vencimento em {{formulario.venc_pago}}), e não à fatura que estava pendente (vencimento em {{formulario.venc_atual}}).
       
-      Como a fatura deste mês continua em aberto, o sistema não retira o bloqueio automaticamente. Para normalizarmos o seu serviço, é necessário realizar o pagamento do boleto correto.
+      Para que você não fique sem conexão devido a esse conflito no sistema, já realizei o desbloqueio manual dos seus serviços de forma excepcional.
       
-      Deseja que eu envie a 2ª via atualizada da fatura pendente?
+      O seu acesso permanecerá liberado até o dia {{formulario.venc_pago}}. Caso a fatura pendente não seja regularizada até essa data, o sistema aplicará um novo bloqueio automático.
+      
+      Deseja que eu te envie a 2ª via atualizada da fatura pendente agora mesmo para facilitar a regularização?
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Vencimento do boleto PAGO: [[venc_pago]]
+            Vencimento do boleto PENDENTE: [[venc_atual]]
 
-# /venc — Alteração de vencimento com cálculo automático para o CLIENTE (BDC)
+  # /venc — Alteração de vencimento com cálculo automático para o CLIENTE (BDC)
   # Uso: /venc [dia atual] [dia novo] — Exemplo: /venc 25 10
   - regex: "/venc (?P<atual>05|10|15|20|25) (?P<novo>05|10|15|20|25)"
     force_clipboard: true
@@ -780,26 +730,53 @@ matches:
   # /doctroca — Solicita documentos (PF ou PJ) para iniciar troca de titularidade
   - trigger: "/doctroca"
     form: |
-      Para darmos andamento à troca de titularidade, por gentileza, nos envie os seguintes dados e documentos do **novo titular**:
+      Para darmos andamento à troca de titularidade, por gentileza, nos envie os seguintes dados e documentos do **[[tipo_titular]]**:
 
       [[documentos]]
       
       Você pode nos enviar as fotos ou arquivos em PDF por aqui mesmo.
     form_fields:
+      tipo_titular:
+        type: choice
+        values:
+          - novo titular
+          - titular atual
       documentos:
         type: choice
         values:
           - "• Documento com foto (RG ou CNH)\n• CPF\n• Data de nascimento\n• E-mail\n• Endereço completo"
           - "• Cartão CNPJ\n• Razão social\n• Comprovante de inscrição e situação cadastral\n• E-mail\n• Endereço completo"
 
-  # /fidelidade — Explica cláusula de fidelidade e valor da multa rescisória
-  - trigger: "/fidelidade"
-    form: |
-      Verifiquei em nosso sistema e o seu contrato foi ativado há [[meses]] meses. 
-      
-      Nossos contratos de prestação de serviço possuem uma cláusula de fidelização padrão de 12 meses. Como o cancelamento está sendo solicitado antes deste período, haverá a cobrança proporcional da multa por quebra de contrato.
-      
-      O valor atualizado da multa rescisória é de R$ [[valor_multa]]. Você está de acordo com esta cobrança para prosseguirmos com o cancelamento?
+  # /fid — Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
+  # Uso: /fid [meses ativos] — Exemplo: /fid 5 (para um cliente com 5 meses de uso)
+  - regex: "/fid (?P<meses>[0-9]{1,2})"
+    force_clipboard: true
+    replace: "{{resultado}}"
+    vars:
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $OutputEncoding = [System.Text.Encoding]::UTF8
+            $mesesUsados = [int]"{{meses}}"
+
+            if ($mesesUsados -ge 12) {
+                Write-Output "Verifiquei em nosso sistema e o seu contrato foi ativado há $mesesUsados meses.`n`nComo o período obrigatório de 12 meses já foi concluído, você está isento da multa de fidelidade. Podemos prosseguir com o cancelamento sem custos rescisórios."
+                exit
+            }
+
+            $mesesRestantes = 12 - $mesesUsados
+            $multa = (499.90 / 12) * $mesesRestantes
+            
+            # Força a formatação da moeda para o padrão brasileiro (vírgula para decimais)
+            $cultura = [System.Globalization.CultureInfo]::GetCultureInfo("pt-BR")
+            $multaFormatada = $multa.ToString("N2", $cultura)
+
+            $mensagem = "Verifiquei em nosso sistema e o seu contrato foi ativado há $mesesUsados meses.`n`nNossos contratos de prestação de serviço possuem uma cláusula de fidelização padrão de 12 meses. Como o cancelamento está sendo solicitado antes deste período, haverá a cobrança proporcional da multa por quebra de contrato.`n`nO valor atualizado da multa rescisória é de R$ $multaFormatada. Você está de acordo com esta cobrança para prosseguirmos com o cancelamento?"
+
+            Write-Output $mensagem
 
   # /retirada — Agenda recolha do modem após cancelamento
   - trigger: "/retirada"
@@ -811,17 +788,8 @@ matches:
       
       Lembramos que é necessária a presença de um responsável maior de 18 anos no local.
 
-  # /faturacanc — Informa valor proporcional da última fatura durante cancelamento
-  - trigger: "/faturacanc"
-    form: |
-      Verifiquei o seu cadastro e o processo de cancelamento do serviço foi iniciado.
-
-      Gostaria de informar que constam valores proporcionais referentes aos dias utilizados neste ciclo de faturamento, totalizando R$ [[valor_fatura]].
-      
-      O boleto atualizado com o valor de rescisão será enviado pelo nosso setor Financeiro. Você prefere receber esta última fatura por e-mail ou aqui mesmo pelo WhatsApp?
-
-  # /lembretefatura — Lembrete proativo de fatura em aberto antes do bloqueio ocorrer
-  - trigger: "/lembretefatura"
+  # /pague — Lembrete proativo de fatura em aberto antes do bloqueio ocorrer
+  - trigger: "/pague"
     form: |
       Aproveitando o nosso contato, notei ao consultar o seu cadastro que a fatura com vencimento em [[vencimento]] consta como pendente em nosso sistema.
       
@@ -897,6 +865,16 @@ matches:
       - name: email_atendimento
         type: global
 
+  # /solcomp — Cliente bloqueado informa que já pagou; solicita o comprovante para liberação
+  - trigger: "/solcomp"
+    force_clipboard: true
+    replace: |-
+      Compreendo! Como o pagamento já foi realizado, é provável que o sistema ainda esteja aguardando o prazo de compensação bancária.
+      
+      Para agilizarmos o processo, por gentileza, envie o comprovante de pagamento (foto, print ou PDF) por aqui. 
+      
+      Assim que recebermos, faremos a validação, anexaremos ao seu cadastro e daremos andamento imediato na liberação dos seus serviços.
+
 
 # =============================================================================
 # 3 · Suporte Técnico — Cliente
@@ -940,26 +918,6 @@ matches:
       - name: empresa_nome
         type: global
 
-  # /massivo — Informa ao cliente que há uma ocorrência massiva em andamento na região
-  - trigger: "/massivo"
-    force_clipboard: true
-    replace: |-
-      Identificamos uma ocorrência em andamento que pode estar afetando clientes na sua região.
-
-      Nossa equipe técnica já está ciente e trabalhando para normalizar os serviços no menor prazo possível.
-
-      Assim que houver atualização, retornaremos por aqui. Pedimos desculpas pelo transtorno e agradecemos pela compreensão. 🙏
-
-  # /massivoresolvido — Notifica o cliente que a falha massiva foi resolvida pela equipe de campo
-  - trigger: "/massivoresolvido"
-    force_clipboard: true
-    replace: |-
-      Olá! Informamos que a intervenção técnica que afetava os serviços na sua região foi concluída com sucesso pela nossa equipe de Manutenção de Fibra.
-      
-      A sua conexão já foi restabelecida e deve operar com total normalidade. Por precaução, recomendamos que desligue o modem da tomada por 1 minuto e ligue novamente.
-      
-      Por gentileza, confirme se o seu acesso normalizou!
-
   # /romp — Informa rompimento grave de fibra óptica na região (acidente/evento externo)
   - trigger: "/romp"
     form: |
@@ -970,6 +928,16 @@ matches:
       As equipes responsáveis já estão trabalhando de forma contínua para realizar os reparos necessários e restabelecer a conectividade o mais rápido possível. Neste momento, a previsão para a normalização dos serviços é entre [[previsao]].
 
       Lamentamos os transtornos causados e agradecemos pela compreensão e paciência durante este período. Continuaremos acompanhando a situação e informaremos qualquer atualização relevante.
+
+  # /resolvido — Notifica o cliente que a falha massiva foi resolvida pela equipe de campo
+  - trigger: "/resolvido"
+    force_clipboard: true
+    replace: |-
+      Olá! Informamos que a intervenção técnica que afetava os serviços na sua região foi concluída com sucesso pela nossa equipe de Manutenção de Fibra.
+      
+      A sua conexão já foi restabelecida e deve operar com total normalidade. Por precaução, recomendamos que desligue o modem da tomada por 1 minuto e ligue novamente.
+      
+      Por gentileza, confirme se o seu acesso normalizou!
 
   # /clima — Informa interrupção causada por condições climáticas severas na área
   - trigger: "/clima"
@@ -990,37 +958,6 @@ matches:
       Por gentileza, realize um teste de navegação para confirmarmos se o serviço normalizou completamente. Caso o acesso ainda não tenha retornado, recomendamos reiniciar o seu equipamento (retirar o modem/roteador da tomada por 1 minuto e ligar novamente).
       
       Fico no aguardo da sua confirmação!
-
-  # /reinicia — Orienta reinício do modem/roteador (1 minuto na tomada)
-  - trigger: "/reinicia"
-    force_clipboard: true
-    replace: |-
-      Vamos realizar um reinício simples do equipamento para normalizar a conexão:
-
-      1. Desligue o modem (e o roteador Wi-Fi, se houver) da tomada.
-      2. Aguarde 1 minuto com os aparelhos desligados.
-      3. Ligue primeiro o modem e aguarde as luzes estabilizarem.
-      4. Em seguida, ligue o roteador Wi-Fi (se aplicável).
-
-      Após esse procedimento, teste o acesso e nos confirme se normalizou.
-
-  # /wifi — Diagnóstico de instabilidade: isola problemas no Wi-Fi vs. fibra
-  - trigger: "/wifi"
-    force_clipboard: true
-    replace: |-
-      Para identificarmos se a instabilidade está no sinal da fibra ou no seu roteador Wi-Fi, verifique os seguintes pontos:
-
-      1. Conecte um dispositivo diretamente ao modem Com4 por cabo de rede e teste a conexão. Se funcionar normalmente, o problema está no roteador Wi-Fi, não na fibra.
-
-      2. Se usar o Wi-Fi, verifique a frequência utilizada:
-         • 2,4 GHz: maior alcance, mais suscetível a interferências (micro-ondas, vizinhos).
-         • 5 GHz: mais velocidade e estabilidade, porém com menor alcance.
-
-      3. Mantenha o roteador em local aberto, longe de paredes grossas, espelhos e aparelhos eletrônicos.
-
-      4. Reinicie o roteador (desligue por no mínimo 2 minutos e ligue novamente) e teste após a reinicialização.
-
-      Com essas informações, consigo indicar o próximo passo com mais precisão. ✅
 
   # /speedwifi — Explica a limitação de velocidade via Wi-Fi e pede teste via cabo (Proposto)
   - trigger: "/speedwifi"
@@ -1117,21 +1054,6 @@ matches:
       2. A presença de um responsável maior de 18 anos é obrigatória no local durante o atendimento.
       3. A confirmação exata da data e horário será feita pela equipe técnica diretamente neste canal.
 
-  # /bridge — Explica modo bridge e uso de roteador próprio com PPPoE
-  - trigger: "/bridge"
-    force_clipboard: true
-    replace: |-
-      Para utilizar o seu roteador particular com a conexão da {{empresa_nome}}, o modem da operadora precisa operar em modo Bridge (ponte).
-
-      Nesse modo, o modem apenas entrega o sinal da fibra; autenticação (PPPoE), Wi-Fi e roteamento ficam a cargo do seu equipamento.
-
-      Após a configuração, utilize as credenciais PPPoE da sua assinatura (solicite por aqui, se necessário).
-
-      Se preferir, podemos agendar uma visita técnica gratuita para realizar essa configuração no local.
-    vars:
-      - name: empresa_nome
-        type: global
-
   # /pppoe — Envia as credenciais de discagem (PPPoE) para configuração de roteador próprio
   - trigger: "/pppoe"
     force_clipboard: true
@@ -1150,8 +1072,8 @@ matches:
             Usuário PPPoE: [[user]]
             Senha PPPoE: [[senha]]
 
-  # /speedtest — Orienta teste de velocidade via cabo de rede
-  - trigger: "/speedtest"
+  # /speedrouter — Orienta teste de velocidade via cabo de rede
+  - trigger: "/speedrouter"
     force_clipboard: true
     replace: |-
       Para medirmos a velocidade com precisão, realize o teste seguindo estas orientações:
@@ -1165,6 +1087,34 @@ matches:
     vars:
       - name: empresa_nome
         type: global
+
+  # /speedbridge — Orienta teste de velocidade via cabo com modem em Bridge (Discador PPPoE)
+  - trigger: "/speedbridge"
+    force_clipboard: true
+    replace: |-
+      Para medirmos a velocidade com precisão direto no modem em modo Bridge, precisamos criar um discador no seu computador. Siga estas orientações:
+
+      1. Conecte o computador (Windows) diretamente ao modem da {{empresa_nome}} por cabo de rede.
+      2. Pressione a tecla Windows e pesquise por "Configurar uma conexão de discagem" (ou vá em Configurações > Rede e Internet > Acesso Discado > Configurar uma nova conexão).
+      3. Escolha "Conectar-se à Internet" e depois clique em "Banda Larga (PPPoE)".
+      4. Insira as suas credenciais de acesso da assinatura:
+         👤 Usuário: {{formulario.user}}
+         🔑 Senha: {{formulario.senha}}
+      5. Clique em Conectar.
+      6. Após a conexão ser estabelecida, feche downloads e VPNs, acesse speedtest.net ou fast.com e execute o teste.
+
+      Por fim, nos envie o print do resultado (download e upload) por aqui.
+    vars:
+      - name: empresa_nome
+        type: global
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Preencha os dados PPPoE do cliente para o teste:
+            
+            Usuário PPPoE: [[user]]
+            Senha PPPoE: [[senha]]
 
   # /iptv — Explica instabilidade causada por bloqueios da Anatel em TV Box/IPTV
   - trigger: "/iptv"
@@ -1191,8 +1141,8 @@ matches:
 
       Você receberá retorno neste mesmo chamado quando a intervenção terminar ou se a Engenharia precisar de mais algum detalhe.
 
-  # /domcong — Explica bloqueio por domínio congelado no Registro.br
-  - trigger: "/domcong"
+  # /congelado — Explica bloqueio por domínio congelado no Registro.br
+  - trigger: "/congelado"
     force_clipboard: true
     replace: |-
       Ao analisar a sua conexão, verificamos que o seu domínio ({{formulario.dominio}}) encontra-se com o status "Congelado" no Registro.br, o órgão que regula os domínios nacionais.
@@ -1212,11 +1162,11 @@ matches:
     replace: |-
       Enviamos para a sua caixa de entrada o relatório atualizado do Gateway Antispam (PMG), contendo os e-mails retidos em quarentena.
 
-      Para consultá-lo em tempo real, abra o e-mail e vá até o rodapé. Localize e clique no link "web" destacado nesta parte da mensagem:
+      Para consultá-lo em tempo real, abra o e-mail e, logo no início da mensagem, localize e clique na palavra "aqui" destacada nesta frase:
 
-      "Por favor use a interface web para gerenciar os spams de sua caixa de e-mail".
+      "Por favor use a interface WEB clicando aqui para gerenciar os spams de sua caixa de email."
 
-      Observamos que esses remetentes ainda não aparecem na sua lista de confiança. O filtro atua de forma automática barrando mensagens com base na pontuação de risco (Spam Score).
+      Observamos que esses remetentes retidos ainda não aparecem na sua lista de confiança. O filtro atua de forma automática barrando mensagens com base na pontuação de risco (Spam Score) numero este atribuido pela rede, com base nas .
 
       No painel, você pode usar as opções abaixo para intervir manualmente:
 
@@ -1271,16 +1221,6 @@ matches:
       No entanto, o suporte técnico da Com4 garante a disponibilidade da infraestrutura (servidor, rede e conectividade). A configuração, correção ou auditoria de sistemas de terceiros (ERPs, códigos particulares, plugins ou integrações de API) foge ao nosso escopo de atuação.
       
       Recomendamos que acione o desenvolvedor responsável pela sua aplicação ou o seu suporte de TI local para analisar os logs do software.
-
-  # /recursos — Alerta sobre limite de CPU/RAM no plano compartilhado e sugere VPS
-  - trigger: "/recursos"
-    force_clipboard: true
-    replace: |-
-      Realizamos a análise no servidor e identificamos que o seu site apresentou lentidão/erros devido ao consumo excessivo de recursos físicos (CPU, Memória RAM ou Processos Simultâneos) alocados para a sua conta.
-      
-      Na hospedagem compartilhada, existem limites de segurança para que uma conta não prejudique as demais. Recomendamos que o seu desenvolvedor otimize o banco de dados e os plugins do site para reduzir a carga.
-      
-      Caso o seu projeto tenha crescido e exija mais processamento constante, a solução técnica definitiva é a migração para um Servidor Virtual (VPS) dedicado. Deseja que eu encaminhe o atendimento ao Comercial para um orçamento?
 
   # /spamout — Trata conta de e-mail bloqueada por disparo de spam (conta comprometida)
   - trigger: "/spamout"
@@ -1340,6 +1280,24 @@ matches:
         type: global
       - name: empresa_nome
         type: global
+
+  # /power — Orienta verificação da fonte de alimentação e troca de tomada
+  - trigger: "/power"
+    force_clipboard: true
+    replace: |-
+      Por favor, verifique se o cabo da fonte de energia está bem encaixado na parte de trás do equipamento e também na tomada.
+
+      Para descartarmos mau contato ou falha na rede elétrica, tire o aparelho da tomada por 1 minuto. Em seguida, ligue-o novamente, mas de preferência em uma tomada diferente (direto na parede, sem o uso de réguas, benjamins ou filtros de linha).
+
+      Esses cuidados ajudam bastante na nossa análise. Me avise assim que fizer o teste, por gentileza! ✅
+
+  # /luzpower — Explica falha elétrica/hardware e abre chamado para visita técnica
+  - trigger: "/luzpower"
+    force_clipboard: true
+    replace: |-
+      Como o equipamento apresenta apenas a luz "Power" acesa/piscando mesmo após os testes na tomada, isso indica uma falha no fornecimento de energia ou um travamento de hardware. O defeito pode estar na fonte de alimentação (que não envia a voltagem correta) ou no próprio aparelho, impedindo que o sistema inicie.
+
+      Para solucionar isso de forma definitiva, vou registrar uma visita técnica. Nossa equipe irá até o local para avaliar o equipamento e realizar a troca da fonte ou do modem para restabelecer a sua conexão.
 
 
 # =============================================================================
@@ -1657,6 +1615,14 @@ matches:
 # 5 · Registros Internos — Financeiro
 # =============================================================================
 
+  # /lognada — Log rápido: nenhuma ação no escopo do analista
+  - trigger: "/lognada"
+    replace: "Sem mais ações para o meu escopo neste atendimento."
+
+  # /logenc — Log rápido: encerramento simples do chamado
+  - trigger: "/logenc"
+    replace: "Chamado encerrado."
+
   # /logacordo — Registra desbloqueio em acordo com canal, solicitante e prazo D+2 úteis
   - trigger: "/logacordo"
     force_clipboard: true
@@ -1769,7 +1735,52 @@ matches:
           - Blip
           - E-mail
 
-# /logvenc — Log de abertura de chamado ao Financeiro (alteração de vencimento) — cálculo automático
+  # /lognfe — Log completo de atendimento de envio de Nota Fiscal
+  - trigger: "/lognfe"
+    form: |
+      Envio de Nota Fiscal (NFe)
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Contrato: [[contrato]]
+      • Mês de Referência: [[referencia]]
+
+      SITUAÇÃO FINANCEIRA E VERIFICAÇÕES
+      • Status do Pagamento: [[status_pagamento]]
+      • Valor da Nota: [[valor]]
+      • Status do Serviço: [[status_servico]]
+
+      ENVIO E DADOS
+      • Meio de Envio: [[envio]]
+      • E-mail de Cadastro: [[email]]
+
+      SOLUÇÃO
+      • Ação Realizada: Nota fiscal enviada ao cliente com sucesso.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - E-mail
+          - Ligação
+      status_pagamento:
+        type: choice
+        values:
+          - Pago
+          - Em aberto
+          - Vencido
+      status_servico:
+        type: choice
+        values:
+          - Ativo
+          - Bloqueado
+          - Cancelado
+      envio:
+        type: choice
+        values:
+          - Blip
+          - E-mail         
+
+  # /logvenc — Log de abertura de chamado ao Financeiro (alteração de vencimento) — cálculo automático
   # Uso: /logvenc [dia atual] [dia novo] — Exemplo: /logvenc 25 10
   - regex: "/logvenc (?P<atual>05|10|15|20|25) (?P<novo>05|10|15|20|25)"
     force_clipboard: true
@@ -1849,7 +1860,7 @@ matches:
 
             Write-Output $mensagem
             
-  # /logboletoinvertido — Log interno de pagamento de fatura do mês incorreto
+  # /loginvertido — Log interno de pagamento de fatura do mês incorreto
   - trigger: "/loginvertido"
     form: |
       Pagamento Invertido de Fatura
@@ -1996,8 +2007,33 @@ matches:
 # 6 · Registros Internos — NOC / Técnico
 # =============================================================================
 
-  # /logcong — Log de domínio congelado no Registro.br com renovação e período
-  - trigger: "/logcong"
+  # /logcpfl — Log de abertura de chamado na CPFL por falta de energia
+  - trigger: "/logcpfl"
+    form: |
+      Queda de Energia — Acionamento CPFL
+      
+      INFORMAÇÕES
+      • Endereço Afetado: [[local]]
+      • Protocolo CPFL: [[protocolo]]
+      • Previsão de Retorno: [[previsao]]
+
+      PROCEDIMENTOS E COMUNICAÇÃO
+      • Chamado aberto na CPFL via canais de atendimento.
+      • Informativo enviado aos e-mails de atendimento e datacenter, e repassado nos grupos do WhatsApp "Com4 Data Center" e "Alertas Com4 Nagios".
+      • Chamado mantido na fila Nível 01 para acompanhamento até o desaparecimento dos alertas.
+    form_fields:
+      local:
+        type: choice
+        values:
+          - Chassi - São Sebastião
+          - Chassi - Vila Hipica
+          - Chassi - Apae
+          - Sitio - 01 (Altinópolis)
+          - Sitio - 02 (Altinópolis)
+          - Sitio - Paulo (Sede)
+
+  # /logcongelado — Log de domínio congelado no Registro.br com renovação e período
+  - trigger: "/logcongelado"
     form: |
       Domínio Congelado
       INFORMAÇÕES
@@ -2379,8 +2415,8 @@ matches:
       acao:
         type: multiline
 
-  # /loginstruir — Log detalhado de orientação sobre o Gateway Antispam PMG
-  - trigger: "/loginstruir"
+  # /logpmg — Log detalhado de orientação sobre o Gateway Antispam PMG
+  - trigger: "/logpmg"
     form: |
       Orientação Técnica — Gateway Antispam (PMG)
       
@@ -3010,33 +3046,78 @@ matches:
           - Falha persiste — escalonado para campo.
           - Cliente não retornou após orientação.
 
-# /solicitacomp — Cliente bloqueado informa que já pagou; solicita o comprovante para liberação
-  - trigger: "/solcomp"
-    force_clipboard: true
-    replace: |-
-      Compreendo! Como o pagamento já foi realizado, é provável que o sistema ainda esteja aguardando o prazo de compensação bancária.
+  # /logcpanel — Log de instrução para solicitação de credenciais do cPanel
+  - trigger: "/logcpanel"
+    form: |
+      instrução de Solicitação de Acesso cPanel
+
+      DESCRIÇÃO
+      Cliente entrou em contato solicitando o envio das credenciais de acesso ao painel de hospedagem (cPanel).
       
-      Para agilizarmos o processo, por gentileza, envie o comprovante de pagamento (foto, print ou PDF) por aqui. 
+      • Canal de Atendimento: [[canal]]
+      • Domínio / Cliente: [[cliente]]
       
-      Assim que recebermos, faremos a validação, anexaremos ao seu cadastro e daremos andamento imediato na liberação dos seus serviços.
+      SOLUÇÃO
+      • Ação Realizada: Cliente instruído sobre o procedimento de segurança obrigatório para liberação de acessos ao painel de hospedagem (cPanel). Informado sobre a necessidade de envio de solicitação formal através de uma conta de e-mail corporativa, contendo os dados cadastrais de validação.
+      • Próximo Passo: Aguardando a formalização da solicitação via e-mail pelo cliente para darmos andamento ao encaminhamento das credenciais.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      cliente:
+        type: text
 
-# /power — Orienta verificação da fonte de alimentação e troca de tomada
-  - trigger: "/power"
-    force_clipboard: true
-    replace: |-
-      Por favor, verifique se o cabo da fonte de energia está bem encaixado na parte de trás do equipamento e também na tomada.
+  # /logcenvio — Log de envio das credenciais do cPanel após formalização por e-mail
+  - trigger: "/logcenvio"
+    form: |
+      Solicitação de Acesso cPanel (Enviado)
 
-      Para descartarmos mau contato ou falha na rede elétrica, tire o aparelho da tomada por 1 minuto. Em seguida, ligue-o novamente, mas de preferência em uma tomada diferente (direto na parede, sem o uso de réguas, benjamins ou filtros de linha).
+      DESCRIÇÃO
+      Cliente realizou o envio do e-mail formal solicitando os dados de acesso ao painel de hospedagem (cPanel), fornecendo os dados cadastrais exigidos para a validação de segurança.
+      
+      • Canal de Atendimento: [[canal]]
+      • Domínio / Cliente: [[cliente]]
+      • E-mail do Solicitante: [[email]]
+      
+      SOLUÇÃO
+      • Ação Realizada: Os dados enviados pelo cliente foram validados e conferem com o cadastro do titular. Após a confirmação, as credenciais de acesso ao cPanel foram encaminhadas com sucesso em resposta ao e-mail corporativo do cliente.
+      • Chamado encerrado.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - E-mail
+          - Blip
+          - Ligação
+      cliente:
+        type: text
+      email:
+        type: text        
 
-      Esses cuidados ajudam bastante na nossa análise. Me avise assim que fizer o teste, por gentileza! ✅
-
-  # /luzpower — Explica falha elétrica/hardware e abre chamado para visita técnica
-  - trigger: "/luzpower"
-    force_clipboard: true
-    replace: |-
-      Como o equipamento apresenta apenas a luz "Power" acesa/piscando mesmo após os testes na tomada, isso indica uma falha no fornecimento de energia ou um travamento de hardware. O defeito pode estar na fonte de alimentação (que não envia a voltagem correta) ou no próprio aparelho, impedindo que o sistema inicie.
-
-      Para solucionar isso de forma definitiva, vou registrar uma visita técnica. Nossa equipe irá até o local para avaliar o equipamento e realizar a troca da fonte ou do modem para restabelecer a sua conexão.
+  # /logcom4email — Log de redefinição de senha para contas @com4.com.br
+  - trigger: "/logcom4email"
+    form: |
+      DESCRIÇÃO
+      Cliente entrou em contato solicitando a redefinição de senha de sua conta de e-mail corporativa (@com4.com.br), relatando perda ou esquecimento do acesso atual.
+      
+      • Canal de Atendimento: [[canal]]
+      • Conta de E-mail: [[email]]
+      
+      SOLUÇÃO
+      • Ação Realizada: Após a validação de segurança e confirmação dos dados cadastrais do solicitante, a senha da conta de e-mail foi redefinida.
+      • Nova Senha: Foi aplicada a senha padrão temporária "Mudarsenha123**".
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      email:
+        type: text
 
   # /logpower — Log de abertura de visita técnica por falha elétrica (Luz Power / Hardware)
   - trigger: "/logpower"
@@ -3061,17 +3142,3 @@ matches:
         values:
           - Foto recebida anexada ao chamado.
           - Relato descritivo do cliente no chat.
-
-# /confirmacanc — Informa os próximos passos após a abertura do chamado de cancelamento
-  - trigger: "/canc"
-    force_clipboard: true
-    replace: |-
-      A sua solicitação de cancelamento foi registrada e encaminhada com sucesso para o nosso setor Financeiro.
-      
-      Conforme o nosso procedimento, a equipe financeira entrará em contato com você em até 24 horas úteis para dar prosseguimento ao atendimento.
-      
-      Eles serão os responsáveis por repassar todas as informações finais e aprofundar assuntos como faturas proporcionais, detalhes contratuais e os trâmites para a devolução dos equipamentos.
-      
-      Vale lembrar que o seu serviço continuará ativo até a finalização completa do processo de cancelamento junto ao Financeiro.
-      
-      Posso te auxiliar em algo mais por enquanto?
