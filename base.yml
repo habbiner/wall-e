@@ -842,25 +842,32 @@ matches:
       email:
         type: text
 
-  # /cancelapf — Informa prazo de 1 dia útil do Financeiro para cancelamento PF
+# /cancelapf — Informa prazo de 24h úteis do Financeiro para cancelamento PF
   - trigger: "/cancelapf"
     force_clipboard: true
     replace: |-
-      Compreendo a sua solicitação de cancelamento. 
+      Compreendo a sua solicitação. 
 
-      Estou abrindo um chamado interno e encaminhando o seu caso para o nosso setor Financeiro. Dentro de 1 dia útil, a equipe entrará em contato com você para repassar todas as informações necessárias (como faturas proporcionais e devolução de equipamentos) e finalizar o processo.
+      Vou registrar a sua solicitação e encaminhar ao setor responsável para validação dos dados antes da efetivação do cancelamento. O prazo de retorno para conclusão do processo ocorrerá em até 24 horas úteis.
       
       Posso confirmar a abertura do chamado?
 
-  # /cancelapj — Solicita formalização por e-mail para cancelamento PJ
+  # /cancelapj — Solicita formalização por e-mail com dados obrigatórios para cancelamento PJ
   - trigger: "/cancelapj"
     force_clipboard: true
     replace: |-
-      Compreendo a sua solicitação de cancelamento. 
+      Compreendo a sua solicitação. 
 
-      Como o seu cadastro é empresarial (Pessoa Jurídica), por questões de segurança corporativa, precisamos que o pedido seja formalizado por e-mail.
+      Como o seu cadastro é empresarial, para prosseguirmos com a solicitação, será necessário o envio da formalização através do e-mail cadastrado da empresa para {{email_atendimento}}.
       
-      Por gentileza, envie um e-mail para {{email_atendimento}} informando o CNPJ e o motivo do cancelamento. Assim que recebermos, o nosso setor Financeiro entrará em contato em até 1 dia útil para dar andamento e finalizar o processo.
+      Por gentileza, o e-mail deve conter as seguintes informações:
+      • Razão Social;
+      • CNPJ;
+      • Serviço(s) que deseja cancelar;
+      • Motivo do cancelamento;
+      • Nome e cargo do responsável pela solicitação.
+      
+      Sua solicitação será encaminhada para o setor responsável e o retorno para conclusão do processo ocorrerá em até 24 horas úteis após o recebimento do e-mail. O serviço permanecerá ativo durante o processo.
     vars:
       - name: email_atendimento
         type: global
@@ -1156,7 +1163,7 @@ matches:
         params:
           layout: "Domínio afetado: [[dominio]]"
 
-  # /pmg — Explica o painel PMG de quarentena antispam e as ações disponíveis
+# /pmg — Explica o painel PMG de quarentena antispam e as ações disponíveis
   - trigger: "/pmg"
     force_clipboard: true
     replace: |-
@@ -1165,15 +1172,19 @@ matches:
       Para consultá-lo em tempo real, abra o e-mail e, logo no início da mensagem, localize e clique na palavra "aqui" destacada nesta frase:
 
       "Por favor use a interface WEB clicando aqui para gerenciar os spams de sua caixa de email."
+      
+      💡 Dica: Para facilitar o uso, você pode alterar o idioma do painel para Português. Basta clicar no seu e-mail no canto superior direito da tela, selecionar a opção "Idioma" (ou Language) e escolher "Português Brasileiro".
 
-      Observamos que esses remetentes retidos ainda não aparecem na sua lista de confiança. O filtro atua de forma automática barrando mensagens com base na pontuação de risco (Spam Score) numero este atribuido pela rede, com base nas .
+      Observamos que esses remetentes retidos ainda não aparecem na sua lista de confiança. O filtro atua de forma automática barrando mensagens com base na pontuação de risco (Spam Score). 
+      
+      O Spam Score é um número atribuído pela rede que avalia a reputação do remetente. A pontuação sobe (indicando maior risco de ser spam) quando o domínio de origem não possui os apontamentos de segurança corretos (SPF, DKIM e DMARC), o IP está em blacklists ou a mensagem contém links/termos suspeitos. Em contrapartida, a pontuação desce (indicando maior confiabilidade) quando o domínio está devidamente autenticado e possui um bom histórico de envios.
 
       No painel, você pode usar as opções abaixo para intervir manualmente:
 
-      ✅ Whitelist: libera o e-mail na quarentena e adiciona o remetente à lista de confiança (mensagens futuras tendem a ser liberadas).
-      ❌ Blacklist: bloqueia novas mensagens desse remetente.
-      📨 Entregar (Deliver): entrega somente aquele e-mail para a sua caixa, sem cadastrar o remetente como confiável.
-      🗑️ Deletar (Delete): remove o e-mail da quarentena de forma permanente.
+      ✅ Whitelist / Welcomelist: libera o e-mail na quarentena e adiciona o remetente à lista de confiança (mensagens futuras tendem a ser liberadas). Na interface web, clique na seta ao lado do botão "Enviar" e selecione "Welcomelist".
+      ❌ Blacklist / Blocklist: bloqueia novas mensagens desse remetente. Na interface web, clique na seta ao lado do botão "Apagar" e selecione "Blocklist".
+      📨 Entregar (Enviar): entrega somente aquele e-mail para a sua caixa, sem cadastrar o remetente como confiável.
+      🗑️ Deletar (Apagar): remove o e-mail da quarentena de forma permanente.
 
       Atenção: é possível solicitar a desativação do antispam do domínio, se desejado — porém isso retira uma camada vital de segurança e aumentará significativamente o volume de spam, lixo eletrônico e riscos de malware na caixa de entrada.
 
@@ -1885,44 +1896,49 @@ matches:
           - E-mail
           - Ligação
 
-  # /logcanc — Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
+# /logcanc — Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
   - trigger: "/logcanc"
     form: |
-      Solicitação de Cancelamento (Repasse Financeiro)
+      DESCRIÇÃO
+      Cliente entrou em contato solicitando o cancelamento dos serviços.
       
-      INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Solicitante: [[solicitante]]
       • Perfil: [[perfil]]
-      • Motivo Alegado: 
-      [[motivo]]
+      • Motivo Alegado: [[motivo]]
+      • Tentativa de Retenção Técnica: [[retencao]]
 
-      PROCEDIMENTOS E ORIENTAÇÕES
-      • Cliente orientado conforme o novo fluxo de cancelamento (Prazo de 1 dia útil para retorno do setor responsável).
-      • Formalização PJ: [[formalizacao_pj]]
-
-      ESCALONAMENTO
-      • Ação: Chamado encaminhado para a fila do Financeiro.
+      SOLUÇÃO
+      • Ação Realizada: Cliente informado de que a solicitação passará por validação contratual e financeira antes da efetivação, com prazo de retorno de até 24 horas úteis. Conforme as regras vigentes, o serviço não foi bloqueado e não foram fornecidas informações sobre multas, débitos ou retirada de equipamentos.
+      • Status de Formalização: [[formalizacao_pj]]
     form_fields:
       canal:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
+      solicitante:
+        type: text
       perfil:
         type: choice
         values:
           - Pessoa Física (PF)
           - Pessoa Jurídica (PJ)
       motivo:
-        type: multiline
+        type: text
+      retencao:
+        type: choice
+        values:
+          - Não se aplica (Motivo não técnico)
+          - Tentativa de reversão técnica sem sucesso
+          - Reversão bem-sucedida (Cancelamento abortado)
       formalizacao_pj:
         type: choice
         values:
-          - Não se aplica (Cliente é PF)
-          - Cliente orientado a enviar e-mail
-          - E-mail de formalização já recebido
+          - Não se aplica (Cliente é PF - Encaminhado à fila do Financeiro)
+          - Aguardando formalização (Chamado classificado como Pendente de E-mail)
+          - E-mail de formalização recebido (Encaminhado à fila do Financeiro)
 
   # /logprotesto — Log de encaminhamento de título protestado ao Financeiro (carta de anuência)
   - trigger: "/logprotesto"
@@ -2415,38 +2431,29 @@ matches:
       acao:
         type: multiline
 
-  # /logpmg — Log detalhado de orientação sobre o Gateway Antispam PMG
+# /logpmg — Log detalhado de orientação sobre o Gateway Antispam PMG
   - trigger: "/logpmg"
     form: |
-      Orientação Técnica — Gateway Antispam (PMG)
+      DESCRIÇÃO
+      Cliente entrou em contato com dúvidas sobre a retenção de mensagens e o uso do filtro Antispam (PMG), relatando ter e-mails bloqueados na quarentena.
       
-      INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
-      • Solicitação: Cliente com dúvidas sobre retenção de mensagens e uso do filtro Antispam. O solicitante afirma ter e-mails retidos na quarentena.
       • E-mail do Solicitante: [[email]]
 
-      PROCEDIMENTOS E ORIENTAÇÕES
-      • O solicitante foi devidamente instruído sobre o funcionamento do Gateway Antispam PMG (Whitelist, Blacklist, Deliver, Delete) e demais funcionalidades do sistema.
-      • [[orientacao]]
-      
-      AÇÕES EXECUTADAS
-      • Encaminhado e-mail com o relatório atualizado de quarentena para o cliente.
-      • [[acoes]]
-
       SOLUÇÃO
-      • Atendimento concluído. Cliente ciente dos procedimentos de gestão da quarentena (Whitelist/Blacklist).
+      • Ações e Orientações: Encaminhado e-mail com o relatório atualizado de quarentena. Cliente instruído sobre o acesso à interface web, alteração do idioma para português e o significado do Spam Score. Orientado também sobre o uso correto das ações de gestão manual (Welcomelist, Blocklist, Enviar e Apagar) e enviado o PDF com o passo a passo.
+      • Observações Adicionais: [[observacoes]]
+      • Atendimento concluído. Cliente ciente dos procedimentos de gestão da quarentena.
     form_fields:
       canal:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       email:
         type: text
-      orientacao:
-        type: multiline
-      acoes:
+      observacoes:
         type: multiline
 
   # /logoffpmg — Log de desativação do filtro antispam PMG para um domínio
