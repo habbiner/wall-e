@@ -123,8 +123,8 @@
 #   /logemail           Log de suporte a e-mail com testes de webmail, DNS e configuração IMAP/POP
 #   /logtroca           Log de troca de titularidade com dados do titular atual e do novo
 #   /logpmg             Log detalhado de orientação sobre o Gateway Antispam PMG
-#   /logpmgoff          Log de desativação do filtro antispam PMG para um domínio
-#   /logpmgon           Log de reativação do filtro antispam PMG para um domínio
+#   /logoffpmg          Log de desativação do filtro antispam PMG para um domínio
+#   /logonpmg           Log de reativação do filtro antispam PMG para um domínio
 #   /logtimeout         Log de encerramento automático por timeout (inatividade no Blip)
 #   /logbloq            Log de bloqueio automático ou manual de conta no servidor (cPanel/Plesk/VPS)
 #   /logdesbloq         Log de desbloqueio manual de conta após regularização
@@ -2449,8 +2449,8 @@ matches:
       acoes:
         type: multiline
 
-  # /logpmgoff — Log de desativação do filtro antispam PMG para um domínio
-  - trigger: "/logpmgoff"
+  # /logoffpmg — Log de desativação do filtro antispam PMG para um domínio
+  - trigger: "/logoffpmg"
     form: |
       Desativação de Gateway Antispam (PMG)
       
@@ -2482,8 +2482,8 @@ matches:
           - Adição da regra global *@* na Whitelist do PMG
           - Alteração dos apontamentos MX (Bypass direto para a hospedagem)
 
-  # /logpmgon — Log de reativação do filtro antispam PMG para um domínio
-  - trigger: "/logpmgon"
+  # /logonpmg — Log de reativação do filtro antispam PMG para um domínio
+  - trigger: "/logonpmg"
     form: |
       Reativação de Gateway Antispam (PMG)
       
@@ -2571,20 +2571,13 @@ matches:
     form: |
       Análise de Suspensão de Serviço
       INFORMAÇÕES
-      • Domínio: [[dominio]]
-      • Final do IP do Servidor: [[ip_servidor]]
       • Origem: Chamado automático de inadimplência.
 
       PROCEDIMENTOS REALIZADOS
       • Ação Realizada: Bloqueio não efetuado.
-      • Motivo da Retenção: 
-      [[motivo]]
 
       ESCALONAMENTO
       • Chamado transferido para a fila do Financeiro para validação de pendências, status do contrato e definição sobre a suspensão do serviço.
-    form_fields:
-      motivo:
-        type: multiline
 
   # /logmudanca — Log de mudança de endereço; encaminha para fila de Ativação da Fibra
   - trigger: "/logmudanca"
