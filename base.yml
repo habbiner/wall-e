@@ -148,6 +148,7 @@
 #   /logcenvio          Log de envio das credenciais do cPanel após formalização por e-mail
 #   /logcom4email       Log de redefinição de senha para contas @com4.com.br
 #   /logpower           Log de abertura de visita técnica por falha elétrica (Luz Power / Hardware)
+#   /logbackup          Log interno de solicitação de restauração de backup
 #
 # =============================================================================
 
@@ -1713,12 +1714,10 @@ matches:
 
       SITUAÇÃO FINANCEIRA E VERIFICAÇÕES
       • Status do Boleto: [[status_boleto]]
-      • Valores Confirmados: [[valores]]
       • Status do Serviço: [[status_servico]]
 
       ENVIO E DADOS DE ACESSO
       • Meio de Envio: [[envio]]
-      • E-mail de Cadastro: [[email]]
 
       SOLUÇÃO
       • Ação Realizada: Segunda via do boleto emitida.
@@ -3142,3 +3141,44 @@ matches:
         values:
           - Foto recebida anexada ao chamado.
           - Relato descritivo do cliente no chat.
+
+# /logbackup — Log interno de solicitação de restauração de backup
+  - trigger: "/logbackup"
+    form: |
+      Solicitação de Restauração de Backup
+
+      DESCRIÇÃO
+      • Canal de Atendimento: [[canal]]
+      • Solicitante: [[solicitante]]
+      • Hospedagem: [[hospedagem]]
+      • IP do Servidor: |.[[ip]]
+
+      DETALHES DA RESTAURAÇÃO
+      • Restauração referente a: [[tipo]]
+      • Conta de E-mail afetada (se aplicável): [[email_afetado]]
+
+      OBSERVAÇÃO:
+      •  
+      [[acoes]]
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      solicitante:
+        type: text
+      hospedagem:
+        type: text
+      ip:
+        type: text
+      tipo:
+        type: choice
+        values:
+          - Site (Arquivos ou Banco de Dados)
+          - E-mail
+      email_afetado:
+        type: text
+      acoes:
+        type: multiline
