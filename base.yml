@@ -149,6 +149,7 @@
 #   /logcom4email       Log de redefinição de senha para contas @com4.com.br
 #   /logpower           Log de abertura de visita técnica por falha elétrica (Luz Power / Hardware)
 #   /logbackup          Log interno de solicitação de restauração de backup
+#   /logoutlook         Log interno de auxílio na configuração de e-mail no Outlook
 #
 # =============================================================================
 
@@ -3182,3 +3183,63 @@ matches:
         type: text
       acoes:
         type: multiline
+
+# /logoutlook — Log interno de auxílio na configuração de e-mail no Outlook
+  - trigger: "/logoutlook"
+    form: |
+      Suporte à Configuração — Outlook
+
+      DESCRIÇÃO
+      • Canal de Atendimento: [[canal]]
+      • Solicitante: [[solicitante]]
+      • Domínio: [[dominio]]
+      • Conta(s) de E-mail: [[email]]
+      • Versão do Aplicativo: [[versao_outlook]]
+
+      PROCEDIMENTOS REALIZADOS
+      • Protocolo de Sincronização: [[protocolo]]
+      • Teste de Envio/Recebimento: [[teste]]
+      • Detalhes da Tratativa: 
+      [[detalhes]]
+
+      SOLUÇÃO
+      • Status: [[status]]
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      solicitante:
+        type: text
+      dominio:
+        type: text
+      email:
+        type: text
+      versao_outlook:
+        type: choice
+        values:
+          - Outlook Clássico (Office 365 / 2016 / 2019)
+          - Novo Outlook (New Outlook do Windows)
+          - Outlook Mobile (Android/iOS)
+          - Não identificado / Outro
+      protocolo:
+        type: choice
+        values:
+          - IMAP (Recomendado)
+          - POP3
+      teste:
+        type: choice
+        values:
+          - Sucesso (Envio e Recebimento OK)
+          - Falha (Erro de Autenticação/Senha)
+          - Falha (Erro de Servidor/Porta)
+      detalhes:
+        type: multiline
+      status:
+        type: choice
+        values:
+          - Conta configurada com sucesso. Chamado encerrado.
+          - Cliente com dificuldades técnicas. Oferecido/Agendado acesso remoto.
+          - Falha na validação. Chamado escalonado ou mantido para acompanhamento.
