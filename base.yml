@@ -21,6 +21,7 @@
 #   /avalie             Solicita avaliação no Google (chat/Blip)
 #   /avaliaemail        Bloco de avaliação Google para e-mails
 #   /tchau              Encerramento de chat com o pedido de avaliação do Google embutido
+#   /retornovendas      Abordagem após o cliente aceitar o template de "retorno_contato"
 #
 # 2 · Financeiro — Cliente
 #   /bloqueado          Informa suspensão por fatura em aberto; oferece 2ª via ou aguarda comprovante
@@ -49,6 +50,8 @@
 #   /cancelapf          Informa prazo de 1 dia útil do Financeiro para cancelamento PF
 #   /cancelapj          Solicita formalização por e-mail para cancelamento PJ
 #   /solcomp            Informa que já pagou e solicita comprovante para liberação (Cliente Bloqueado)
+#   /trocapf            Solicita dados e documentos do novo titular para troca PF
+#   /trocapj            Solicita dados e documentos do novo titular para troca PJ
 #
 # 3 · Suporte Técnico — Cliente
 #   /fibra              Orienta verificação visual do cabo de fibra e do conector
@@ -81,6 +84,7 @@
 #   /semviabilidade     Informa cliente (Lead) sobre falta de viabilidade de fibra no endereço (Padrão BDC)
 #   /power              Orienta verificação da fonte de alimentação e troca de tomada
 #   /luzpower           Explica falha elétrica/hardware e abre chamado para visita técnica
+#   /agendafibra        Informa encaminhamento para o setor de fibra agendar instalação
 #
 # 4 · E-mail, Hospedagem e Migração
 #   /ativhosp           Envia dados de acesso ao cPanel, FTP, Webmail e DNS (ativação de hospedagem)
@@ -150,6 +154,8 @@
 #   /logpower           Log de abertura de visita técnica por falha elétrica (Luz Power / Hardware)
 #   /logbackup          Log interno de solicitação de restauração de backup
 #   /logoutlook         Log interno de auxílio na configuração de e-mail no Outlook
+#   /logativacao        Log de encaminhamento para ativação de fibra (Venda Suporte)
+#   /logredefinirsenha  Log interno de redefinição de senha para contas @com4.com.br
 #
 # =============================================================================
 
@@ -464,6 +470,20 @@ matches:
       - name: despedida
         type: global
 
+# /retornovendas — Abordagem após o cliente aceitar o template de "retorno_contato"
+  - trigger: "/retornovendas"
+    force_clipboard: true
+    replace: |-
+      Olá, {{saudacao}}! Tudo bem? Sou o {{atendente_nome}} da Com4. Agradeço pelo seu retorno!
+      
+      Pedimos sinceras desculpas pela ausência de resposta imediata; enfrentamos uma instabilidade sistêmica em nossos canais de recepção de mensagens recentemente, mas a situação já foi normalizada.
+      
+      Vi que você havia nos procurado com interesse em nossos serviços. Como posso te auxiliar hoje? Você gostaria de consultar os nossos planos disponíveis ou já verificar a viabilidade para o seu endereço?
+    vars:
+      - name: saudacao
+        type: global
+      - name: atendente_nome
+        type: global
 
 # =============================================================================
 # 2 · Financeiro — Cliente
@@ -884,6 +904,38 @@ matches:
       
       Assim que recebermos, faremos a validação, anexaremos ao seu cadastro e daremos andamento imediato na liberação dos seus serviços.
 
+
+# /trocapf — Solicita dados e documentos do novo titular para troca PF
+  - trigger: "/trocapf"
+    force_clipboard: true
+    replace: |-
+      Para darmos andamento à troca de titularidade, precisamos confirmar os dados do novo titular (Pessoa Física).
+
+      Por gentileza, preencha as informações abaixo e nos envie:
+      • Nome completo:
+      • CPF:
+      • RG:
+      • E-mail:
+      • Telefone de contato:
+      • Endereço completo (com CEP):
+
+      Além dos dados, é necessário enviar por aqui uma foto legível ou PDF do **documento com foto (RG ou CNH)** do novo titular.
+
+  # /trocapj — Solicita dados e documentos do novo titular para troca PJ
+  - trigger: "/trocapj"
+    force_clipboard: true
+    replace: |-
+      Para darmos andamento à troca de titularidade, precisamos confirmar os dados do novo titular (Pessoa Jurídica).
+
+      Por gentileza, preencha as informações abaixo e nos envie:
+      • Razão Social:
+      • CNPJ:
+      • Inscrição Estadual (ou Isento):
+      • E-mail corporativo/financeiro:
+      • Telefone de contato:
+      • Endereço completo (com CEP):
+
+      Além dos dados, é necessário enviar por aqui o **Cartão CNPJ** atualizado e uma foto/PDF do **documento com foto (RG ou CNH)** do representante legal da empresa.
 
 # =============================================================================
 # 3 · Suporte Técnico — Cliente
@@ -1312,6 +1364,17 @@ matches:
 
       Para solucionar isso de forma definitiva, vou registrar uma visita técnica. Nossa equipe irá até o local para avaliar o equipamento e realizar a troca da fonte ou do modem para restabelecer a sua conexão.
 
+# /agendafibra — Informa encaminhamento para o setor de fibra agendar instalação
+  - trigger: "/agendafibra"
+    force_clipboard: true
+    replace: |-
+      Tudo certo com o seu cadastro e o contrato foi gerado com sucesso! ✅
+      
+      A sua solicitação já foi aprovada e encaminhada diretamente para a nossa equipe de Fibra Óptica.
+      
+      Como o nosso setor de agendamentos atua em horário comercial, eles entrarão em contato com você no próximo dia útil para formalizar a data e o horário exatos da visita técnica para a instalação e ativação dos seus serviços.
+      
+      Seja muito bem-vindo(a) à Com4! Qualquer dúvida, sigo à disposição! 😊
 
 # =============================================================================
 # 4 · E-mail, Hospedagem e Migração
@@ -2549,7 +2612,7 @@ matches:
         values:
           - cPanel / WHM
           - Plesk
-          - Proxmox (VPS)
+          - Fibra
 
   # /logdesbloq — Log de desbloqueio manual de conta após regularização
   - trigger: "/logdesbloq"
@@ -3243,3 +3306,136 @@ matches:
           - Conta configurada com sucesso. Chamado encerrado.
           - Cliente com dificuldades técnicas. Oferecido/Agendado acesso remoto.
           - Falha na validação. Chamado escalonado ou mantido para acompanhamento.
+
+# /logativacao — Log de encaminhamento para ativação de fibra (Venda Suporte)
+  - trigger: "/logativacao"
+    form: |
+      Pedido de Ativação — Nova Contratação
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Solicitante: [[nome]]
+      • CPF / CNPJ: [[doc]]
+      • Contato: [[telefone]]
+      • Plano Contratado: [[plano]]
+      • Vencimento: [[vencimento]]
+      
+      DADOS DA INSTALAÇÃO
+      • Endereço: [[endereco]]
+      • CTO com Viabilidade: [[cto]]
+      • Distância: [[distancia]]
+      
+      VERIFICAÇÕES E PROCEDIMENTOS
+      • Consulta de Protesto: Realizada e sem restrições impeditivas.
+      • Lead / Oportunidade: Registrado.
+      • Contrato Físico: Gerado, preenchido e impresso em duas vias.
+      • Documentação: Documentos de identificação, comprovante de endereço e print da consulta de protesto devidamente anexados a este chamado.
+      
+      SOLUÇÃO
+      • Chamado classificado como "Pedido de Ativação" e encaminhado para a fila "Fibra Ativação - Fibra Ativação" para agendamento e execução da instalação.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      nome:
+        type: text
+      doc:
+        type: text
+      telefone:
+        type: text
+      plano:
+        type: choice
+        values:
+          - 100 Mb / 10 Mb
+          - 100 Mb / 100 Mb
+          - 200 Mb / 20 Mb
+          - 200 Mb / 200 Mb
+          - 300 Mb / 30 Mb
+          - 300 Mb / 300 Mb
+          - 600 Mb / 60 Mb
+          - 600 Mb / 600 Mb
+          - Outro (Plano Corporativo / Promocional / Customizado)
+      endereco:
+        type: text
+      cto:
+        type: text
+      distancia:
+        type: text
+      vencimento:
+        type: choice
+        values:
+          - "05"
+          - "10"
+          - "15"
+          - "20"
+          - "25"
+# /logredefinirsenha — Log interno de redefinição de senha para contas @com4.com.br
+  - trigger: "/logredefinirsenha"
+    form: |
+      Redefinição de Senha — E-mail Corporativo
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Solicitante: [[solicitante]]
+      • Conta de E-mail: [[email]]
+      
+      PROCEDIMENTOS REALIZADOS
+      • Validação de Segurança: Dados cadastrais e titularidade confirmados com sucesso.
+      • Motivo: Perda, bloqueio ou esquecimento do acesso atual.
+      
+      SOLUÇÃO
+      • Ação Realizada: Senha da conta redefinida no servidor corporativo (@com4.com.br).
+      • Nova Senha: Foi aplicada a senha padrão temporária "Mudarsenha123**".
+      • Status: Cliente orientado a realizar o acesso pelo Webmail e alterar a senha imediatamente por motivos de segurança. Chamado encerrado.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      solicitante:
+        type: text
+      email:
+        type: text
+
+# /logretornovendas — Log de retorno ativo (Instabilidade de 40 dias - Contratação)
+  - trigger: "/logretornovendas"
+    form: |
+      Retorno Ativo — Lista de Instabilidade (Comercial)
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: Blip
+      • Solicitante: [[nome]]
+      • Telefone: [[telefone]]
+      
+      PROCEDIMENTOS REALIZADOS
+      • Origem: Contato ativo realizado com base no relatório do Desenvolvimento (falha de retorno de leads nos últimos 40 dias).
+      • Ação inicial: Disparo do template 'retorno_contato' efetuado no Blip.
+      
+      RESULTADO DA ABORDAGEM
+      • Interação do Cliente: [[resposta]]
+      
+      SOLUÇÃO
+      • Status Final: [[acao]]
+    form_fields:
+      nome:
+        type: text
+      telefone:
+        type: text
+      resposta:
+        type: choice
+        values:
+          - Cliente clicou em "Sim" no template e manteve interesse.
+          - Cliente clicou em "Não" / Informou que já contratou outro provedor.
+          - Sem interação ou retorno do cliente após o disparo do template.
+      acao:
+        type: choice
+        values:
+          - Atendimento em andamento (Consultando viabilidade / Criando PN).
+          - Oportunidade (Lead) registrada e transferida para a fila do Comercial.
+          - Chamado encerrado (Cliente sem interesse / Negócio perdido).
+          - Chamado encerrado automaticamente por inatividade (Timeout).
