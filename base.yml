@@ -119,6 +119,7 @@
 #   /loglead            Log de oportunidade comercial identificada; encaminha lead ao Comercial
 #   /logcorreios        Log de orientação sobre atraso de fatura impressa (Correios)
 #   /logprotestoboleto  Log de abertura de chamado para o Financeiro gerar boleto de protesto
+#   /cha                Notificação padronizada de encaminhamento de chamados no WhatsApp
 #
 # 6 · Registros Internos — NOC / Técnico
 #   /logcongelado       Log de domínio congelado no Registro.br com renovação e período
@@ -2151,6 +2152,25 @@ matches:
         type: text
       doc:
         type: text
+
+# /cha — Notificação padronizada de encaminhamento de chamados no WhatsApp
+  - trigger: "/cha"
+    form: "[[prefixo]] [[cliente]] | [[assunto]]"
+    form_fields:
+      prefixo:
+        type: choice
+        values:
+          - "Chamado aberto para a fila 02 ➥"
+          - "Chamado aberto para fila Manutenção ➥"
+          - "Chamado aberto para fila de Ativação ➥"
+          - "Chamado aberto para fila Consultoria ➥"
+          - "Blip transferido para a consultoria ➥"
+      cliente:
+        type: text
+        multiline: false
+      assunto:
+        type: text
+        multiline: false
 
 # =============================================================================
 # 6 · Registros Internos — NOC / Técnico
