@@ -22,6 +22,7 @@
 #   /avaliaemail        Bloco de avaliação Google para e-mails
 #   /tchau              Encerramento de chat com o pedido de avaliação do Google embutido
 #   /retornovendas      Abordagem após o cliente aceitar o template de "retorno_contato"
+#   /aniversario        Mensagem padrão de feliz aniversário para o grupo da Com4
 #
 # 2 · Financeiro — Cliente
 #   /bloqueado          Informa suspensão por fatura em aberto; oferece 2ª via ou aguarda comprovante
@@ -37,7 +38,7 @@
 #   /faltadados         Solicita CPF/CNPJ de comprovante recebido sem identificação via e-mail
 #   /paginvertido       Cliente pagou boleto do mês posterior em vez do vigente
 #   /venc               Alteração de vencimento com cálculo automático para o CLIENTE (BDC)
-#   /protesto           Explica o processo e encaminha título protestado ao Financeiro
+#   /transfereprotesto  Explica o processo e encaminha o solicitante ao financeiro ciente do título protestado
 #   /comodato           Informa regras de devolução do equipamento e multa por extravio
 #   /doctroca           Solicita documentos (PF ou PJ) para iniciar troca de titularidade
 #   /fid                Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
@@ -52,6 +53,7 @@
 #   /solcomp            Informa que já pagou e solicita comprovante para liberação (Cliente Bloqueado)
 #   /trocapf            Solicita dados e documentos do novo titular para troca PF
 #   /trocapj            Solicita dados e documentos do novo titular para troca PJ
+#   /protestoboleto     Informa que o chamado foi para o Financeiro gerar o boleto atualizado do protesto
 #
 # 3 · Suporte Técnico — Cliente
 #   /fibra              Orienta verificação visual do cabo de fibra e do conector
@@ -99,6 +101,7 @@
 #   /propag             Avisa sobre propagação DNS após migração ou alteração de apontamentos
 #   /senhaemail         Informa que suporte não acessa senhas de e-mail (segurança)
 #   /senhacp            Orienta redefinição de senha de e-mail via cPanel (cliente)
+#   /popimap            Explica a diferença entre os protocolos POP e IMAP
 #
 # 5 · Registros Internos — Financeiro
 #   /lognada            Log rápido: nenhuma ação no escopo do analista
@@ -112,9 +115,10 @@
 #   /logvenc            Log de abertura de chamado ao Financeiro (alteração de vencimento)
 #   /loginvertido       Log interno de pagamento de fatura do mês incorreto
 #   /logcanc            Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
-#   /logprotesto        Log de encaminhamento de título protestado ao Financeiro (carta de anuência)
+#   /logtransfereprotesto        Log de encaminhamento do cliente e de título protestado ao Financeiro (carta de anuência)
 #   /loglead            Log de oportunidade comercial identificada; encaminha lead ao Comercial
 #   /logcorreios        Log de orientação sobre atraso de fatura impressa (Correios)
+#   /logprotestoboleto  Log de abertura de chamado para o Financeiro gerar boleto de protesto
 #
 # 6 · Registros Internos — NOC / Técnico
 #   /logcongelado       Log de domínio congelado no Registro.br com renovação e período
@@ -156,6 +160,8 @@
 #   /logoutlook         Log interno de auxílio na configuração de e-mail no Outlook
 #   /logativacao        Log de encaminhamento para ativação de fibra (Venda Suporte)
 #   /logredefinirsenha  Log interno de redefinição de senha para contas @com4.com.br
+#   /logmaxerro       Log de bloqueio automático por limite de falhas/adiamentos por hora (Max Defers)
+
 #
 # =============================================================================
 
@@ -485,6 +491,12 @@ matches:
       - name: atendente_nome
         type: global
 
+# /aniversario — Mensagem padrão de feliz aniversário para o grupo da Com4
+  - trigger: "/aniversario"
+    form: "Parabéns [[nome]]! Muitos anos de vida, saúde e felicidades! 🥳🎉"
+    form_fields:
+      nome:
+        type: text
 # =============================================================================
 # 2 · Financeiro — Cliente
 # =============================================================================
@@ -729,8 +741,8 @@ matches:
 
             Write-Output $mensagem
 
-  # /protesto — Explica o processo e encaminha título protestado ao Financeiro
-  - trigger: "/protesto"
+  # /transfereprotesto — Explica o processo e encaminha o cliente ciente do título protestado ao Financeiro
+  - trigger: "/transfereprotesto"
     force_clipboard: true
     replace: |-
       Compreendo a solicitação referente ao título protestado.
@@ -936,6 +948,16 @@ matches:
       • Endereço completo (com CEP):
 
       Além dos dados, é necessário enviar por aqui o **Cartão CNPJ** atualizado e uma foto/PDF do **documento com foto (RG ou CNH)** do representante legal da empresa.
+
+# /protestoboleto — Informa que o chamado foi para o Financeiro gerar o boleto atualizado do protesto
+  - trigger: "/protestoboleto"
+    force_clipboard: true
+    replace: |-
+      Compreendo a sua solicitação referente ao título protestado.
+      
+      Como este procedimento envolve o levantamento das custas cartorárias e a emissão de um boleto atualizado com esses valores, vou encaminhar o seu caso agora mesmo para o nosso setor Financeiro.
+      
+      Eles farão a emissão do documento e enviarão o boleto diretamente para você por aqui. Peço que aguarde um momento, por gentileza!
 
 # =============================================================================
 # 3 · Suporte Técnico — Cliente
@@ -1686,6 +1708,27 @@ matches:
       - name: empresa_nome
         type: global
 
+# /popimap — Explica a diferença entre os protocolos POP e IMAP
+  - trigger: "/popimap"
+    force_clipboard: true
+    replace: |-
+      Compreendo a sua dúvida! A escolha entre os protocolos POP e IMAP define como o seu aplicativo de e-mail (Outlook, celular) vai interagir com as mensagens no nosso servidor. 
+      
+      Aqui está a diferença de forma direta:
+      
+      🌐 IMAP (Recomendado)
+      • Sincroniza em tempo real com o servidor.
+      • As mensagens permanecem salvas na nuvem e podem ser acessadas de vários aparelhos ao mesmo tempo (computador, celular e webmail).
+      • Tudo o que você fizer (ler, apagar ou mover para pastas) em um dispositivo, refletirá automaticamente nos outros.
+      
+      💻 POP (POP3)
+      • Faz o download (baixa) das mensagens para o seu aparelho e, por padrão, as apaga do nosso servidor.
+      • Ideal se você precisa economizar espaço de armazenamento na sua hospedagem ou acessa o e-mail de um único computador fixo.
+      • Não possui sincronização: se você baixar e ler os e-mails no computador, não conseguirá vê-los no celular depois.
+      
+      Se você precisa acessar a mesma conta em mais de um aparelho ou quer ter o backup no servidor, a recomendação técnica é utilizar o IMAP. 
+      
+      Qual você prefere utilizar para que eu possa te orientar com as portas corretas de configuração?
 
 # =============================================================================
 # 5 · Registros Internos — Financeiro
@@ -2003,8 +2046,8 @@ matches:
           - Aguardando formalização (Chamado classificado como Pendente de E-mail)
           - E-mail de formalização recebido (Encaminhado à fila do Financeiro)
 
-  # /logprotesto — Log de encaminhamento de título protestado ao Financeiro (carta de anuência)
-  - trigger: "/logprotesto"
+  # /logtransfereprotesto — Log de encaminhamento de título protestado ao Financeiro (carta de anuência)
+  - trigger: "/logtransfereprotesto"
     form: |
       Tratativa de Boleto Protestado
       INFORMAÇÕES
@@ -2081,6 +2124,33 @@ matches:
           - Cliente optou por aguardar correspondência. Chamado encerrado.
           - Cliente não retornou.
 
+# /logprotestoboleto — Log de abertura de chamado para o Financeiro gerar boleto de protesto
+  - trigger: "/logprotestoboleto"
+    form: |
+      Geração de Boleto — Título Protestado
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Solicitante: [[nome]]
+      • CPF / CNPJ: [[doc]]
+      
+      SOLICITAÇÃO
+      • Cliente entrou em contato solicitando a regularização de um título que se encontra protestado em cartório.
+      
+      PROCEDIMENTOS E ESCALONAMENTO
+      • Cliente orientado de que o setor responsável fará o levantamento das custas e enviará o boleto atualizado.
+      • Ação: Chamado transferido para a fila do Financeiro solicitando a geração e o envio do boleto protestado ao cliente, para posterior liberação da carta de anuência.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      nome:
+        type: text
+      doc:
+        type: text
 
 # =============================================================================
 # 6 · Registros Internos — NOC / Técnico
@@ -3439,3 +3509,35 @@ matches:
           - Oportunidade (Lead) registrada e transferida para a fila do Comercial.
           - Chamado encerrado (Cliente sem interesse / Negócio perdido).
           - Chamado encerrado automaticamente por inatividade (Timeout).
+
+ # /logmaxerro — Log de bloqueio automático por limite de falhas/adiamentos por hora (Max Defers)
+  - trigger: "/logmaxerro"
+    form: |
+      Bloqueio Automático — Max Defers and Failures
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Solicitante: [[solicitante]]
+      • Domínio Afetado: [[dominio]]
+      
+      DIAGNÓSTICO E SINTOMA
+      • Sintoma Relatado: Cliente recebe o retorno "exceeded the max defers and failures per hour" ao tentar enviar novos e-mails.
+      • Análise NOC: Confirmado o acionamento da trava de segurança do servidor (Exim) devido a um alto índice de devoluções (envios para destinatários inválidos, incorretos ou com caixa cheia) dentro da mesma hora.
+      
+      PROCEDIMENTOS E ORIENTAÇÕES
+      • Status do Fluxo: O bloqueio é temporário e o contador reseta automaticamente na virada da hora. Testes confirmam que o fluxo de envios já se encontra normalizado no momento do atendimento.
+      • Orientação Passada: Cliente instruído sobre o funcionamento do bloqueio protetivo (que evita que o domínio caia em Blacklists) e fortemente orientado a realizar a higienização da sua lista de contatos/mala direta.
+      
+      SOLUÇÃO
+      • Status Final: Serviços normalizados e cliente ciente das boas práticas de envio. Chamado encerrado.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      solicitante:
+        type: text
+      dominio:
+        type: text         
