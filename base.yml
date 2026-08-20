@@ -90,7 +90,7 @@
 #
 # 4 · E-mail, Hospedagem e Migração
 #   /ativhosp           Envia dados de acesso ao cPanel, FTP, Webmail e DNS (ativação de hospedagem)
-#   /dadospainel        Envia URLs e senhas dos painéis cPanel e/ou Plesk
+#   /dadospainel        Envia URLs e senhas do cPanel e/ou Plesk dinamicamente
 #   /ativemail          Envia dados de acesso e portas de configuração da conta de e-mail Com4
 #   /migraaponta        Avisa sobre migração de servidor e solicita atualização dos apontamentos DNS externos
 #   /migracontato       Propõe migração de hospedagem e solicita adição como contato técnico no Registro.br
@@ -135,7 +135,7 @@
 #   /logoffpmg          Log de desativação do filtro antispam PMG para um domínio
 #   /logonpmg           Log de reativação do filtro antispam PMG para um domínio
 #   /logtimeout         Log de encerramento automático por timeout (inatividade no Blip)
-#   /logbloq           \ Log de bloqueio no servidor/painel e encaminhamento correto
+#   /logbloq            Log de bloqueio no servidor/painel e encaminhamento correto
 #   /logdesbloq         Log de desbloqueio de conta pós pagamento normal (Sem acordo prévio)
 #   /logfin             Log de bloqueio não efetuado; escala para o Financeiro para validação
 #   /logmudanca         Log de mudança de endereço; encaminha para fila de Ativação da Fibra
@@ -155,7 +155,6 @@
 #   /logcpfl            Log de abertura de chamado na CPFL por falta de energia
 #   /logcpanel          Log de instrução para solicitação de credenciais do cPanel
 #   /logcenvio          Log de envio das credenciais do cPanel após formalização por e-mail
-#   /logcom4email       Log de redefinição de senha para contas @com4.com.br
 #   /logpower           Log de abertura de visita técnica por falha elétrica (Luz Power / Hardware)
 #   /logbackup          Log interno de solicitação de restauração de backup
 #   /logoutlook         Log interno de auxílio na configuração de e-mail no Outlook
@@ -213,6 +212,17 @@ global_vars:
           $l = Get-Content $p | Where-Object { $_ -match '^\s*CHAVE_PIX\s*=' } | Select-Object -First 1
           if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { '' }
         } else { '' }
+
+  - name: valor_mensalidade_fid
+    type: shell
+    params:
+      shell: powershell
+      cmd: "'499.90'"   # ou lido do match.env, como os demais
+  - name: multa_comodato
+    type: shell
+    params:
+      shell: powershell
+      cmd: "'525,00'"
 
   - name: contato_registro_br
     type: shell
@@ -758,9 +768,12 @@ matches:
     replace: |-
       Lembramos que os equipamentos instalados (modem e fonte de alimentação) são cedidos em regime de comodato.
       
-      Com o encerramento do serviço, a devolução é obrigatória. Conforme previsto em contrato, em caso de extravio, dano ou não devolução, é aplicada uma taxa de restituição no valor de R$ 525,00.
+      Com o encerramento do serviço, a devolução é obrigatória. Conforme previsto em contrato, em caso de extravio, dano ou não devolução, é aplicada uma taxa de restituição no valor de R$ {{multa_comodato}}.
       
       Como prefere organizar a devolução? Podemos agendar a retirada pela nossa equipe técnica ou você prefere entregar diretamente em nossa sede?
+    vars:
+      - name: multa_comodato
+        type: global
 
   # /doctroca — Solicita documentos (PF ou PJ) para iniciar troca de titularidade
   - trigger: "/doctroca"
@@ -782,12 +795,14 @@ matches:
           - "• Documento com foto (RG ou CNH)\n• CPF\n• Data de nascimento\n• E-mail\n• Endereço completo"
           - "• Cartão CNPJ\n• Razão social\n• Comprovante de inscrição e situação cadastral\n• E-mail\n• Endereço completo"
 
-  # /fid — Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
+# /fid — Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
   # Uso: /fid [meses ativos] — Exemplo: /fid 5 (para um cliente com 5 meses de uso)
   - regex: "/fid (?P<meses>[0-9]{1,2})"
     force_clipboard: true
     replace: "{{resultado}}"
     vars:
+      - name: valor_mensalidade_fid
+        type: global
       - name: resultado
         type: shell
         params:
@@ -803,7 +818,12 @@ matches:
             }
 
             $mesesRestantes = 12 - $mesesUsados
-            $multa = (499.90 / 12) * $mesesRestantes
+            
+            # Tratamento seguro para converter o valor global (com ponto ou vírgula) para decimal
+            $mensalidadeStr = "{{valor_mensalidade_fid}}".Replace(",", ".")
+            $mensalidade = [convert]::ToDouble($mensalidadeStr, [System.Globalization.CultureInfo]::InvariantCulture)
+            
+            $multa = ($mensalidade / 12) * $mesesRestantes
             
             # Força a formatação da moeda para o padrão brasileiro (vírgula para decimais)
             $cultura = [System.Globalization.CultureInfo]::GetCultureInfo("pt-BR")
@@ -1456,23 +1476,10 @@ matches:
                 - ian.ns.cloudflare.com e melinda.ns.cloudflare.com
                 - coco.ns.cloudflare.com e lamar.ns.cloudflare.com
 
-  # /dadospainel — Envia URLs e senhas dos painéis cPanel e/ou Plesk
+  # /dadospainel — Envia URLs e senhas do cPanel ou Plesk dinamicamente
   - trigger: "/dadospainel"
     force_clipboard: true
-    replace: |-
-      Olá, {{saudacao}}! Tudo bem? 😊
-
-      Conforme solicitado, seguem os dados de acesso ao painel de controle da hospedagem do domínio {{formulario.dominio}}:
-
-      Painel Administrativo cPanel:
-      Endereço: https://cpanel.{{formulario.dominio}}/ ou https://189.90.130.{{formulario.ip}}:2083/
-      Usuário: {{formulario.user}}
-      Senha: {{formulario.senha}}
-
-      Painel Administrativo Plesk:
-      Endereço: https://plesk7.com4.com.br:8443/
-      Usuário: {{formulario.user_plesk}}
-      Senha: {{formulario.senha_plesk}}
+    replace: "{{resultado}}"
     vars:
       - name: saudacao
         type: global
@@ -1480,12 +1487,48 @@ matches:
         type: form
         params:
           layout: |
+            Plataforma a enviar: [[plataforma]]
             Domínio: [[dominio]]
+            
+            -- Se for cPanel, preencha: --
             IP final (ex: 45): [[ip]]
-            Usuário cPanel: [[user]]
-            Senha cPanel: [[senha]]
+            Usuário cPanel: [[user_cpanel]]
+            Senha cPanel: [[senha_cpanel]]
+            
+            -- Se for Plesk, preencha: --
             Usuário Plesk: [[user_plesk]]
             Senha Plesk: [[senha_plesk]]
+          fields:
+            plataforma:
+              type: choice
+              values:
+                - cPanel
+                - Plesk
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $plat = "{{formulario.plataforma}}"
+            $dom = "{{formulario.dominio}}"
+            $ip = "{{formulario.ip}}"
+            $userCp = "{{formulario.user_cpanel}}"
+            $senhaCp = "{{formulario.senha_cpanel}}"
+            $userPl = "{{formulario.user_plesk}}"
+            $senhaPl = "{{formulario.senha_plesk}}"
+            $saudacao = "{{saudacao}}"
+            
+            $msg = "Olá, ${saudacao}! Tudo bem? 😊`n`nConforme solicitado, seguem os dados de acesso ao painel de controle da hospedagem do domínio ${dom}:`n"
+            
+            if ($plat -eq "cPanel") {
+                $msg += "`nPainel Administrativo cPanel:`nEndereço: https://cpanel.${dom}/ ou https://189.90.130.${ip}:2083/`nUsuário: ${userCp}`nSenha: ${senhaCp}"
+            }
+            elseif ($plat -eq "Plesk") {
+                $msg += "`nPainel Administrativo Plesk:`nEndereço: https://plesk7.com4.com.br:8443/`nUsuário: ${userPl}`nSenha: ${senhaPl}"
+            }
+            
+            Write-Output $msg
 
   # /ativemail — Envia dados de acesso e portas de configuração da conta de e-mail Com4
   - trigger: "/ativemail"
@@ -1764,8 +1807,8 @@ matches:
               type: choice
               values:
                 - Blip
-                - E-mail
                 - Ligação
+                - E-mail
             tipo:
               type: choice
               values:
@@ -1812,8 +1855,8 @@ matches:
               type: choice
               values:
                 - Blip
-                - E-mail
                 - Ligação
+                - E-mail
 
 # /logpagou — Registra pagamento compensado e encaminha ao Financeiro (se DC) ou encerra (se Fibra)
   - trigger: "/logpagou"
@@ -1908,8 +1951,8 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       status_boleto:
         type: choice
         values:
@@ -1952,8 +1995,8 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       status_pagamento:
         type: choice
         values:
@@ -2074,8 +2117,9 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
+
 
 # /logcanc — Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
   - trigger: "/logcanc"
@@ -2140,8 +2184,9 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
+
 
   # /loglead — Log de oportunidade comercial identificada; encaminha lead ao Comercial
   - trigger: "/loglead"
@@ -2190,8 +2235,8 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       status:
         type: choice
         values:
@@ -2303,8 +2348,8 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       status:
         type: choice
         values:
@@ -2317,7 +2362,8 @@ matches:
           - Sim
           - Não
       acao:
-        type: multiline
+        type: text
+        multiline: true
 
   # /logfalha — Log de falha de acesso aos serviços Com4 com testes de DNS e Imunify360
   - trigger: "/logfalha"
@@ -2344,8 +2390,8 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       escopo:
         type: choice
         values:
@@ -2362,7 +2408,8 @@ matches:
           - Não constam bloqueios
           - IP Bloqueado pelo Firewall
       acao:
-        type: multiline
+        type: text
+        multiline: true
 
   # /loglos — Log de abertura de visita técnica de fibra (LOS ou atenuação)
   - trigger: "/loglos"
@@ -2402,10 +2449,11 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       acao:
-        type: multiline
+        type: text
+        multiline: true
 
   # /logsemretorno — Log de tentativa de retorno telefônico sem resposta do cliente
   - trigger: "/logsemretorno"
@@ -2428,8 +2476,8 @@ matches:
             canal:
               type: choice
               values:
-                - Ligação
                 - Blip
+                - Ligação               
                 - E-mail
 
   # /logvps — Log de suporte a servidor VPS com testes, acesso e autorização de reinício
@@ -2473,7 +2521,8 @@ matches:
           - Sim
           - Não
       acao:
-        type: multiline
+        type: text
+        multiline: true
 
   # /logsite — Log de suporte a site com diagnóstico de DNS, disco e banco de dados
   - trigger: "/logsite"
@@ -2506,8 +2555,8 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       whois:
         type: choice
         values:
@@ -2530,7 +2579,8 @@ matches:
           - Regular
           - Irregular
       acao:
-        type: multiline
+        type: text
+        multiline: true
 
   # /logemail — Log de suporte a e-mail com testes de webmail, DNS e configuração IMAP/POP
   - trigger: "/logemail"
@@ -2567,8 +2617,8 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       tipo_conf:
         type: choice
         values:
@@ -2602,7 +2652,8 @@ matches:
           - Regular
           - Irregular
       acao:
-        type: multiline
+        type: text
+        multiline: true
 
   # /logtroca — Log de troca de titularidade com dados do titular atual e do novo
   - trigger: "/logtroca"
@@ -2638,8 +2689,8 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       tipo_atual:
         type: choice
         values:
@@ -2656,7 +2707,8 @@ matches:
           - Sem Restrição
           - Com Restrição
       acao:
-        type: multiline
+        type: text
+        multiline: true
 
 # /logpmg — Log detalhado de orientação sobre o Gateway Antispam PMG
   - trigger: "/logpmg"
@@ -2681,7 +2733,8 @@ matches:
       email:
         type: text
       observacoes:
-        type: multiline
+        type: text
+        multiline: true
 
   # /logoffpmg — Log de desativação do filtro antispam PMG para um domínio
   - trigger: "/logoffpmg"
@@ -2704,8 +2757,8 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       dominio:
         type: text
       solicitante:
@@ -2737,8 +2790,8 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       dominio:
         type: text
       solicitante:
@@ -2872,8 +2925,8 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail
           - Ligação
+          - E-mail
       tipo_imovel:
         type: choice
         values:
@@ -2974,7 +3027,8 @@ matches:
           - Comércio
           - Prédio
       obs:
-        type: multiline
+        type: text
+        multiline: true
 
   # /logreinicia — Log de reinício remoto de servidor ou serviço solicitado pelo cliente
   - trigger: "/logreinicia"
@@ -3055,7 +3109,8 @@ matches:
           - Sem acesso à internet
           - Lentidão / Não atinge a velocidade do plano
       acoes:
-        type: multiline
+        type: text
+        multiline: true
 
   # /logvisitarot — Log de abertura de visita técnica para configuração de novo roteador
   - trigger: "/logvisitarot"
@@ -3085,7 +3140,8 @@ matches:
       disponibilidade:
         type: text
       obs:
-        type: multiline
+        type: text
+        multiline: true
 
   # /logpppoe — Log de envio de credenciais PPPoE ao cliente
   - trigger: "/logpppoe"
@@ -3308,7 +3364,7 @@ matches:
   # /logcpanel — Log de instrução para solicitação de credenciais do cPanel
   - trigger: "/logcpanel"
     form: |
-      instrução de Solicitação de Acesso cPanel
+      Instrução de Solicitação de Acesso cPanel
 
       DESCRIÇÃO
       Cliente entrou em contato solicitando o envio das credenciais de acesso ao painel de hospedagem (cPanel).
@@ -3355,28 +3411,6 @@ matches:
         type: text
       email:
         type: text        
-
-  # /logcom4email — Log de redefinição de senha para contas @com4.com.br
-  - trigger: "/logcom4email"
-    form: |
-      DESCRIÇÃO
-      Cliente entrou em contato solicitando a redefinição de senha de sua conta de e-mail corporativa (@com4.com.br), relatando perda ou esquecimento do acesso atual.
-      
-      • Canal de Atendimento: [[canal]]
-      • Conta de E-mail: [[email]]
-      
-      SOLUÇÃO
-      • Ação Realizada: Após a validação de segurança e confirmação dos dados cadastrais do solicitante, a senha da conta de e-mail foi redefinida.
-      • Nova Senha: Foi aplicada a senha padrão temporária "Mudarsenha123**".
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      email:
-        type: text
 
   # /logpower — Log de abertura de visita técnica por falha elétrica (Luz Power / Hardware)
   - trigger: "/logpower"
@@ -3441,7 +3475,8 @@ matches:
       email_afetado:
         type: text
       acoes:
-        type: multiline
+        type: text
+        multiline: true
 
 # /logoutlook — Log interno de auxílio na configuração de e-mail no Outlook
   - trigger: "/logoutlook"
@@ -3495,7 +3530,8 @@ matches:
           - Falha (Erro de Autenticação/Senha)
           - Falha (Erro de Servidor/Porta)
       detalhes:
-        type: multiline
+        type: text
+        multiline: true
       status:
         type: choice
         values:
