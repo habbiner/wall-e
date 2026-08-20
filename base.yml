@@ -106,10 +106,10 @@
 # 5 · Registros Internos — Financeiro
 #   /lognada            Log rápido: nenhuma ação no escopo do analista
 #   /logenc             Log rápido: encerramento simples do chamado
-#   /logacordo          Registra desbloqueio em acordo com canal, solicitante e prazo D+2 úteis
+#   /logacordo          Registra desbloqueio em acordo e assume chamado para acompanhamento
 #   /logbaixa           Registra recebimento de comprovante e previsão de compensação D+1 útil
-#   /logpagou           Registra pagamento compensado e confirmado no sistema
-#   /logcalote          Registra retomada da suspensão por falta de pagamento pós-acordo
+#   /logpagou           Registra pagamento compensado e encaminha ao Financeiro (se DC) ou encerra (se Fibra)
+#   /logcalote          Registra retomada da suspensão (quebra de acordo)
 #   /log2via            Log completo de atendimento de emissão de 2ª via de boleto
 #   /lognfe             Log completo de atendimento de envio de Nota Fiscal
 #   /logvenc            Log de abertura de chamado ao Financeiro (alteração de vencimento)
@@ -135,8 +135,8 @@
 #   /logoffpmg          Log de desativação do filtro antispam PMG para um domínio
 #   /logonpmg           Log de reativação do filtro antispam PMG para um domínio
 #   /logtimeout         Log de encerramento automático por timeout (inatividade no Blip)
-#   /logbloq            Log de bloqueio automático ou manual de conta no servidor (cPanel/Plesk/VPS)
-#   /logdesbloq         Log de desbloqueio manual de conta após regularização
+#   /logbloq           \ Log de bloqueio no servidor/painel e encaminhamento correto
+#   /logdesbloq         Log de desbloqueio de conta pós pagamento normal (Sem acordo prévio)
 #   /logfin             Log de bloqueio não efetuado; escala para o Financeiro para validação
 #   /logmudanca         Log de mudança de endereço; encaminha para fila de Ativação da Fibra
 #   /logozmap           Log de análise de viabilidade técnica com coordenadas e CTO no Ozmap
@@ -1743,17 +1743,10 @@ matches:
   - trigger: "/logenc"
     replace: "Chamado encerrado."
 
-  # /logacordo — Registra desbloqueio em acordo com canal, solicitante e prazo D+2 úteis
+  # /logacordo — Registra desbloqueio em acordo e assume chamado para acompanhamento
   - trigger: "/logacordo"
     force_clipboard: true
-    replace: |-
-      Contato via: {{formulario.canal}}
-      Solicitante: {{formulario.nome}} — {{formulario.telefone}}
-
-      Ação: Desbloqueio em acordo realizado.
-      Prazo estendido até: {{data_2d_uteis}}.
-
-      Status: Aguardando confirmação da baixa bancária em nosso sistema.
+    replace: "{{resultado}}"
     vars:
       - name: data_2d_uteis
         type: global
@@ -1761,9 +1754,11 @@ matches:
         type: form
         params:
           layout: |
+            Desbloqueio em Acordo
             Canal: [[canal]]
             Nome: [[nome]]
             Telefone: [[telefone]]
+            Tipo de Serviço: [[tipo]]
           fields:
             canal:
               type: choice
@@ -1771,6 +1766,31 @@ matches:
                 - Blip
                 - E-mail
                 - Ligação
+            tipo:
+              type: choice
+              values:
+                - Data Center (cPanel, Plesk, VPS)
+                - Fibra Óptica
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $tipo = "{{formulario.tipo}}"
+            $canal = "{{formulario.canal}}"
+            $nome = "{{formulario.nome}}"
+            $telefone = "{{formulario.telefone}}"
+            $prazo = "{{data_2d_uteis}}"
+            
+            if ($tipo -match "Data Center") {
+                $acao = "Desbloqueio do serviço realizado no servidor. O status no sistema de gestão permanece 'Bloqueado'."
+            } else {
+                $acao = "Desbloqueio em acordo executado via SAP/HANA."
+            }
+            
+            $msg = "Desbloqueio em Acordo`n`nINFORMAÇÕES`n• Contato via: $canal`n• Solicitante: $nome — $telefone`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação: $acao`n• Prazo estendido até: $prazo.`n• Encaminhamento: Chamado assumido pelo próprio analista para acompanhamento da baixa bancária."
+            Write-Output $msg
 
   # /logbaixa — Registra recebimento de comprovante e previsão de compensação D+1 útil
   - trigger: "/logbaixa"
@@ -1795,21 +1815,75 @@ matches:
                 - E-mail
                 - Ligação
 
-  # /logpagou — Registra pagamento compensado e confirmado no sistema
+# /logpagou — Registra pagamento compensado e encaminha ao Financeiro (se DC) ou encerra (se Fibra)
   - trigger: "/logpagou"
     force_clipboard: true
-    replace: |-
-      Pagamento compensado e confirmado em nosso sistema.
+    replace: "{{resultado}}"
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Acompanhamento de Acordo — Pagamento Confirmado
+            Tipo de Serviço: [[tipo]]
+          fields:
+            tipo:
+              type: choice
+              values:
+                - Data Center (cPanel, Plesk, VPS)
+                - Fibra Óptica
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $tipo = "{{formulario.tipo}}"
+            
+            if ($tipo -match "Data Center") {
+                $encaminhamento = "Chamado transferido para a fila do Financeiro para realizar a liberação e alteração do status do contrato no sistema."
+            } else {
+                $encaminhamento = "Chamado de acompanhamento encerrado."
+            }
+            
+            $msg = "Acompanhamento de Acordo — Pagamento Confirmado`n`n• Tipo de Serviço: $tipo`n• Status: Pagamento compensado e confirmado na plataforma.`n`nENCAMINHAMENTO`n• $encaminhamento"
+            Write-Output $msg
 
-      Chamado finalizado.
-
-  # /logcalote — Registra retomada da suspensão por falta de pagamento pós-acordo
+# /logcalote — Registra retomada da suspensão (quebra de acordo)
   - trigger: "/logcalote"
     force_clipboard: true
-    replace: |-
-      Suspensão retomada.
-
-      Acordo de desbloqueio encerrado por falta de pagamento.
+    replace: "{{resultado}}"
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Acompanhamento de Acordo — Quebra de Acordo
+            Tipo de Serviço: [[tipo]]
+          fields:
+            tipo:
+              type: choice
+              values:
+                - Data Center (cPanel, Plesk, VPS)
+                - Fibra Óptica
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $tipo = "{{formulario.tipo}}"
+            
+            if ($tipo -match "Data Center") {
+                $acao = "Suspensão do serviço retomada no servidor por falta de pagamento dentro do prazo."
+                $encaminhamento = "Chamado de acompanhamento encerrado diretamente (contrato já consta como 'Bloqueado' no sistema)."
+            } else {
+                $acao = "Suspensão retomada no SAP/HANA por falta de pagamento."
+                $encaminhamento = "Chamado de acompanhamento encerrado."
+            }
+            
+            $msg = "Acompanhamento de Acordo — Quebra de Acordo`n`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• $acao`n• $encaminhamento"
+            Write-Output $msg
 
   # /log2via — Log completo de atendimento de emissão de 2ª via de boleto
   - trigger: "/log2via"
@@ -2682,49 +2756,81 @@ matches:
       Atendimento encerrado automaticamente por timeout (inatividade do usuário no Blip).
       Não houve o reporte de incidentes ou solicitações adicionais, resultando na finalização do ticket sem a necessidade de intervenção técnica ou aplicação de procedimentos de troubleshooting.
 
-  # /logbloq — Log de bloqueio automático ou manual de conta no servidor (cPanel/Plesk/VPS)
+  # /logbloq — Log de bloqueio no servidor/painel e encaminhamento correto
   - trigger: "/logbloq"
-    form: |
-      Suspensão de Serviço (Bloqueio Automático)
-      INFORMAÇÕES
-      • Domínio/Serviço: [[dominio]]
-      • Final do IP do Servidor: |.[[ip_servidor]]
-      • Plataforma: [[plataforma]]
+    force_clipboard: true
+    replace: "{{resultado}}"
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Suspensão de Serviço (Bloqueio)
+            Domínio / Cliente: [[dominio]]
+            Tipo de Serviço: [[tipo]]
+          fields:
+            tipo:
+              type: choice
+              values:
+                - Data Center (cPanel, Plesk, VPS)
+                - Fibra Óptica
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $tipo = "{{formulario.tipo}}"
+            $dominio = "{{formulario.dominio}}"
+            
+            if ($tipo -match "Data Center") {
+                $acao = "Conta/serviço suspenso com sucesso no servidor."
+                $encaminhamento = "Chamado encaminhado para a fila do Financeiro detalhando o serviço bloqueado, para alteração do status do contrato para 'Bloqueado' no sistema."
+            } else {
+                $acao = "Bloqueio do serviço executado via SAP/HANA."
+                $encaminhamento = "Chamado encerrado."
+            }
+            
+            $msg = "Suspensão de Serviço (Bloqueio)`n`nINFORMAÇÕES`n• Domínio / Cliente: $dominio`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação Realizada: $acao`n• Encaminhamento: $encaminhamento"
+            Write-Output $msg
 
-      PROCEDIMENTOS REALIZADOS
-      • Ação Realizada: Conta suspensa com sucesso no servidor.
-      • Status Atual: Bloqueado.
-
-      Chamado finalizado.
-    form_fields:
-      plataforma:
-        type: choice
-        values:
-          - cPanel / WHM
-          - Plesk
-          - Fibra
-
-  # /logdesbloq — Log de desbloqueio manual de conta após regularização
+  # /logdesbloq — Log de desbloqueio de conta pós pagamento normal (Sem acordo prévio)
   - trigger: "/logdesbloq"
-    form: |
-      Desbloqueio de Serviço
-      INFORMAÇÕES
-      • Domínio/Serviço: [[dominio]]
-      • Final do IP do Servidor: |.[[ip_servidor]]
-      • Plataforma: [[plataforma]]
-
-      PROCEDIMENTOS REALIZADOS
-      • Ação Realizada: Conta desbloqueada com sucesso no servidor.
-      • Status Atual: Ativo.
-
-      Chamado finalizado.
-    form_fields:
-      plataforma:
-        type: choice
-        values:
-          - cPanel / WHM
-          - Plesk
-          - Proxmox (VPS)
+    force_clipboard: true
+    replace: "{{resultado}}"
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Desbloqueio de Serviço
+            Domínio / Cliente: [[dominio]]
+            Tipo de Serviço: [[tipo]]
+          fields:
+            tipo:
+              type: choice
+              values:
+                - Data Center (cPanel, Plesk, VPS)
+                - Fibra Óptica
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $tipo = "{{formulario.tipo}}"
+            $dominio = "{{formulario.dominio}}"
+            
+            if ($tipo -match "Data Center") {
+                $acao = "Conta/serviço desbloqueado com sucesso no servidor."
+                $encaminhamento = "Chamado transferido para a fila do Financeiro para alterar o status do contrato para 'Ativo' no sistema e formalizar a baixa."
+            } else {
+                $acao = "Desbloqueio executado via SAP/HANA."
+                $encaminhamento = "Chamado encerrado."
+            }
+            
+            $msg = "Desbloqueio de Serviço`n`nINFORMAÇÕES`n• Domínio / Cliente: $dominio`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação Realizada: $acao`n• Encaminhamento: $encaminhamento"
+            Write-Output $msg
 
   # /logfin — Log de bloqueio não efetuado; escala para o Financeiro para validação
   - trigger: "/logfin"
