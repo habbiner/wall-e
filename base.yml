@@ -36,7 +36,7 @@
 #   /comp               Confirma recebimento e registro do comprovante de pagamento
 #   /emailcomp          Confirmação formal de recebimento de comprovante via e-mail
 #   /faltadados         Solicita CPF/CNPJ de comprovante recebido sem identificação via e-mail
-#   /paginvertido       Cliente pagou boleto do mês posterior em vez do vigente
+#   /invertido          Cliente pagou boleto do mês posterior em vez do vigente
 #   /venc               Alteração de vencimento com cálculo automático para o CLIENTE (BDC)
 #   /transfereprotesto  Explica o processo e encaminha o solicitante ao financeiro ciente do título protestado
 #   /comodato           Informa regras de devolução do equipamento e multa por extravio
@@ -105,7 +105,6 @@
 #
 # 5 · Registros Internos — Financeiro
 #   /lognada            Log rápido: nenhuma ação no escopo do analista
-#   /logenc             Log rápido: encerramento simples do chamado
 #   /logacordo          Registra desbloqueio em acordo e assume chamado para acompanhamento
 #   /logbaixa           Registra recebimento de comprovante e previsão de compensação D+1 útil
 #   /logpagou           Registra pagamento compensado e encaminha ao Financeiro (se DC) ou encerra (se Fibra)
@@ -160,8 +159,9 @@
 #   /logoutlook         Log interno de auxílio na configuração de e-mail no Outlook
 #   /logativacao        Log de encaminhamento para ativação de fibra (Venda Suporte)
 #   /logredefinirsenha  Log interno de redefinição de senha para contas @com4.com.br
-#   /logmaxerro       Log de bloqueio automático por limite de falhas/adiamentos por hora (Max Defers)
-
+#   /logmaxerro         Log de bloqueio automático por limite de falhas/adiamentos por hora (Max Defers)
+#   /logencbloq         Log interno de encaminhamento para o N2 realizar bloqueio
+#   /logencdesbloq      Log interno de encaminhamento para o N2 realizar desbloqueio
 #
 # =============================================================================
 
@@ -646,25 +646,6 @@ matches:
       - name: empresa_nome
         type: global
 
-  # /paginvertido — Cliente pagou boleto do mês posterior em vez do vigente
-  - trigger: "/paginvertido"
-    force_clipboard: true
-    replace: |-
-      Identificamos no sistema que o pagamento realizado foi referente à fatura do próximo mês (vencimento em {{formulario.venc_pago}}), e não à fatura que estava pendente (vencimento em {{formulario.venc_atual}}).
-      
-      Para que você não fique sem conexão devido a esse conflito no sistema, já realizei o desbloqueio manual dos seus serviços de forma excepcional.
-      
-      O seu acesso permanecerá liberado até o dia {{formulario.venc_pago}}. Caso a fatura pendente não seja regularizada até essa data, o sistema aplicará um novo bloqueio automático.
-      
-      Deseja que eu te envie a 2ª via atualizada da fatura pendente agora mesmo para facilitar a regularização?
-    vars:
-      - name: formulario
-        type: form
-        params:
-          layout: |
-            Vencimento do boleto PAGO: [[venc_pago]]
-            Vencimento do boleto PENDENTE: [[venc_atual]]
-
   # /venc — Alteração de vencimento com cálculo automático para o CLIENTE (BDC)
   # Uso: /venc [dia atual] [dia novo] — Exemplo: /venc 25 10
   - regex: "/venc (?P<atual>05|10|15|20|25) (?P<novo>05|10|15|20|25)"
@@ -980,6 +961,26 @@ matches:
       
       Eles farão a emissão do documento e enviarão o boleto diretamente para você por aqui. Peço que aguarde um momento, por gentileza!
 
+# /invertido — Avisa o cliente sobre o pagamento invertido e o prazo de desbloqueio
+  - trigger: "/invertido"
+    force_clipboard: true
+    replace: |-
+      Identificamos em nosso sistema que o pagamento realizado foi referente à fatura do próximo mês (vencimento em {{formulario.vencimento_pago}}), e não à fatura que estava pendente (vencimento em {{formulario.vencimento_atual}}).
+      
+      Para que você não fique sem conexão devido a essa inversão, já realizei o desbloqueio manual dos seus serviços de forma excepcional.
+      
+      O seu acesso permanecerá liberado até o dia {{formulario.vencimento_pago}}. Caso a fatura pendente ({{formulario.vencimento_atual}}) não seja regularizada até essa data, o sistema aplicará um novo bloqueio automático.
+      
+      Deseja que eu te envie a 2ª via atualizada da fatura pendente agora mesmo para facilitar a regularização?
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Pagamento Invertido
+            Vencimento pago (errado): [[vencimento_pago]]
+            Vencimento pendente (atual): [[vencimento_atual]]
+      
 # =============================================================================
 # 3 · Suporte Técnico — Cliente
 # =============================================================================
@@ -1782,10 +1783,6 @@ matches:
   - trigger: "/lognada"
     replace: "Sem mais ações para o meu escopo neste atendimento."
 
-  # /logenc — Log rápido: encerramento simples do chamado
-  - trigger: "/logenc"
-    replace: "Chamado encerrado."
-
   # /logacordo — Registra desbloqueio em acordo e assume chamado para acompanhamento
   - trigger: "/logacordo"
     force_clipboard: true
@@ -2120,7 +2117,6 @@ matches:
           - Ligação
           - E-mail
 
-
 # /logcanc — Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
   - trigger: "/logcanc"
     form: |
@@ -2188,11 +2184,13 @@ matches:
           - E-mail
 
 
-  # /loglead — Log de oportunidade comercial identificada; encaminha lead ao Comercial
+# /loglead — Log de oportunidade comercial identificada; encaminha lead ao Comercial
   - trigger: "/loglead"
     form: |
       Oportunidade Comercial Identificada
+      
       INFORMAÇÕES DO LEAD
+      • Canal de Atendimento: [[canal]]
       • Solicitante: [[nome]]
       • Telefone/WhatsApp: [[telefone]]
 
@@ -2203,6 +2201,12 @@ matches:
 
       Ação: Chamado encaminhado para a fila do Comercial para prospecção e envio de proposta.
     form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
       servico:
         type: choice
         values:
@@ -2365,14 +2369,14 @@ matches:
         type: text
         multiline: true
 
-  # /logfalha — Log de falha de acesso aos serviços Com4 com testes de DNS e Imunify360
+# /logfalha — Log de falha de acesso aos serviços Com4 com testes de DNS e Imunify360
   - trigger: "/logfalha"
     form: |
       Sem Acesso aos Serviços Com4
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Domínio: [[dominio]]
-      • IP do Servidor: [[ip_servidor]]
+      • Servidor: [[server]]
       • Escopo da Falha: [[escopo]]
       • Erro Apresentado: [[erro]]
 
@@ -2392,6 +2396,30 @@ matches:
           - Blip
           - Ligação
           - E-mail
+      server:
+        type: choice
+        values:
+          - "Cpanel 1 — 189.90.130.2"
+          - "Cpanel 2 — 189.90.130.58"
+          - "Cpanel 3 — 189.90.130.60"
+          - "Cpanel 4 — 189.90.130.100"
+          - "Cpanel 5 — 189.90.130.52"
+          - "Cpanel 6 — 189.90.130.200"
+          - "Cpanel 7 — 189.90.130.138"
+          - "Cpanel 9 — 189.90.130.102"
+          - "Cpanel 12 — 189.90.130.154"
+          - "Cpanel 15 — 189.90.130.16"
+          - "Cloud CPanel 1 — 189.90.130.140"
+          - "Cloud CPanel 2 (152) — 189.90.130.152"
+          - "Cloud CPanel 2 (232) — 189.90.130.232"
+          - "Cpanel Email Corp1 (120) — 189.90.130.120"
+          - "Cpanel Email Corp1 (129) — 189.90.130.129"
+          - "Cpanel Email Corp2 — 189.90.131.130"
+          - "Cpanel Email Com4 — 189.90.130.10"
+          - "Cpanel Rev1 — 189.90.130.208"
+          - "Cpanel Rev2 — 189.90.130.210"
+          - "Cpanel Rev3 — 189.90.130.212"
+          - "Outro Servidor / VPS (Digitar na ação)"
       escopo:
         type: choice
         values:
@@ -2408,8 +2436,7 @@ matches:
           - Não constam bloqueios
           - IP Bloqueado pelo Firewall
       acao:
-        type: text
-        multiline: true
+        type: multiline
 
   # /loglos — Log de abertura de visita técnica de fibra (LOS ou atenuação)
   - trigger: "/loglos"
@@ -2524,14 +2551,14 @@ matches:
         type: text
         multiline: true
 
-  # /logsite — Log de suporte a site com diagnóstico de DNS, disco e banco de dados
+# /logsite — Log de suporte a site com diagnóstico de DNS, disco e banco de dados
   - trigger: "/logsite"
     form: |
       Suporte a Site
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Domínio: [[dominio]]
-      • IP do Servidor: [[ipservidor]]
+      • Servidor: [[server]]
       • Erro: [[erro]]
 
       TESTES E VERIFICAÇÕES
@@ -2557,6 +2584,30 @@ matches:
           - Blip
           - Ligação
           - E-mail
+      server:
+        type: choice
+        values:
+          - "Cpanel 1 — 189.90.130.2"
+          - "Cpanel 2 — 189.90.130.58"
+          - "Cpanel 3 — 189.90.130.60"
+          - "Cpanel 4 — 189.90.130.100"
+          - "Cpanel 5 — 189.90.130.52"
+          - "Cpanel 6 — 189.90.130.200"
+          - "Cpanel 7 — 189.90.130.138"
+          - "Cpanel 9 — 189.90.130.102"
+          - "Cpanel 12 — 189.90.130.154"
+          - "Cpanel 15 — 189.90.130.16"
+          - "Cloud CPanel 1 — 189.90.130.140"
+          - "Cloud CPanel 2 (152) — 189.90.130.152"
+          - "Cloud CPanel 2 (232) — 189.90.130.232"
+          - "Cpanel Email Corp1 (120) — 189.90.130.120"
+          - "Cpanel Email Corp1 (129) — 189.90.130.129"
+          - "Cpanel Email Corp2 — 189.90.131.130"
+          - "Cpanel Email Com4 — 189.90.130.10"
+          - "Cpanel Rev1 — 189.90.130.208"
+          - "Cpanel Rev2 — 189.90.130.210"
+          - "Cpanel Rev3 — 189.90.130.212"
+          - "Outro Servidor / VPS (Digitar na ação)"
       whois:
         type: choice
         values:
@@ -2579,17 +2630,16 @@ matches:
           - Regular
           - Irregular
       acao:
-        type: text
-        multiline: true
+        type: multiline
 
-  # /logemail — Log de suporte a e-mail com testes de webmail, DNS e configuração IMAP/POP
+# /logemail — Log de suporte a e-mail com testes de webmail, DNS e configuração IMAP/POP
   - trigger: "/logemail"
     form: |
       Suporte a E-mail
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Domínio: [[dominio]]
-      • IP do Servidor: [[ip]]
+      • Servidor: [[server]]
       • Contas Afetadas: [[contas]]
       • Gerenciador Utilizado: [[gerenciador]]
       • Tipo de Configuração: [[tipo_conf]]
@@ -2619,6 +2669,30 @@ matches:
           - Blip
           - Ligação
           - E-mail
+      server:
+        type: choice
+        values:
+          - "Cpanel 1 — 189.90.130.2"
+          - "Cpanel 2 — 189.90.130.58"
+          - "Cpanel 3 — 189.90.130.60"
+          - "Cpanel 4 — 189.90.130.100"
+          - "Cpanel 5 — 189.90.130.52"
+          - "Cpanel 6 — 189.90.130.200"
+          - "Cpanel 7 — 189.90.130.138"
+          - "Cpanel 9 — 189.90.130.102"
+          - "Cpanel 12 — 189.90.130.154"
+          - "Cpanel 15 — 189.90.130.16"
+          - "Cloud CPanel 1 — 189.90.130.140"
+          - "Cloud CPanel 2 (152) — 189.90.130.152"
+          - "Cloud CPanel 2 (232) — 189.90.130.232"
+          - "Cpanel Email Corp1 (120) — 189.90.130.120"
+          - "Cpanel Email Corp1 (129) — 189.90.130.129"
+          - "Cpanel Email Corp2 — 189.90.131.130"
+          - "Cpanel Email Com4 — 189.90.130.10"
+          - "Cpanel Rev1 — 189.90.130.208"
+          - "Cpanel Rev2 — 189.90.130.210"
+          - "Cpanel Rev3 — 189.90.130.212"
+          - "Outro Servidor / VPS (Digitar na ação)"
       tipo_conf:
         type: choice
         values:
@@ -2652,8 +2726,7 @@ matches:
           - Regular
           - Irregular
       acao:
-        type: text
-        multiline: true
+        type: multiline
 
   # /logtroca — Log de troca de titularidade com dados do titular atual e do novo
   - trigger: "/logtroca"
@@ -2809,7 +2882,7 @@ matches:
       Atendimento encerrado automaticamente por timeout (inatividade do usuário no Blip).
       Não houve o reporte de incidentes ou solicitações adicionais, resultando na finalização do ticket sem a necessidade de intervenção técnica ou aplicação de procedimentos de troubleshooting.
 
-  # /logbloq — Log de bloqueio no servidor/painel e encaminhamento correto
+# /logbloq — Log de bloqueio no servidor/painel e encaminhamento correto
   - trigger: "/logbloq"
     force_clipboard: true
     replace: "{{resultado}}"
@@ -2820,6 +2893,7 @@ matches:
           layout: |
             Suspensão de Serviço (Bloqueio)
             Domínio / Cliente: [[dominio]]
+            Servidor: [[server]]
             Tipo de Serviço: [[tipo]]
           fields:
             tipo:
@@ -2827,6 +2901,30 @@ matches:
               values:
                 - Data Center (cPanel, Plesk, VPS)
                 - Fibra Óptica
+            server:
+              type: choice
+              values:
+                - "Cpanel 1 — 189.90.130.2"
+                - "Cpanel 2 — 189.90.130.58"
+                - "Cpanel 3 — 189.90.130.60"
+                - "Cpanel 4 — 189.90.130.100"
+                - "Cpanel 5 — 189.90.130.52"
+                - "Cpanel 6 — 189.90.130.200"
+                - "Cpanel 7 — 189.90.130.138"
+                - "Cpanel 9 — 189.90.130.102"
+                - "Cpanel 12 — 189.90.130.154"
+                - "Cpanel 15 — 189.90.130.16"
+                - "Cloud CPanel 1 — 189.90.130.140"
+                - "Cloud CPanel 2 (152) — 189.90.130.152"
+                - "Cloud CPanel 2 (232) — 189.90.130.232"
+                - "Cpanel Email Corp1 (120) — 189.90.130.120"
+                - "Cpanel Email Corp1 (129) — 189.90.130.129"
+                - "Cpanel Email Corp2 — 189.90.131.130"
+                - "Cpanel Email Com4 — 189.90.130.10"
+                - "Cpanel Rev1 — 189.90.130.208"
+                - "Cpanel Rev2 — 189.90.130.210"
+                - "Cpanel Rev3 — 189.90.130.212"
+                - "Outro / Fibra / Externo"
       - name: resultado
         type: shell
         params:
@@ -2835,6 +2933,7 @@ matches:
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
             $dominio = "{{formulario.dominio}}"
+            $server = "{{formulario.server}}"
             
             if ($tipo -match "Data Center") {
                 $acao = "Conta/serviço suspenso com sucesso no servidor."
@@ -2844,7 +2943,7 @@ matches:
                 $encaminhamento = "Chamado encerrado."
             }
             
-            $msg = "Suspensão de Serviço (Bloqueio)`n`nINFORMAÇÕES`n• Domínio / Cliente: $dominio`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação Realizada: $acao`n• Encaminhamento: $encaminhamento"
+            $msg = "Suspensão de Serviço (Bloqueio)`n`nINFORMAÇÕES`n• Domínio / Cliente: $dominio`n• Servidor: $server`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação Realizada: $acao`n• Encaminhamento: $encaminhamento"
             Write-Output $msg
 
   # /logdesbloq — Log de desbloqueio de conta pós pagamento normal (Sem acordo prévio)
@@ -2858,6 +2957,7 @@ matches:
           layout: |
             Desbloqueio de Serviço
             Domínio / Cliente: [[dominio]]
+            Servidor: [[server]]            
             Tipo de Serviço: [[tipo]]
           fields:
             tipo:
@@ -2865,6 +2965,30 @@ matches:
               values:
                 - Data Center (cPanel, Plesk, VPS)
                 - Fibra Óptica
+            server:
+              type: choice
+              values:
+                - "Cpanel 1 — 189.90.130.2"
+                - "Cpanel 2 — 189.90.130.58"
+                - "Cpanel 3 — 189.90.130.60"
+                - "Cpanel 4 — 189.90.130.100"
+                - "Cpanel 5 — 189.90.130.52"
+                - "Cpanel 6 — 189.90.130.200"
+                - "Cpanel 7 — 189.90.130.138"
+                - "Cpanel 9 — 189.90.130.102"
+                - "Cpanel 12 — 189.90.130.154"
+                - "Cpanel 15 — 189.90.130.16"
+                - "Cloud CPanel 1 — 189.90.130.140"
+                - "Cloud CPanel 2 (152) — 189.90.130.152"
+                - "Cloud CPanel 2 (232) — 189.90.130.232"
+                - "Cpanel Email Corp1 (120) — 189.90.130.120"
+                - "Cpanel Email Corp1 (129) — 189.90.130.129"
+                - "Cpanel Email Corp2 — 189.90.131.130"
+                - "Cpanel Email Com4 — 189.90.130.10"
+                - "Cpanel Rev1 — 189.90.130.208"
+                - "Cpanel Rev2 — 189.90.130.210"
+                - "Cpanel Rev3 — 189.90.130.212"
+                - "Outro / Fibra / Externo"
       - name: resultado
         type: shell
         params:
@@ -2873,6 +2997,7 @@ matches:
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
             $dominio = "{{formulario.dominio}}"
+            $server = "{{formulario.server}}"
             
             if ($tipo -match "Data Center") {
                 $acao = "Conta/serviço desbloqueado com sucesso no servidor."
@@ -2882,7 +3007,7 @@ matches:
                 $encaminhamento = "Chamado encerrado."
             }
             
-            $msg = "Desbloqueio de Serviço`n`nINFORMAÇÕES`n• Domínio / Cliente: $dominio`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação Realizada: $acao`n• Encaminhamento: $encaminhamento"
+            $msg = "Desbloqueio de Serviço`n`nINFORMAÇÕES`n• Domínio / Cliente: $dominio`n• Servidor: $server`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação Realizada: $acao`n• Encaminhamento: $encaminhamento"
             Write-Output $msg
 
   # /logfin — Log de bloqueio não efetuado; escala para o Financeiro para validação
@@ -2963,7 +3088,7 @@ matches:
   # /logromp — Log padronizado de atendimento de cliente afetado por rompimento de fibra
   - trigger: "/logromp"
     form: |
-      Atendimento de Incidente Massivo (Rompimento)
+      Rompimento CTO: [[cto]]
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Sintoma Relatado: Cliente informa indisponibilidade de acesso à internet. Equipamento apresenta luz LOS ativa (vermelha).
@@ -2981,7 +3106,8 @@ matches:
           - Blip
           - Ligação
           - E-mail
-
+      cto: 
+        type: text
   # /logfimromp — Log de encerramento de chamado após reparo do rompimento concluído
   - trigger: "/logfimromp"
     form: |
@@ -3436,47 +3562,137 @@ matches:
           - Foto recebida anexada ao chamado.
           - Relato descritivo do cliente no chat.
 
-# /logbackup — Log interno de solicitação de restauração de backup
+  # /logbackup — Log interno de solicitação de restauração de backup (Hospedagem ou VPS)
   - trigger: "/logbackup"
-    form: |
-      Solicitação de Restauração de Backup
+    force_clipboard: true
+    replace: "{{resultado}}"
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Solicitação de Restauração de Backup
 
-      DESCRIÇÃO
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[solicitante]]
-      • Hospedagem: [[hospedagem]]
-      • IP do Servidor: |.[[ip]]
+            Canal de Atendimento: [[canal]]
+            Solicitante: [[solicitante]]
+            Origem do Backup: [[origem]]
 
-      DETALHES DA RESTAURAÇÃO
-      • Restauração referente a: [[tipo]]
-      • Conta de E-mail afetada (se aplicável): [[email_afetado]]
+            -- Se Hospedagem (cPanel/Plesk), preencha: --
+            Hospedagem / Domínio: [[hospedagem]]
+            Servidor: [[servidor_com4]]
 
-      OBSERVAÇÃO:
-      •  
-      [[acoes]]
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      solicitante:
-        type: text
-      hospedagem:
-        type: text
-      ip:
-        type: text
-      tipo:
-        type: choice
-        values:
-          - Site (Arquivos ou Banco de Dados)
-          - E-mail
-      email_afetado:
-        type: text
-      acoes:
-        type: text
-        multiline: true
+            -- Se VPS / Servidor Dedicado, preencha: --
+            IP do Servidor VPS: [[vps_ip]]
+            Autorização do cliente (reinício/indisponibilidade temporária): [[autorizacao_vps]]
+
+            Tipo de Restauração: [[tipo]]
+
+            -- Se E-mail, preencha: --
+            Conta de E-mail Afetada: [[email_afetado]]
+
+            -- Se Pasta/Arquivo Específico (VPS), preencha: --
+            Caminho / Pasta Específica: [[pasta_especifica]]
+
+            Data ou ponto de backup solicitado: [[data_backup]]
+
+            Observações: [[acoes]]
+          fields:
+            canal:
+              type: choice
+              values:
+                - Blip
+                - Ligação
+                - E-mail
+            origem:
+              type: choice
+              values:
+                - Hospedagem (cPanel/Plesk)
+                - VPS / Servidor Dedicado
+            servidor_com4:
+              type: choice
+              values:
+                - "Cpanel 1 — 189.90.130.2"
+                - "Cpanel 2 — 189.90.130.58"
+                - "Cpanel 3 — 189.90.130.60"
+                - "Cpanel 4 — 189.90.130.100"
+                - "Cpanel 5 — 189.90.130.52"
+                - "Cpanel 6 — 189.90.130.200"
+                - "Cpanel 7 — 189.90.130.138"
+                - "Cpanel 9 — 189.90.130.102"
+                - "Cpanel 12 — 189.90.130.154"
+                - "Cpanel 15 — 189.90.130.16"
+                - "Cloud CPanel 1 — 189.90.130.140"
+                - "Cloud Cpanel 2 — 189.90.130.152"
+                - "Cloud Cpanel 2 — 189.90.130.232"
+                - "Cpanel Email Corp1 — 189.90.130.120"
+                - "Cpanel Email Corp1 — 189.90.130.129"
+                - "Cpanel Email Corp2 — 189.90.131.130"
+                - "Cpanel Email Com4 — 189.90.130.10"
+                - "Cpanel Rev1 — 189.90.130.208"
+                - "Cpanel Rev2 — 189.90.130.210"
+                - "Cpanel Rev3 — 189.90.130.212"
+                - Não se aplica (VPS)
+            autorizacao_vps:
+              type: choice
+              values:
+                - Não se aplica (Hospedagem)
+                - Sim
+                - Não
+            tipo:
+              type: choice
+              values:
+                - Site (Arquivos)
+                - Site (Banco de Dados)
+                - E-mail
+                - VPS Completa
+                - VPS - Pasta/Arquivo Específico
+            acoes:
+              type: text
+              multiline: true
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $canal = "{{formulario.canal}}"
+            $solicitante = "{{formulario.solicitante}}"
+            $origem = "{{formulario.origem}}"
+            $hospedagem = "{{formulario.hospedagem}}"
+            $servidor = "{{formulario.servidor_com4}}"
+            $vpsIp = "{{formulario.vps_ip}}"
+            $autorizacaoVps = "{{formulario.autorizacao_vps}}"
+            $tipo = "{{formulario.tipo}}"
+            $emailAfetado = "{{formulario.email_afetado}}"
+            $pastaEspecifica = "{{formulario.pasta_especifica}}"
+            $dataBackup = "{{formulario.data_backup}}"
+            $acoes = "{{formulario.acoes}}"
+
+            $msg = "Solicitação de Restauração de Backup`n`nINFORMAÇÕES`n• Canal de Atendimento: $canal`n• Solicitante: $solicitante`n• Origem: $origem`n"
+
+            if ($origem -match "Hospedagem") {
+                $msg += "• Hospedagem / Domínio: $hospedagem`n• Servidor: $servidor`n"
+            } else {
+                $msg += "• IP do Servidor VPS: $vpsIp`n• Autorização do Cliente: $autorizacaoVps`n"
+            }
+
+            $msg += "`nDETALHES DA RESTAURAÇÃO`n• Tipo: $tipo`n"
+
+            if ($tipo -eq "E-mail") {
+                $msg += "• Conta de E-mail Afetada: $emailAfetado`n"
+            }
+            if ($tipo -match "Pasta/Arquivo") {
+                $msg += "• Caminho / Pasta Específica: $pastaEspecifica`n"
+            }
+            if ($dataBackup -ne "") {
+                $msg += "• Data/Ponto de Backup Solicitado: $dataBackup`n"
+            }
+
+            if ($acoes -ne "") {
+                $msg += "`nOBSERVAÇÃO`n$acoes"
+            }
+
+            Write-Output $msg
 
 # /logoutlook — Log interno de auxílio na configuração de e-mail no Outlook
   - trigger: "/logoutlook"
@@ -3703,3 +3919,57 @@ matches:
         type: text
       dominio:
         type: text         
+
+# /logencbloq — Log interno de encaminhamento para o N2 realizar bloqueio
+  - trigger: "/logencbloq"
+    form: |
+      Escalonamento para Nível 2 — Bloqueio de Serviço
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Origem: Chamado automático de inadimplência.
+      • Serviço Afetado: [[servico]]
+      
+      MOTIVO DO ESCALONAMENTO
+      • Bloqueio/suspensão do serviço devido a pendência financeira.
+      • Ação não realizada pelo NOC 1 por limitação de privilégios de acesso na infraestrutura/painel.
+      
+      AÇÃO
+      • Chamado encaminhado para a fila da Engenharia (Nível 2) para execução do bloqueio.
+      • Por gentileza encaminhar o chamado para a fila financeiro após o bloqueio
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      servico:
+        type: text
+
+  # /logencdesbloq — Log interno de encaminhamento para o N2 realizar desbloqueio
+  - trigger: "/logencdesbloq"
+    form: |
+      Escalonamento para Nível 2 — Desbloqueio de Serviço
+      
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Origem: Chamado automático de inadimplência.
+      • Serviço Afetado: [[servico]]
+      
+      MOTIVO DO ESCALONAMENTO
+      • Cliente solicitou a reativação/desbloqueio do serviço.
+      • Ação não realizada pelo NOC 1 por limitação de privilégios de acesso na infraestrutura/painel.
+      
+      AÇÃO
+      • Chamado encaminhado para a fila da Engenharia (Nível 2) para execução do desbloqueio.
+      • Por gentileza encaminhar o chamado para a fila financeiro após o desbloqueio
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      servico:
+        type: text
