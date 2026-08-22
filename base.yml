@@ -2398,7 +2398,7 @@ matches:
           - E-mail
       server:
         type: choice
-        values:
+        values: &lista_servidores_com4
           - "Cpanel 1 — 189.90.130.2"
           - "Cpanel 2 — 189.90.130.58"
           - "Cpanel 3 — 189.90.130.60"
@@ -2419,7 +2419,7 @@ matches:
           - "Cpanel Rev1 — 189.90.130.208"
           - "Cpanel Rev2 — 189.90.130.210"
           - "Cpanel Rev3 — 189.90.130.212"
-          - "Outro Servidor / VPS (Digitar na ação)"
+          - "Outro Servidor / Externo (Especificar no chamado)"
       escopo:
         type: choice
         values:
@@ -2436,7 +2436,8 @@ matches:
           - Não constam bloqueios
           - IP Bloqueado pelo Firewall
       acao:
-        type: multiline
+        type: text
+        multiline: true
 
   # /loglos — Log de abertura de visita técnica de fibra (LOS ou atenuação)
   - trigger: "/loglos"
@@ -2586,28 +2587,7 @@ matches:
           - E-mail
       server:
         type: choice
-        values:
-          - "Cpanel 1 — 189.90.130.2"
-          - "Cpanel 2 — 189.90.130.58"
-          - "Cpanel 3 — 189.90.130.60"
-          - "Cpanel 4 — 189.90.130.100"
-          - "Cpanel 5 — 189.90.130.52"
-          - "Cpanel 6 — 189.90.130.200"
-          - "Cpanel 7 — 189.90.130.138"
-          - "Cpanel 9 — 189.90.130.102"
-          - "Cpanel 12 — 189.90.130.154"
-          - "Cpanel 15 — 189.90.130.16"
-          - "Cloud CPanel 1 — 189.90.130.140"
-          - "Cloud CPanel 2 (152) — 189.90.130.152"
-          - "Cloud CPanel 2 (232) — 189.90.130.232"
-          - "Cpanel Email Corp1 (120) — 189.90.130.120"
-          - "Cpanel Email Corp1 (129) — 189.90.130.129"
-          - "Cpanel Email Corp2 — 189.90.131.130"
-          - "Cpanel Email Com4 — 189.90.130.10"
-          - "Cpanel Rev1 — 189.90.130.208"
-          - "Cpanel Rev2 — 189.90.130.210"
-          - "Cpanel Rev3 — 189.90.130.212"
-          - "Outro Servidor / VPS (Digitar na ação)"
+        values: *lista_servidores_com4
       whois:
         type: choice
         values:
@@ -2630,7 +2610,8 @@ matches:
           - Regular
           - Irregular
       acao:
-        type: multiline
+        type: text
+        multiline: true
 
 # /logemail — Log de suporte a e-mail com testes de webmail, DNS e configuração IMAP/POP
   - trigger: "/logemail"
@@ -2671,28 +2652,7 @@ matches:
           - E-mail
       server:
         type: choice
-        values:
-          - "Cpanel 1 — 189.90.130.2"
-          - "Cpanel 2 — 189.90.130.58"
-          - "Cpanel 3 — 189.90.130.60"
-          - "Cpanel 4 — 189.90.130.100"
-          - "Cpanel 5 — 189.90.130.52"
-          - "Cpanel 6 — 189.90.130.200"
-          - "Cpanel 7 — 189.90.130.138"
-          - "Cpanel 9 — 189.90.130.102"
-          - "Cpanel 12 — 189.90.130.154"
-          - "Cpanel 15 — 189.90.130.16"
-          - "Cloud CPanel 1 — 189.90.130.140"
-          - "Cloud CPanel 2 (152) — 189.90.130.152"
-          - "Cloud CPanel 2 (232) — 189.90.130.232"
-          - "Cpanel Email Corp1 (120) — 189.90.130.120"
-          - "Cpanel Email Corp1 (129) — 189.90.130.129"
-          - "Cpanel Email Corp2 — 189.90.131.130"
-          - "Cpanel Email Com4 — 189.90.130.10"
-          - "Cpanel Rev1 — 189.90.130.208"
-          - "Cpanel Rev2 — 189.90.130.210"
-          - "Cpanel Rev3 — 189.90.130.212"
-          - "Outro Servidor / VPS (Digitar na ação)"
+        values: *lista_servidores_com4
       tipo_conf:
         type: choice
         values:
@@ -2726,7 +2686,8 @@ matches:
           - Regular
           - Irregular
       acao:
-        type: multiline
+        type: text
+        multiline: true
 
   # /logtroca — Log de troca de titularidade com dados do titular atual e do novo
   - trigger: "/logtroca"
@@ -2903,28 +2864,7 @@ matches:
                 - Fibra Óptica
             server:
               type: choice
-              values:
-                - "Cpanel 1 — 189.90.130.2"
-                - "Cpanel 2 — 189.90.130.58"
-                - "Cpanel 3 — 189.90.130.60"
-                - "Cpanel 4 — 189.90.130.100"
-                - "Cpanel 5 — 189.90.130.52"
-                - "Cpanel 6 — 189.90.130.200"
-                - "Cpanel 7 — 189.90.130.138"
-                - "Cpanel 9 — 189.90.130.102"
-                - "Cpanel 12 — 189.90.130.154"
-                - "Cpanel 15 — 189.90.130.16"
-                - "Cloud CPanel 1 — 189.90.130.140"
-                - "Cloud CPanel 2 (152) — 189.90.130.152"
-                - "Cloud CPanel 2 (232) — 189.90.130.232"
-                - "Cpanel Email Corp1 (120) — 189.90.130.120"
-                - "Cpanel Email Corp1 (129) — 189.90.130.129"
-                - "Cpanel Email Corp2 — 189.90.131.130"
-                - "Cpanel Email Com4 — 189.90.130.10"
-                - "Cpanel Rev1 — 189.90.130.208"
-                - "Cpanel Rev2 — 189.90.130.210"
-                - "Cpanel Rev3 — 189.90.130.212"
-                - "Outro / Fibra / Externo"
+              values: *lista_servidores_com4
       - name: resultado
         type: shell
         params:
@@ -2967,28 +2907,7 @@ matches:
                 - Fibra Óptica
             server:
               type: choice
-              values:
-                - "Cpanel 1 — 189.90.130.2"
-                - "Cpanel 2 — 189.90.130.58"
-                - "Cpanel 3 — 189.90.130.60"
-                - "Cpanel 4 — 189.90.130.100"
-                - "Cpanel 5 — 189.90.130.52"
-                - "Cpanel 6 — 189.90.130.200"
-                - "Cpanel 7 — 189.90.130.138"
-                - "Cpanel 9 — 189.90.130.102"
-                - "Cpanel 12 — 189.90.130.154"
-                - "Cpanel 15 — 189.90.130.16"
-                - "Cloud CPanel 1 — 189.90.130.140"
-                - "Cloud CPanel 2 (152) — 189.90.130.152"
-                - "Cloud CPanel 2 (232) — 189.90.130.232"
-                - "Cpanel Email Corp1 (120) — 189.90.130.120"
-                - "Cpanel Email Corp1 (129) — 189.90.130.129"
-                - "Cpanel Email Corp2 — 189.90.131.130"
-                - "Cpanel Email Com4 — 189.90.130.10"
-                - "Cpanel Rev1 — 189.90.130.208"
-                - "Cpanel Rev2 — 189.90.130.210"
-                - "Cpanel Rev3 — 189.90.130.212"
-                - "Outro / Fibra / Externo"
+              values: *lista_servidores_com4
       - name: resultado
         type: shell
         params:
@@ -3562,7 +3481,7 @@ matches:
           - Foto recebida anexada ao chamado.
           - Relato descritivo do cliente no chat.
 
-  # /logbackup — Log interno de solicitação de restauração de backup (Hospedagem ou VPS)
+# /logbackup — Log interno de solicitação de restauração de backup (Hospedagem ou VPS)
   - trigger: "/logbackup"
     force_clipboard: true
     replace: "{{resultado}}"
@@ -3610,28 +3529,7 @@ matches:
                 - VPS / Servidor Dedicado
             servidor_com4:
               type: choice
-              values:
-                - "Cpanel 1 — 189.90.130.2"
-                - "Cpanel 2 — 189.90.130.58"
-                - "Cpanel 3 — 189.90.130.60"
-                - "Cpanel 4 — 189.90.130.100"
-                - "Cpanel 5 — 189.90.130.52"
-                - "Cpanel 6 — 189.90.130.200"
-                - "Cpanel 7 — 189.90.130.138"
-                - "Cpanel 9 — 189.90.130.102"
-                - "Cpanel 12 — 189.90.130.154"
-                - "Cpanel 15 — 189.90.130.16"
-                - "Cloud CPanel 1 — 189.90.130.140"
-                - "Cloud Cpanel 2 — 189.90.130.152"
-                - "Cloud Cpanel 2 — 189.90.130.232"
-                - "Cpanel Email Corp1 — 189.90.130.120"
-                - "Cpanel Email Corp1 — 189.90.130.129"
-                - "Cpanel Email Corp2 — 189.90.131.130"
-                - "Cpanel Email Com4 — 189.90.130.10"
-                - "Cpanel Rev1 — 189.90.130.208"
-                - "Cpanel Rev2 — 189.90.130.210"
-                - "Cpanel Rev3 — 189.90.130.212"
-                - Não se aplica (VPS)
+              values: *lista_servidores_com4
             autorizacao_vps:
               type: choice
               values:
