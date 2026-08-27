@@ -88,7 +88,7 @@
 #   /power              Orienta verificação da fonte de alimentação e troca de tomada
 #   /luzpower           Explica falha elétrica/hardware e abre chamado para visita técnica
 #   /agendafibra        Informa encaminhamento para o setor de fibra agendar instalação
-#   /pmglibera          Informa liberação de e-mails retidos no PMG
+#   /liberapmg          Informa liberação de e-mails retidos no PMG
 #
 # 4 · E-mail, Hospedagem e Migração
 #   /ativhosp           Envia dados de acesso ao cPanel, FTP, Webmail e DNS (ativação de hospedagem)
@@ -1443,8 +1443,8 @@ matches:
 
       Seja muito bem-vindo(a) à Com4! Qualquer dúvida, sigo à disposição! 😊
 
-  # /pmglibera — Informa liberação de e-mails retidos no PMG
-  - trigger: "/pmglibera"
+  # /liberapmg — Informa liberação de e-mails retidos no PMG
+  - trigger: "/liberapmg"
     force_clipboard: true
     replace: |-
       Olá, {{saudacao}}! Tudo bem? 😊
@@ -3922,8 +3922,8 @@ matches:
       servico:
         type: text
 
-  # /logpmglibera — Log de liberação manual de e-mails na quarentena do PMG
-  - trigger: "/logpmglibera"
+  # /logliberapmg — Log de liberação manual de e-mails na quarentena do PMG
+  - trigger: "/logliberapmg"
     form: |
       Liberação de Quarentena (PMG)
 
