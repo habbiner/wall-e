@@ -88,6 +88,7 @@
 #   /power              Orienta verificação da fonte de alimentação e troca de tomada
 #   /luzpower           Explica falha elétrica/hardware e abre chamado para visita técnica
 #   /agendafibra        Informa encaminhamento para o setor de fibra agendar instalação
+#   /pmglibera          Informa liberação de e-mails retidos no PMG
 #
 # 4 · E-mail, Hospedagem e Migração
 #   /ativhosp           Envia dados de acesso ao cPanel, FTP, Webmail e DNS (ativação de hospedagem)
@@ -1441,6 +1442,25 @@ matches:
       Como o nosso setor de agendamentos atua em horário comercial, eles entrarão em contato com você no próximo dia útil para formalizar a data e o horário exatos da visita técnica para a instalação e ativação dos seus serviços.
 
       Seja muito bem-vindo(a) à Com4! Qualquer dúvida, sigo à disposição! 😊
+
+  # /pmglibera — Informa liberação de e-mails retidos no PMG
+  - trigger: "/pmglibera"
+    force_clipboard: true
+    replace: |-
+      Olá, {{saudacao}}! Tudo bem? 😊
+
+      Informamos que os e-mails retidos do remetente {{formulario.remetente}} foram devidamente liberados da quarentena do nosso Gateway Antispam (PMG).
+
+      As mensagens já constam na sua caixa de entrada, posicionadas na data e hora originais em que foram emitidas pelo remetente (não constarão como "recebidas agora"). 
+
+      Caso não as localize nas primeiras posições, recomendamos realizar uma busca pelo e-mail ou nome do remetente na barra de pesquisa. Qualquer dúvida, sigo à disposição!
+    vars:
+      - name: saudacao
+        type: global
+      - name: formulario
+        type: form
+        params:
+          layout: "Remetente liberado: [[remetente]]"
 
   # =============================================================================
   # 4 · E-mail, Hospedagem e Migração
@@ -3900,4 +3920,36 @@ matches:
       • Por gentileza encaminhar o chamado para a fila financeiro após o desbloqueio
     form_fields:
       servico:
+        type: text
+
+  # /logpmglibera — Log de liberação manual de e-mails na quarentena do PMG
+  - trigger: "/logpmglibera"
+    form: |
+      Liberação de Quarentena (PMG)
+
+      INFORMAÇÕES
+      • Canal de Atendimento: [[canal]]
+      • Solicitante: [[solicitante]]
+      • E-mail Afetado: [[email]]
+      • Remetente(s) Liberado(s): [[remetente]]
+
+      PROCEDIMENTOS REALIZADOS
+      • Acesso ao painel do Gateway Antispam (PMG).
+      • E-mails retidos do remetente especificado foram entregues manualmente na caixa de entrada do cliente (Deliver).
+      • Cliente devidamente orientado de que as mensagens estarão posicionadas na data de emissão original no gerenciador.
+
+      SOLUÇÃO
+      • Liberação executada com sucesso e cliente posicionado. Chamado encerrado.
+    form_fields:
+      canal:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+          - E-mail
+      solicitante:
+        type: text
+      email:
+        type: text
+      remetente:
         type: text
