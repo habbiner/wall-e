@@ -202,22 +202,11 @@ global_vars:
           if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { 'atendimento@com4.com.br' }
         } else { 'atendimento@com4.com.br' }
 
-  - name: chave_pix
-    type: shell
-    params:
-      shell: powershell
-      cmd: |
-        $p = Join-Path $env:CONFIG 'match\.env'
-        if (Test-Path $p) {
-          $l = Get-Content $p | Where-Object { $_ -match '^\s*CHAVE_PIX\s*=' } | Select-Object -First 1
-          if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { '' }
-        } else { '' }
-
   - name: valor_mensalidade_fid
     type: shell
     params:
       shell: powershell
-      cmd: "'499.90'"   # ou lido do match.env, como os demais
+      cmd: "'499.90'" # ou lido do match.env, como os demais
   - name: multa_comodato
     type: shell
     params:
@@ -289,10 +278,9 @@ global_vars:
       cmd: "$d = Get-Date; $c = 1; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
 
 matches:
-
-# =============================================================================
-# 1 · Saudação, Identificação e Encerramento
-# =============================================================================
+  # =============================================================================
+  # 1 · Saudação, Identificação e Encerramento
+  # =============================================================================
 
   # /ola — Saudação inicial com horário dinâmico e coleta de dados obrigatórios
   - trigger: "/ola"
@@ -334,10 +322,10 @@ matches:
     force_clipboard: true
     replace: |-
       Olá, {{saudacao}}! Aqui é o {{atendente_nome}}, do suporte técnico da {{empresa_nome}}.
-      
+
       Recebemos o seu chamado por meio do nosso setor Comercial referente aos seus serviços.
       Para que eu possa iniciar o diagnóstico de forma precisa, por gentileza, detalhe o que está ocorrendo no momento.
-      
+
       Você está próximo ao equipamento para realizarmos os testes?
     vars:
       - name: atendente_nome
@@ -352,7 +340,7 @@ matches:
     force_clipboard: true
     replace: |-
       Olá, {{saudacao}}! Peço sinceras desculpas pelo tempo de espera em nosso retorno. 
-      
+
       Estamos operando com um volume de chamados excepcionalmente alto no plantão de hoje, o que acabou gerando fila e impactando o nosso tempo de resposta.
     vars:
       - name: saudacao
@@ -393,7 +381,7 @@ matches:
   - trigger: "/prazo"
     form: |
       A sua solicitação foi registrada com sucesso. O nosso prazo de retorno para este tipo de atendimento é de até [[horas]] horas úteis.
-      
+
       Assim que tivermos uma atualização, entraremos em contato por aqui.
     form_fields:
       horas:
@@ -428,7 +416,7 @@ matches:
       Como não recebemos mais retorno, encerro este atendimento por inatividade.
 
       Se precisar de ajuda novamente, fale com a gente por aqui. Estamos à disposição! 🤝
-      
+
       Seu feedback é importante para a Com4 Data Center. Poste uma avaliação no nosso perfil do Google:
       👉 https://g.page/r/CdBIvBOvM7UBEAE/review
 
@@ -449,11 +437,11 @@ matches:
     force_clipboard: true
     replace: |-
       Fico feliz que conseguimos resolver a sua solicitação! 😊
-      
+
       A sua opinião é muito importante para nós. Se o atendimento foi satisfatório, você poderia nos deixar uma avaliação no Google? Leva menos de um minuto e nos ajuda a continuar melhorando.
-      
+
       Basta acessar este link: https://g.page/r/CdBIvBOvM7UBEAE/review
-      
+
       A {{empresa_nome}} agradece!
     vars:
       - name: empresa_nome
@@ -464,7 +452,7 @@ matches:
     force_clipboard: true
     replace: |-
       Obrigado pelo seu contato hoje. A sua avaliação nos ajuda a melhorar e atender mais clientes. 
-      
+
       Seu feedback é muito importante para a {{empresa_nome}}. Por gentileza, poste uma avaliação no nosso perfil através do link abaixo:
       https://g.page/r/CdBIvBOvM7UBEAE/review
     vars:
@@ -476,10 +464,10 @@ matches:
     force_clipboard: true
     replace: |-
       Fico feliz que a solicitação foi resolvida! Caso tenha qualquer outra dúvida, estamos à disposição. 😊
-      
+
       A sua opinião é muito importante para nós. Se o atendimento foi satisfatório, poderia nos avaliar no Google? Leva menos de um minuto:
       👉 https://g.page/r/CdBIvBOvM7UBEAE/review
-      
+
       A {{empresa_nome}} agradece o seu contato. {{despedida}}!
     vars:
       - name: empresa_nome
@@ -487,14 +475,14 @@ matches:
       - name: despedida
         type: global
 
-# /retornovendas — Abordagem após o cliente aceitar o template de "retorno_contato"
+  # /retornovendas — Abordagem após o cliente aceitar o template de "retorno_contato"
   - trigger: "/retornovendas"
     force_clipboard: true
     replace: |-
       Olá, {{saudacao}}! Tudo bem? Sou o {{atendente_nome}} da Com4. Agradeço pelo seu retorno!
-      
+
       Pedimos sinceras desculpas pela ausência de resposta imediata; enfrentamos uma instabilidade sistêmica em nossos canais de recepção de mensagens recentemente, mas a situação já foi normalizada.
-      
+
       Vi que você havia nos procurado com interesse em nossos serviços. Como posso te auxiliar hoje? Você gostaria de consultar os nossos planos disponíveis ou já verificar a viabilidade para o seu endereço?
     vars:
       - name: saudacao
@@ -502,15 +490,15 @@ matches:
       - name: atendente_nome
         type: global
 
-# /aniversario — Mensagem padrão de feliz aniversário para o grupo da Com4
+  # /aniversario — Mensagem padrão de feliz aniversário para o grupo da Com4
   - trigger: "/aniversario"
     form: "Parabéns [[nome]]! Muitos anos de vida, saúde e felicidades! 🥳🎉"
     form_fields:
       nome:
         type: text
-# =============================================================================
-# 2 · Financeiro — Cliente
-# =============================================================================
+  # =============================================================================
+  # 2 · Financeiro — Cliente
+  # =============================================================================
 
   # /bloqueado — Informa suspensão por fatura em aberto; oferece 2ª via ou aguarda comprovante
   - trigger: "/bloqueado"
@@ -536,7 +524,7 @@ matches:
   - trigger: "/nfe"
     form: |
       Conforme solicitado, segue em anexo a sua Nota Fiscal referente ao mês de [[mes_referencia]].
-      
+
       Qualquer dúvida, sigo à disposição!
 
   # /agendamento — Informa que o documento enviado é comprovante de agendamento, não pagamento
@@ -575,9 +563,9 @@ matches:
     force_clipboard: true
     replace: |-
       Podemos realizar um desbloqueio em acordo para que a sua conexão seja restabelecida neste momento.
-      
+
       Esse procedimento libera os seus serviços por 2 dias úteis, tempo hábil para a compensação bancária. Caso o pagamento não seja efetivado e baixado em nosso sistema até o final do dia {{data_2d_uteis}}, o serviço será restrito novamente de forma automática.
-      
+
       Deseja que eu realize essa liberação no seu cadastro?
     vars:
       - name: data_2d_uteis
@@ -748,9 +736,9 @@ matches:
     force_clipboard: true
     replace: |-
       Lembramos que os equipamentos instalados (modem e fonte de alimentação) são cedidos em regime de comodato.
-      
+
       Com o encerramento do serviço, a devolução é obrigatória. Conforme previsto em contrato, em caso de extravio, dano ou não devolução, é aplicada uma taxa de restituição no valor de R$ {{multa_comodato}}.
-      
+
       Como prefere organizar a devolução? Podemos agendar a retirada pela nossa equipe técnica ou você prefere entregar diretamente em nossa sede?
     vars:
       - name: multa_comodato
@@ -762,7 +750,7 @@ matches:
       Para darmos andamento à troca de titularidade, por gentileza, nos envie os seguintes dados e documentos do **[[tipo_titular]]**:
 
       [[documentos]]
-      
+
       Você pode nos enviar as fotos ou arquivos em PDF por aqui mesmo.
     form_fields:
       tipo_titular:
@@ -776,7 +764,7 @@ matches:
           - "• Documento com foto (RG ou CNH)\n• CPF\n• Data de nascimento\n• E-mail\n• Endereço completo"
           - "• Cartão CNPJ\n• Razão social\n• Comprovante de inscrição e situação cadastral\n• E-mail\n• Endereço completo"
 
-# /fid — Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
+  # /fid — Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
   # Uso: /fid [meses ativos] — Exemplo: /fid 5 (para um cliente com 5 meses de uso)
   - regex: "/fid (?P<meses>[0-9]{1,2})"
     force_clipboard: true
@@ -799,13 +787,13 @@ matches:
             }
 
             $mesesRestantes = 12 - $mesesUsados
-            
+
             # Tratamento seguro para converter o valor global (com ponto ou vírgula) para decimal
             $mensalidadeStr = "{{valor_mensalidade_fid}}".Replace(",", ".")
             $mensalidade = [convert]::ToDouble($mensalidadeStr, [System.Globalization.CultureInfo]::InvariantCulture)
-            
+
             $multa = ($mensalidade / 12) * $mesesRestantes
-            
+
             # Força a formatação da moeda para o padrão brasileiro (vírgula para decimais)
             $cultura = [System.Globalization.CultureInfo]::GetCultureInfo("pt-BR")
             $multaFormatada = $multa.ToString("N2", $cultura)
@@ -819,18 +807,18 @@ matches:
     force_clipboard: true
     replace: |-
       Para concluirmos o processo de cancelamento, precisamos recolher os equipamentos cedidos em comodato (modem e fonte de alimentação).
-      
+
       Por gentileza, confirme os melhores dias e horários da próxima semana para que a nossa equipe técnica vá até o local realizar a retirada.
-      
+
       Lembramos que é necessária a presença de um responsável maior de 18 anos no local.
 
   # /pague — Lembrete proativo de fatura em aberto antes do bloqueio ocorrer
   - trigger: "/pague"
     form: |
       Aproveitando o nosso contato, notei ao consultar o seu cadastro que a fatura com vencimento em [[vencimento]] consta como pendente em nosso sistema.
-      
+
       Como os seus serviços continuam ativos, decidi enviar a segunda via atualizada em anexo (ou via PIX) para facilitar a sua regularização e evitar qualquer interrupção sistêmica nos próximos dias.
-      
+
       Se o pagamento já foi realizado, peço que desconsidere este aviso ou nos envie o comprovante para baixarmos manualmente.
 
   # /negado — Informa que o comprovante está ilegível ou incompleto
@@ -868,24 +856,24 @@ matches:
   - trigger: "/correios"
     form: |
       Verifiquei o seu cadastro e confirmo que as faturas estão sendo enviadas normalmente de forma digital para o e-mail registrado: [[email]].
-      
+
       Em relação à fatura impressa, estamos enfrentando problemas de atraso e extravio nas entregas devido a paralisações e greves dos Correios. Como a logística física é terceirizada, acaba fugindo do nosso controle garantir a data exata em que a correspondência chegará ao seu endereço neste momento.
-      
+
       Lembramos que o envio automático por e-mail continua operando normalmente. Além disso, sempre que precisar, você pode solicitar a segunda via atualizada de forma rápida pelos nossos canais de atendimento (WhatsApp, telefone ou e-mail).
-      
+
       Deseja que eu te envie a fatura deste mês por aqui agora mesmo?
     form_fields:
       email:
         type: text
 
-# /cancelapf — Informa prazo de 24h úteis do Financeiro para cancelamento PF
+  # /cancelapf — Informa prazo de 24h úteis do Financeiro para cancelamento PF
   - trigger: "/cancelapf"
     force_clipboard: true
     replace: |-
       Compreendo a sua solicitação. 
 
       Vou registrar a sua solicitação e encaminhar ao setor responsável para validação dos dados antes da efetivação do cancelamento. O prazo de retorno para conclusão do processo ocorrerá em até 24 horas úteis.
-      
+
       Posso confirmar a abertura do chamado?
 
   # /cancelapj — Solicita formalização por e-mail com dados obrigatórios para cancelamento PJ
@@ -895,14 +883,14 @@ matches:
       Compreendo a sua solicitação. 
 
       Como o seu cadastro é empresarial, para prosseguirmos com a solicitação, será necessário o envio da formalização através do e-mail cadastrado da empresa para {{email_atendimento}}.
-      
+
       Por gentileza, o e-mail deve conter as seguintes informações:
       • Razão Social;
       • CNPJ;
       • Serviço(s) que deseja cancelar;
       • Motivo do cancelamento;
       • Nome e cargo do responsável pela solicitação.
-      
+
       Sua solicitação será encaminhada para o setor responsável e o retorno para conclusão do processo ocorrerá em até 24 horas úteis após o recebimento do e-mail. O serviço permanecerá ativo durante o processo.
     vars:
       - name: email_atendimento
@@ -913,13 +901,12 @@ matches:
     force_clipboard: true
     replace: |-
       Compreendo! Como o pagamento já foi realizado, é provável que o sistema ainda esteja aguardando o prazo de compensação bancária.
-      
+
       Para agilizarmos o processo, por gentileza, envie o comprovante de pagamento (foto, print ou PDF) por aqui. 
-      
+
       Assim que recebermos, faremos a validação, anexaremos ao seu cadastro e daremos andamento imediato na liberação dos seus serviços.
 
-
-# /trocapf — Solicita dados e documentos do novo titular para troca PF
+  # /trocapf — Solicita dados e documentos do novo titular para troca PF
   - trigger: "/trocapf"
     force_clipboard: true
     replace: |-
@@ -951,26 +938,26 @@ matches:
 
       Além dos dados, é necessário enviar por aqui o **Cartão CNPJ** atualizado e uma foto/PDF do **documento com foto (RG ou CNH)** do representante legal da empresa.
 
-# /protestoboleto — Informa que o chamado foi para o Financeiro gerar o boleto atualizado do protesto
+  # /protestoboleto — Informa que o chamado foi para o Financeiro gerar o boleto atualizado do protesto
   - trigger: "/protestoboleto"
     force_clipboard: true
     replace: |-
       Compreendo a sua solicitação referente ao título protestado.
-      
+
       Como este procedimento envolve o levantamento das custas cartorárias e a emissão de um boleto atualizado com esses valores, vou encaminhar o seu caso agora mesmo para o nosso setor Financeiro.
-      
+
       Eles farão a emissão do documento e enviarão o boleto diretamente para você por aqui. Peço que aguarde um momento, por gentileza!
 
-# /invertido — Avisa o cliente sobre o pagamento invertido e o prazo de desbloqueio
+  # /invertido — Avisa o cliente sobre o pagamento invertido e o prazo de desbloqueio
   - trigger: "/invertido"
     force_clipboard: true
     replace: |-
       Identificamos em nosso sistema que o pagamento realizado foi referente à fatura do próximo mês (vencimento em {{formulario.vencimento_pago}}), e não à fatura que estava pendente (vencimento em {{formulario.vencimento_atual}}).
-      
+
       Para que você não fique sem conexão devido a essa inversão, já realizei o desbloqueio manual dos seus serviços de forma excepcional.
-      
+
       O seu acesso permanecerá liberado até o dia {{formulario.vencimento_pago}}. Caso a fatura pendente ({{formulario.vencimento_atual}}) não seja regularizada até essa data, o sistema aplicará um novo bloqueio automático.
-      
+
       Deseja que eu te envie a 2ª via atualizada da fatura pendente agora mesmo para facilitar a regularização?
     vars:
       - name: formulario
@@ -980,10 +967,10 @@ matches:
             Pagamento Invertido
             Vencimento pago (errado): [[vencimento_pago]]
             Vencimento pendente (atual): [[vencimento_atual]]
-      
-# =============================================================================
-# 3 · Suporte Técnico — Cliente
-# =============================================================================
+
+  # =============================================================================
+  # 3 · Suporte Técnico — Cliente
+  # =============================================================================
 
   # /fibra — Orienta verificação visual do cabo de fibra e do conector
   - trigger: "/fibra"
@@ -1002,11 +989,11 @@ matches:
     force_clipboard: true
     replace: |-
       Para que eu possa analisar o status físico da sua conexão com maior precisão, você poderia me enviar algumas fotos dos equipamentos aí no local? 📸
-      
+
       Por gentileza, tente capturar:
       1. A parte frontal do modem da {{empresa_nome}} (mostrando nitidamente quais luzes estão acesas, apagadas ou piscando).
       2. A parte traseira (mostrando como os cabos estão conectados).
-      
+
       Com essas evidências visuais, consigo identificar possíveis falhas de cabeamento, travamentos ou perda de sinal de forma muito mais rápida!
     vars:
       - name: empresa_nome
@@ -1039,9 +1026,9 @@ matches:
     force_clipboard: true
     replace: |-
       Olá! Informamos que a intervenção técnica que afetava os serviços na sua região foi concluída com sucesso pela nossa equipe de Manutenção de Fibra.
-      
+
       A sua conexão já foi restabelecida e deve operar com total normalidade. Por precaução, recomendamos que desligue o modem da tomada por 1 minuto e ligue novamente.
-      
+
       Por gentileza, confirme se o seu acesso normalizou!
 
   # /clima — Informa interrupção causada por condições climáticas severas na área
@@ -1049,9 +1036,9 @@ matches:
     force_clipboard: true
     replace: |-
       Identificamos que as fortes chuvas e condições climáticas adversas na sua região afetaram o fornecimento de energia elétrica ou a infraestrutura externa da nossa rede de fibra óptica.
-      
+
       Nossas equipes de campo já estão de prontidão e atuando para restabelecer os serviços na área afetada assim que as condições de segurança permitirem.
-      
+
       Pedimos desculpas pelo transtorno e agradecemos a compreensão!
 
   # /online — Confirma que o monitoramento detectou o sinal restaurado; pede teste
@@ -1059,9 +1046,9 @@ matches:
     force_clipboard: true
     replace: |-
       Nossos sistemas de monitoramento indicam que o sinal da sua conexão já foi restabelecido após a conclusão dos reparos.
-      
+
       Por gentileza, realize um teste de navegação para confirmarmos se o serviço normalizou completamente. Caso o acesso ainda não tenha retornado, recomendamos reiniciar o seu equipamento (retirar o modem/roteador da tomada por 1 minuto e ligar novamente).
-      
+
       Fico no aguardo da sua confirmação!
 
   # /speedwifi — Explica a limitação de velocidade via Wi-Fi e pede teste via cabo (Proposto)
@@ -1069,9 +1056,9 @@ matches:
     force_clipboard: true
     replace: |-
       Notamos que o teste de velocidade foi realizado através da rede Wi-Fi. 
-      
+
       O sinal sem fio sofre perda natural de pacotes e interferências do ambiente (paredes, espelhos, outros eletrônicos), não conseguindo transmitir a velocidade total da fibra óptica.
-      
+
       Para atestarmos a real capacidade que chega ao seu equipamento, é fundamental realizar o teste com um computador conectado diretamente ao modem através de um cabo de rede. Consegue realizar este teste e nos enviar o resultado?
 
   # /rotoff — Informa que o modem Com4 está normal, mas o roteador do cliente está desligado/desconectado
@@ -1079,11 +1066,11 @@ matches:
     force_clipboard: true
     replace: |-
       Realizei uma análise detalhada da sua conexão e confirmo que o sinal da fibra óptica e o modem da Com4 estão operando perfeitamente. A internet está chegando com total normalidade até o local.
-      
+
       No entanto, o nosso sistema não está detectando o seu roteador particular (que emite o Wi-Fi). Isso indica que ele pode estar desligado da energia ou que o cabo de rede que liga o modem da Com4 ao seu roteador foi desconectado/está frouxo.
-      
+
       Por gentileza, verifique se o seu roteador está na tomada (com as luzes acesas) e confira se o cabo de rede está bem encaixado entre os dois aparelhos (geralmente na porta "WAN" ou "Internet" do seu roteador). 
-      
+
       Pode fazer essa verificação física e me confirmar?
 
   # /instab — Questionário de diagnóstico de instabilidade (lentidão, queda, falha específica)
@@ -1217,7 +1204,7 @@ matches:
         params:
           layout: |
             Preencha os dados PPPoE do cliente para o teste:
-            
+
             Usuário PPPoE: [[user]]
             Senha PPPoE: [[senha]]
 
@@ -1226,11 +1213,11 @@ matches:
     force_clipboard: true
     replace: |-
       Realizei uma análise detalhada da sua conexão e confirmo que os serviços até o modem da Com4 estão operando com total normalidade. O sinal da fibra óptica está estável e entregando a velocidade contratada perfeitamente.
-      
+
       A instabilidade (travamentos ou lentidão) que você está enfrentando está isolada no uso do seu aparelho de TV Box / IPTV. Como muitos desses serviços operam de forma não homologada e estão frequentemente atrelados à pirataria de sinal, a própria Anatel (Agência Nacional de Telecomunicações) aplica bloqueios e restrições severas e diárias aos servidores desses aplicativos em todo o Brasil.
-      
+
       É por isso que a sua internet funciona bem no celular e no computador, mas a transmissão da TV oscila bastante. Como a restrição ocorre direto na fonte do aplicativo, foge do escopo de atuação do provedor de internet. 
-      
+
       Recomendamos que entre em contato direto com o fornecedor da sua TV Box / IPTV para que eles verifiquem rotas alternativas, servidores disponíveis ou atualizações para o seu aparelho.
 
   # /eng — Informa escalonamento do chamado para a Engenharia (Nível 2)
@@ -1251,9 +1238,9 @@ matches:
     force_clipboard: true
     replace: |-
       Ao analisar a sua conexão, verificamos que o seu domínio ({{formulario.dominio}}) encontra-se com o status "Congelado" no Registro.br, o órgão que regula os domínios nacionais.
-      
+
       Isso geralmente ocorre devido a uma pendência na taxa anual de renovação, fazendo com que o site e os e-mails parem de funcionar.
-      
+
       Como a gestão do domínio é externa, é necessário acessar o portal do Registro.br (ou contactar o responsável pelo registro) para regularizar a situação. Após a compensação, os serviços voltarão ao normal de forma automática.
     vars:
       - name: formulario
@@ -1261,7 +1248,7 @@ matches:
         params:
           layout: "Domínio afetado: [[dominio]]"
 
-# /pmg — Explica o painel PMG de quarentena antispam e as ações disponíveis
+  # /pmg — Explica o painel PMG de quarentena antispam e as ações disponíveis
   - trigger: "/pmg"
     force_clipboard: true
     replace: |-
@@ -1270,11 +1257,11 @@ matches:
       Para consultá-lo em tempo real, abra o e-mail e, logo no início da mensagem, localize e clique na palavra "aqui" destacada nesta frase:
 
       "Por favor use a interface WEB clicando aqui para gerenciar os spams de sua caixa de email."
-      
+
       💡 Dica: Para facilitar o uso, você pode alterar o idioma do painel para Português. Basta clicar no seu e-mail no canto superior direito da tela, selecionar a opção "Idioma" (ou Language) e escolher "Português Brasileiro".
 
       Observamos que esses remetentes retidos ainda não aparecem na sua lista de confiança. O filtro atua de forma automática barrando mensagens com base na pontuação de risco (Spam Score). 
-      
+
       O Spam Score é um número atribuído pela rede que avalia a reputação do remetente. A pontuação sobe (indicando maior risco de ser spam) quando o domínio de origem não possui os apontamentos de segurança corretos (SPF, DKIM e DMARC), o IP está em blacklists ou a mensagem contém links/termos suspeitos. Em contrapartida, a pontuação desce (indicando maior confiabilidade) quando o domínio está devidamente autenticado e possui um bom histórico de envios.
 
       No painel, você pode usar as opções abaixo para intervir manualmente:
@@ -1326,9 +1313,9 @@ matches:
     force_clipboard: true
     replace: |-
       Compreendo a sua solicitação referente a este erro na aplicação.
-      
+
       No entanto, o suporte técnico da Com4 garante a disponibilidade da infraestrutura (servidor, rede e conectividade). A configuração, correção ou auditoria de sistemas de terceiros (ERPs, códigos particulares, plugins ou integrações de API) foge ao nosso escopo de atuação.
-      
+
       Recomendamos que acione o desenvolvedor responsável pela sua aplicação ou o seu suporte de TI local para analisar os logs do software.
 
   # /spamout — Trata conta de e-mail bloqueada por disparo de spam (conta comprometida)
@@ -1336,13 +1323,13 @@ matches:
     force_clipboard: true
     replace: |-
       Identificamos um comportamento anômalo na sua conta de e-mail: ela foi utilizada para o disparo massivo de mensagens (SPAM).
-      
+
       Para proteger a reputação do seu domínio e do nosso servidor, a conta foi temporariamente bloqueada para envios. Esse cenário geralmente ocorre quando a senha da conta é capturada por vírus ou malwares no computador do usuário.
-      
+
       Para restabelecermos o acesso, é obrigatório:
       1. Realizar uma varredura completa com antivírus em todos os dispositivos que acessam esta conta.
       2. Alterar a senha do e-mail imediatamente através do cPanel ou Webmail (utilize uma senha forte com letras, números e símbolos).
-      
+
       Assim que a senha for alterada, nos avise para realizarmos a liberação.
 
   # /dnsprop — Explica propagação DNS ao cliente (2 a 24 horas)
@@ -1408,21 +1395,21 @@ matches:
 
       Para solucionar isso de forma definitiva, vou registrar uma visita técnica. Nossa equipe irá até o local para avaliar o equipamento e realizar a troca da fonte ou do modem para restabelecer a sua conexão.
 
-# /agendafibra — Informa encaminhamento para o setor de fibra agendar instalação
+  # /agendafibra — Informa encaminhamento para o setor de fibra agendar instalação
   - trigger: "/agendafibra"
     force_clipboard: true
     replace: |-
       Tudo certo com o seu cadastro e o contrato foi gerado com sucesso! ✅
-      
+
       A sua solicitação já foi aprovada e encaminhada diretamente para a nossa equipe de Fibra Óptica.
-      
+
       Como o nosso setor de agendamentos atua em horário comercial, eles entrarão em contato com você no próximo dia útil para formalizar a data e o horário exatos da visita técnica para a instalação e ativação dos seus serviços.
-      
+
       Seja muito bem-vindo(a) à Com4! Qualquer dúvida, sigo à disposição! 😊
 
-# =============================================================================
-# 4 · E-mail, Hospedagem e Migração
-# =============================================================================
+  # =============================================================================
+  # 4 · E-mail, Hospedagem e Migração
+  # =============================================================================
 
   # /ativhosp — Envia dados de acesso ao cPanel, FTP, Webmail e DNS (ativação de hospedagem)
   - trigger: "/ativhosp"
@@ -1490,12 +1477,12 @@ matches:
           layout: |
             Plataforma a enviar: [[plataforma]]
             Domínio: [[dominio]]
-            
+
             -- Se for cPanel, preencha: --
             IP final (ex: 45): [[ip]]
             Usuário cPanel: [[user_cpanel]]
             Senha cPanel: [[senha_cpanel]]
-            
+
             -- Se for Plesk, preencha: --
             Usuário Plesk: [[user_plesk]]
             Senha Plesk: [[senha_plesk]]
@@ -1519,16 +1506,16 @@ matches:
             $userPl = "{{formulario.user_plesk}}"
             $senhaPl = "{{formulario.senha_plesk}}"
             $saudacao = "{{saudacao}}"
-            
+
             $msg = "Olá, ${saudacao}! Tudo bem? 😊`n`nConforme solicitado, seguem os dados de acesso ao painel de controle da hospedagem do domínio ${dom}:`n"
-            
+
             if ($plat -eq "cPanel") {
                 $msg += "`nPainel Administrativo cPanel:`nEndereço: https://cpanel.${dom}/ ou https://189.90.130.${ip}:2083/`nUsuário: ${userCp}`nSenha: ${senhaCp}"
             }
             elseif ($plat -eq "Plesk") {
                 $msg += "`nPainel Administrativo Plesk:`nEndereço: https://plesk7.com4.com.br:8443/`nUsuário: ${userPl}`nSenha: ${senhaPl}"
             }
-            
+
             Write-Output $msg
 
   # /ativemail — Envia dados de acesso e portas de configuração da conta de e-mail Com4
@@ -1684,9 +1671,9 @@ matches:
     force_clipboard: true
     replace: |-
       Para prosseguirmos com a migração da sua hospedagem para o novo servidor, precisamos da sua autorização formal por este canal.
-      
+
       Este procedimento visa melhorar a performance e a segurança do seu serviço. Na grande maioria dos casos, as credenciais de acesso (cPanel, e-mails, FTP, banco de dados) não sofrem alterações.
-      
+
       Você autoriza a execução desta migração? Se sim, por favor, confirme o melhor dia e horário para realizarmos o procedimento (recomendamos a execução fora do horário comercial para minimizar impactos).
 
   # /ftp — Envia host, usuário e porta 21 para conexão via FileZilla (FTP)
@@ -1694,13 +1681,13 @@ matches:
     force_clipboard: true
     replace: |-
       Para realizar a transferência dos arquivos do seu site, recomendamos a utilização do software FileZilla (ou outro cliente FTP de sua preferência).
-      
+
       Utilize os seguintes dados para a conexão:
       • Host / Servidor: ftp.{{formulario.dominio}}
       • Nome de Usuário: O mesmo usuário do seu cPanel
       • Senha: A senha do seu cPanel
       • Porta: 21
-      
+
       Caso o seu provedor de internet bloqueie a porta 21, informe-nos para verificarmos uma alternativa de conexão segura (SFTP).
     vars:
       - name: formulario
@@ -1728,9 +1715,9 @@ matches:
     force_clipboard: true
     replace: |-
       Compreendo a sua solicitação. No entanto, por políticas de privacidade e segurança da informação, a {{empresa_nome}} não possui acesso para visualizar ou recuperar senhas de contas de e-mail individuais criadas dentro da sua hospedagem.
-      
+
       A gestão das caixas de e-mail é feita exclusivamente através do painel de controle (cPanel / Plesk). Apenas o responsável técnico da sua empresa que possui o acesso administrativo a esse painel consegue realizar a redefinição de uma nova senha para a sua conta.
-      
+
       Recomendamos que entre em contato com o administrador da sua hospedagem ou com o setor de TI da sua empresa para que eles realizem a alteração, tudo bem?
     vars:
       - name: empresa_nome
@@ -1753,31 +1740,31 @@ matches:
       - name: empresa_nome
         type: global
 
-# /popimap — Explica a diferença entre os protocolos POP e IMAP
+  # /popimap — Explica a diferença entre os protocolos POP e IMAP
   - trigger: "/popimap"
     force_clipboard: true
     replace: |-
       Compreendo a sua dúvida! A escolha entre os protocolos POP e IMAP define como o seu aplicativo de e-mail (Outlook, celular) vai interagir com as mensagens no nosso servidor. 
-      
+
       Aqui está a diferença de forma direta:
-      
+
       🌐 IMAP (Recomendado)
       • Sincroniza em tempo real com o servidor.
       • As mensagens permanecem salvas na nuvem e podem ser acessadas de vários aparelhos ao mesmo tempo (computador, celular e webmail).
       • Tudo o que você fizer (ler, apagar ou mover para pastas) em um dispositivo, refletirá automaticamente nos outros.
-      
+
       💻 POP (POP3)
       • Faz o download (baixa) das mensagens para o seu aparelho e, por padrão, as apaga do nosso servidor.
       • Ideal se você precisa economizar espaço de armazenamento na sua hospedagem ou acessa o e-mail de um único computador fixo.
       • Não possui sincronização: se você baixar e ler os e-mails no computador, não conseguirá vê-los no celular depois.
-      
+
       Se você precisa acessar a mesma conta em mais de um aparelho ou quer ter o backup no servidor, a recomendação técnica é utilizar o IMAP. 
-      
+
       Qual você prefere utilizar para que eu possa te orientar com as portas corretas de configuração?
 
-# =============================================================================
-# 5 · Registros Internos — Financeiro
-# =============================================================================
+  # =============================================================================
+  # 5 · Registros Internos — Financeiro
+  # =============================================================================
 
   # /lognada — Log rápido: nenhuma ação no escopo do analista
   - trigger: "/lognada"
@@ -1822,31 +1809,32 @@ matches:
             $nome = "{{formulario.nome}}"
             $telefone = "{{formulario.telefone}}"
             $prazo = "{{data_2d_uteis}}"
-            
+
             if ($tipo -match "Data Center") {
                 $acao = "Desbloqueio do serviço realizado no servidor. O status no sistema de gestão permanece 'Bloqueado'."
             } else {
                 $acao = "Desbloqueio em acordo executado via SAP/HANA."
             }
-            
+
             $msg = "Desbloqueio em Acordo`n`nINFORMAÇÕES`n• Contato via: $canal`n• Solicitante: $nome — $telefone`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação: $acao`n• Prazo estendido até: $prazo.`n• Encaminhamento: Chamado assumido pelo próprio analista para acompanhamento da baixa bancária."
             Write-Output $msg
 
   # /logbaixa — Registra recebimento de comprovante e previsão de compensação D+1 útil
   - trigger: "/logbaixa"
     force_clipboard: true
-    replace: |-
-      Contato via: {{formulario.canal}}
-      Cliente enviou o comprovante de pagamento (em anexo).
-
-      Chamado em aguardo de compensação bancária prevista para {{data_1d_util}}.
+    replace: "{{resultado}}"
     vars:
       - name: data_1d_util
         type: global
       - name: formulario
         type: form
         params:
-          layout: "Canal: [[canal]]"
+          layout: |
+            Comprovante de pagamento
+            Canal: [[canal]]
+            Nome: [[nome]]
+            Telefone: [[telefone]]
+            Tipo de Serviço: [[tipo]]
           fields:
             canal:
               type: choice
@@ -1854,8 +1842,33 @@ matches:
                 - Blip
                 - Ligação
                 - E-mail
+            tipo:
+              type: choice
+              values:
+                - Data Center (cPanel, Plesk, VPS)
+                - Fibra Óptica
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $tipo = "{{formulario.tipo}}"
+            $canal = "{{formulario.canal}}"
+            $nome = "{{formulario.nome}}"
+            $telefone = "{{formulario.telefone}}"
+            $prazo = "{{data_1d_util}}"
 
-# /logpagou — Registra pagamento compensado e encaminha ao Financeiro (se DC) ou encerra (se Fibra)
+            if ($tipo -match "Data Center") {
+                $encaminhamento = "Chamado transferido para a fila do Financeiro para validação do comprovante e acompanhamento da baixa no sistema de gestão."
+            } else {
+                $encaminhamento = "Chamado mantido na fila aguardando a compensação bancária automática via SAP/HANA."
+            }
+
+            $msg = "Recebimento de Comprovante`n`nINFORMAÇÕES`n• Contato via: $canal`n• Solicitante: $nome — $telefone`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação: Comprovante de pagamento recebido e anexado ao atendimento.`n• Previsão de compensação: $prazo`n• Encaminhamento: $encaminhamento"
+            Write-Output $msg
+
+  # /logpagou — Registra pagamento compensado e encaminha ao Financeiro (se DC) ou encerra (se Fibra)
   - trigger: "/logpagou"
     force_clipboard: true
     replace: "{{resultado}}"
@@ -1879,17 +1892,17 @@ matches:
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
-            
+
             if ($tipo -match "Data Center") {
                 $encaminhamento = "Chamado transferido para a fila do Financeiro para realizar a liberação e alteração do status do contrato no sistema."
             } else {
                 $encaminhamento = "Chamado de acompanhamento encerrado."
             }
-            
+
             $msg = "Acompanhamento de Acordo — Pagamento Confirmado`n`n• Tipo de Serviço: $tipo`n• Status: Pagamento compensado e confirmado na plataforma.`n`nENCAMINHAMENTO`n• $encaminhamento"
             Write-Output $msg
 
-# /logcalote — Registra retomada da suspensão (quebra de acordo)
+  # /logcalote — Registra retomada da suspensão (quebra de acordo)
   - trigger: "/logcalote"
     force_clipboard: true
     replace: "{{resultado}}"
@@ -1913,7 +1926,7 @@ matches:
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
-            
+
             if ($tipo -match "Data Center") {
                 $acao = "Suspensão do serviço retomada no servidor por falta de pagamento dentro do prazo."
                 $encaminhamento = "Chamado de acompanhamento encerrado diretamente (contrato já consta como 'Bloqueado' no sistema)."
@@ -1921,7 +1934,7 @@ matches:
                 $acao = "Suspensão retomada no SAP/HANA por falta de pagamento."
                 $encaminhamento = "Chamado de acompanhamento encerrado."
             }
-            
+
             $msg = "Acompanhamento de Acordo — Quebra de Acordo`n`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• $acao`n• $encaminhamento"
             Write-Output $msg
 
@@ -1977,13 +1990,11 @@ matches:
       • Mês de Referência: [[referencia]]
 
       SITUAÇÃO FINANCEIRA E VERIFICAÇÕES
-      • Status do Pagamento: [[status_pagamento]]
-      • Valor da Nota: [[valor]]
+      • Status do Boleto: [[status_boleto]]
       • Status do Serviço: [[status_servico]]
 
-      ENVIO E DADOS
+      ENVIO E DADOS DE ACESSO
       • Meio de Envio: [[envio]]
-      • E-mail de Cadastro: [[email]]
 
       SOLUÇÃO
       • Ação Realizada: Nota fiscal enviada ao cliente com sucesso.
@@ -1994,11 +2005,10 @@ matches:
           - Blip
           - Ligação
           - E-mail
-      status_pagamento:
+      status_boleto:
         type: choice
         values:
-          - Pago
-          - Em aberto
+          - Aberto
           - Vencido
       status_servico:
         type: choice
@@ -2010,7 +2020,7 @@ matches:
         type: choice
         values:
           - Blip
-          - E-mail         
+          - E-mail
 
   # /logvenc — Log de abertura de chamado ao Financeiro (alteração de vencimento) — cálculo automático
   # Uso: /logvenc [dia atual] [dia novo] — Exemplo: /logvenc 25 10
@@ -2091,22 +2101,22 @@ matches:
             $mensagem = "Alteração Data Vencimento`n`nCliente entrou em contato solicitando para alterar a data de vencimento de seus boletos do dia $atualStr para todo dia $novoStr.`n`nForam passadas as seguintes informações ao cliente:`nÚltimo boleto gerado: $ultimoStr - Referente ao mês de $mesUltimo`nPróximo boleto gerado: $proximoStr - Referente ao mês de $mesProximo`n`nPor gentileza, verificar."
 
             Write-Output $mensagem
-            
+
   # /loginvertido — Log interno de pagamento de fatura do mês incorreto
   - trigger: "/loginvertido"
     form: |
       Pagamento Invertido de Fatura
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Solicitante: [[nome]]
-      
+
       OCORRÊNCIA
       • O cliente efetuou o pagamento da fatura com vencimento em [[vencimento_pago]] (mês posterior) em vez da fatura pendente com vencimento em [[vencimento_atual]].
-      
+
       PROCEDIMENTOS
       • Cliente orientado de que a fatura atual continua em aberto e requer pagamento para evitar a suspensão dos serviços.
-      
+
       AÇÃO
       • Chamado mantido na fila do Financeiro aguardando a baixa bancária do boleto pago e a regularização do boleto pendente.
     form_fields:
@@ -2117,12 +2127,12 @@ matches:
           - Ligação
           - E-mail
 
-# /logcanc — Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
+  # /logcanc — Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
   - trigger: "/logcanc"
     form: |
       DESCRIÇÃO
       Cliente entrou em contato solicitando o cancelamento dos serviços.
-      
+
       • Canal de Atendimento: [[canal]]
       • Solicitante: [[solicitante]]
       • Perfil: [[perfil]]
@@ -2183,12 +2193,11 @@ matches:
           - Ligação
           - E-mail
 
-
-# /loglead — Log de oportunidade comercial identificada; encaminha lead ao Comercial
+  # /loglead — Log de oportunidade comercial identificada; encaminha lead ao Comercial
   - trigger: "/loglead"
     form: |
       Oportunidade Comercial Identificada
-      
+
       INFORMAÇÕES DO LEAD
       • Canal de Atendimento: [[canal]]
       • Solicitante: [[nome]]
@@ -2223,15 +2232,15 @@ matches:
   - trigger: "/logcorreios"
     form: |
       Atraso na Entrega de Fatura Impressa — Correios
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • E-mail de cadastro confirmado: [[email]]
-      
+
       PROCEDIMENTOS
       • Cliente orientado sobre atrasos/extravios nos Correios e reforçados os canais digitais (e-mail, WhatsApp, 2ª via).
       • Oferecido envio imediato da fatura por canal digital.
-      
+
       SOLUÇÃO
       • [[status]]
     form_fields:
@@ -2248,19 +2257,19 @@ matches:
           - Cliente optou por aguardar correspondência. Chamado encerrado.
           - Cliente não retornou.
 
-# /logprotestoboleto — Log de abertura de chamado para o Financeiro gerar boleto de protesto
+  # /logprotestoboleto — Log de abertura de chamado para o Financeiro gerar boleto de protesto
   - trigger: "/logprotestoboleto"
     form: |
       Geração de Boleto — Título Protestado
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Solicitante: [[nome]]
       • CPF / CNPJ: [[doc]]
-      
+
       SOLICITAÇÃO
       • Cliente entrou em contato solicitando a regularização de um título que se encontra protestado em cartório.
-      
+
       PROCEDIMENTOS E ESCALONAMENTO
       • Cliente orientado de que o setor responsável fará o levantamento das custas e enviará o boleto atualizado.
       • Ação: Chamado transferido para a fila do Financeiro solicitando a geração e o envio do boleto protestado ao cliente, para posterior liberação da carta de anuência.
@@ -2276,7 +2285,7 @@ matches:
       doc:
         type: text
 
-# /cha — Notificação padronizada de encaminhamento de chamados no WhatsApp
+  # /cha — Notificação padronizada de encaminhamento de chamados no WhatsApp
   - trigger: "/cha"
     form: "[[prefixo]] [[cliente]] | [[assunto]]"
     form_fields:
@@ -2295,15 +2304,15 @@ matches:
         type: text
         multiline: false
 
-# =============================================================================
-# 6 · Registros Internos — NOC / Técnico
-# =============================================================================
+  # =============================================================================
+  # 6 · Registros Internos — NOC / Técnico
+  # =============================================================================
 
   # /logcpfl — Log de abertura de chamado na CPFL por falta de energia
   - trigger: "/logcpfl"
     form: |
       Queda de Energia — Acionamento CPFL
-      
+
       INFORMAÇÕES
       • Endereço Afetado: [[local]]
       • Protocolo CPFL: [[protocolo]]
@@ -2369,7 +2378,7 @@ matches:
         type: text
         multiline: true
 
-# /logfalha — Log de falha de acesso aos serviços Com4 com testes de DNS e Imunify360
+  # /logfalha — Log de falha de acesso aos serviços Com4 com testes de DNS e Imunify360
   - trigger: "/logfalha"
     form: |
       Sem Acesso aos Serviços Com4
@@ -2454,7 +2463,7 @@ matches:
       problema:
         type: choice
         values:
-          - Luz LOS 
+          - Luz LOS
           - Fibra Atenuada
 
   # /logmassivo — Log de cliente atendido durante ocorrência massiva em área
@@ -2505,7 +2514,7 @@ matches:
               type: choice
               values:
                 - Blip
-                - Ligação               
+                - Ligação
                 - E-mail
 
   # /logvps — Log de suporte a servidor VPS com testes, acesso e autorização de reinício
@@ -2552,7 +2561,7 @@ matches:
         type: text
         multiline: true
 
-# /logsite — Log de suporte a site com diagnóstico de DNS, disco e banco de dados
+  # /logsite — Log de suporte a site com diagnóstico de DNS, disco e banco de dados
   - trigger: "/logsite"
     form: |
       Suporte a Site
@@ -2613,7 +2622,7 @@ matches:
         type: text
         multiline: true
 
-# /logemail — Log de suporte a e-mail com testes de webmail, DNS e configuração IMAP/POP
+  # /logemail — Log de suporte a e-mail com testes de webmail, DNS e configuração IMAP/POP
   - trigger: "/logemail"
     form: |
       Suporte a E-mail
@@ -2744,12 +2753,12 @@ matches:
         type: text
         multiline: true
 
-# /logpmg — Log detalhado de orientação sobre o Gateway Antispam PMG
+  # /logpmg — Log detalhado de orientação sobre o Gateway Antispam PMG
   - trigger: "/logpmg"
     form: |
       DESCRIÇÃO
       Cliente entrou em contato com dúvidas sobre a retenção de mensagens e o uso do filtro Antispam (PMG), relatando ter e-mails bloqueados na quarentena.
-      
+
       • Canal de Atendimento: [[canal]]
       • E-mail do Solicitante: [[email]]
 
@@ -2774,7 +2783,7 @@ matches:
   - trigger: "/logoffpmg"
     form: |
       Desativação de Gateway Antispam (PMG)
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Domínio / E-mail Afetado: [[dominio]]
@@ -2807,7 +2816,7 @@ matches:
   - trigger: "/logonpmg"
     form: |
       Reativação de Gateway Antispam (PMG)
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Domínio / E-mail Afetado: [[dominio]]
@@ -2843,7 +2852,7 @@ matches:
       Atendimento encerrado automaticamente por timeout (inatividade do usuário no Blip).
       Não houve o reporte de incidentes ou solicitações adicionais, resultando na finalização do ticket sem a necessidade de intervenção técnica ou aplicação de procedimentos de troubleshooting.
 
-# /logbloq — Log de bloqueio no servidor/painel e encaminhamento correto
+  # /logbloq — Log de bloqueio no servidor/painel e encaminhamento correto
   - trigger: "/logbloq"
     force_clipboard: true
     replace: "{{resultado}}"
@@ -2874,7 +2883,7 @@ matches:
             $tipo = "{{formulario.tipo}}"
             $dominio = "{{formulario.dominio}}"
             $server = "{{formulario.server}}"
-            
+
             if ($tipo -match "Data Center") {
                 $acao = "Conta/serviço suspenso com sucesso no servidor."
                 $encaminhamento = "Chamado encaminhado para a fila do Financeiro detalhando o serviço bloqueado, para alteração do status do contrato para 'Bloqueado' no sistema."
@@ -2882,7 +2891,7 @@ matches:
                 $acao = "Bloqueio do serviço executado via SAP/HANA."
                 $encaminhamento = "Chamado encerrado."
             }
-            
+
             $msg = "Suspensão de Serviço (Bloqueio)`n`nINFORMAÇÕES`n• Domínio / Cliente: $dominio`n• Servidor: $server`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação Realizada: $acao`n• Encaminhamento: $encaminhamento"
             Write-Output $msg
 
@@ -2917,7 +2926,7 @@ matches:
             $tipo = "{{formulario.tipo}}"
             $dominio = "{{formulario.dominio}}"
             $server = "{{formulario.server}}"
-            
+
             if ($tipo -match "Data Center") {
                 $acao = "Conta/serviço desbloqueado com sucesso no servidor."
                 $encaminhamento = "Chamado transferido para a fila do Financeiro para alterar o status do contrato para 'Ativo' no sistema e formalizar a baixa."
@@ -2925,7 +2934,7 @@ matches:
                 $acao = "Desbloqueio executado via SAP/HANA."
                 $encaminhamento = "Chamado encerrado."
             }
-            
+
             $msg = "Desbloqueio de Serviço`n`nINFORMAÇÕES`n• Domínio / Cliente: $dominio`n• Servidor: $server`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação Realizada: $acao`n• Encaminhamento: $encaminhamento"
             Write-Output $msg
 
@@ -2994,7 +3003,7 @@ matches:
       • Status: [[status]]
       • CTO mais próxima: [[cto]]
       • Distância aproximada: [[distancia]] metros
-      
+
       Observações: [[obs]]
     form_fields:
       status:
@@ -3025,7 +3034,7 @@ matches:
           - Blip
           - Ligação
           - E-mail
-      cto: 
+      cto:
         type: text
   # /logfimromp — Log de encerramento de chamado após reparo do rompimento concluído
   - trigger: "/logfimromp"
@@ -3053,7 +3062,7 @@ matches:
       • CTO mais próxima: [[cto]]
       • Distância aproximada: [[distancia]] metros
       • Tipo de imóvel: [[tipo_imovel]]
-      
+
       • Observações Adicionais: 
       [[obs]]
 
@@ -3120,14 +3129,14 @@ matches:
   - trigger: "/logfast"
     form: |
       Diagnóstico de Equipamento Particular — Roteador Fast
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Sintoma Relatado: [[sintoma]]
 
       TESTES E PROCEDIMENTOS
       • Análise: Link com parâmetros normais até a ONU da Com4. Identificado via monitoramento (Nagios) que o roteador do cliente está negociando a 100 Mbps (tecnologia Fast), o que causa gargalo na banda e quedas na rede local.
-      
+
       • Ações Executadas no Suporte:
       [[acoes]]
 
@@ -3161,7 +3170,7 @@ matches:
   - trigger: "/logvisitarot"
     form: |
       Agendamento de Visita Técnica — Configuração de Roteador
-      
+
       MOTIVO DA VISITA
       • Instalação e configuração de novo roteador particular (Padrão Gigabit).
 
@@ -3174,7 +3183,7 @@ matches:
       AGENDAMENTO E LOCAL
       • Endereço Confirmado: [[endereco]]
       • Disponibilidade do Cliente: [[disponibilidade]]
-      
+
       • Observações Adicionais: 
       [[obs]]
     form_fields:
@@ -3192,7 +3201,7 @@ matches:
   - trigger: "/logpppoe"
     form: |
       Envio de Credenciais PPPoE
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Solicitante: [[solicitante]]
@@ -3201,7 +3210,7 @@ matches:
       PROCEDIMENTOS E ORIENTAÇÕES
       • Motivo da solicitação: [[motivo]]
       • Cliente instruído sobre o uso seguro das credenciais PPPoE para discagem/autenticação em seu equipamento.
-      
+
       SOLUÇÃO
       • Dados de acesso (Usuário e Senha) repassados ao cliente com sucesso. Chamado encerrado.
     form_fields:
@@ -3224,7 +3233,7 @@ matches:
   - trigger: "/logreset"
     form: |
       Reconfiguração Lógica / Reset de Equipamento
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Sintoma Relatado: [[sintoma]]
@@ -3266,7 +3275,7 @@ matches:
   - trigger: "/logiptv"
     form: |
       Diagnóstico de Instabilidade — TV Box / IPTV
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Sintoma Relatado: Cliente relata lentidão/travamentos na conexão, isolados no uso de TV Box/IPTV.
@@ -3295,7 +3304,7 @@ matches:
   - trigger: "/logrotoff"
     form: |
       Diagnóstico de Equipamento Particular — Roteador Inacessível
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Sintoma Relatado: Cliente informa falta de conexão à internet.
@@ -3328,7 +3337,7 @@ matches:
   - trigger: "/logsenha"
     form: |
       Abertura de Visita Técnica — Configuração Wi-Fi
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Solicitante: [[solicitante]]
@@ -3341,7 +3350,7 @@ matches:
       AGENDAMENTO
       • Disponibilidade do Cliente: [[turno]]
       • Observações Adicionais: [[obs]]
-      
+
       SOLUÇÃO
       • Chamado aberto e encaminhado para a equipe de Agendamento/Campo.
     form_fields:
@@ -3375,15 +3384,15 @@ matches:
   - trigger: "/logonline"
     form: |
       Sinal Restaurado — Confirmação com Cliente
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Contexto: [[contexto]]
-      
+
       PROCEDIMENTOS
       • Monitoramento NOC confirmou sinal normalizado.
       • Cliente orientado a reiniciar equipamentos e validar navegação.
-      
+
       SOLUÇÃO
       • Retorno do cliente: [[status]]
     form_fields:
@@ -3413,10 +3422,10 @@ matches:
 
       DESCRIÇÃO
       Cliente entrou em contato solicitando o envio das credenciais de acesso ao painel de hospedagem (cPanel).
-      
+
       • Canal de Atendimento: [[canal]]
       • Domínio / Cliente: [[cliente]]
-      
+
       SOLUÇÃO
       • Ação Realizada: Cliente instruído sobre o procedimento de segurança obrigatório para liberação de acessos ao painel de hospedagem (cPanel). Informado sobre a necessidade de envio de solicitação formal através de uma conta de e-mail corporativa, contendo os dados cadastrais de validação.
       • Próximo Passo: Aguardando a formalização da solicitação via e-mail pelo cliente para darmos andamento ao encaminhamento das credenciais.
@@ -3437,11 +3446,11 @@ matches:
 
       DESCRIÇÃO
       Cliente realizou o envio do e-mail formal solicitando os dados de acesso ao painel de hospedagem (cPanel), fornecendo os dados cadastrais exigidos para a validação de segurança.
-      
+
       • Canal de Atendimento: [[canal]]
       • Domínio / Cliente: [[cliente]]
       • E-mail do Solicitante: [[email]]
-      
+
       SOLUÇÃO
       • Ação Realizada: Os dados enviados pelo cliente foram validados e conferem com o cadastro do titular. Após a confirmação, as credenciais de acesso ao cPanel foram encaminhadas com sucesso em resposta ao e-mail corporativo do cliente.
       • Chamado encerrado.
@@ -3455,7 +3464,7 @@ matches:
       cliente:
         type: text
       email:
-        type: text        
+        type: text
 
   # /logpower — Log de abertura de visita técnica por falha elétrica (Luz Power / Hardware)
   - trigger: "/logpower"
@@ -3481,7 +3490,7 @@ matches:
           - Foto recebida anexada ao chamado.
           - Relato descritivo do cliente no chat.
 
-# /logbackup — Log interno de solicitação de restauração de backup (Hospedagem ou VPS)
+  # /logbackup — Log interno de solicitação de restauração de backup (Hospedagem ou VPS)
   - trigger: "/logbackup"
     force_clipboard: true
     replace: "{{resultado}}"
@@ -3592,7 +3601,7 @@ matches:
 
             Write-Output $msg
 
-# /logoutlook — Log interno de auxílio na configuração de e-mail no Outlook
+  # /logoutlook — Log interno de auxílio na configuração de e-mail no Outlook
   - trigger: "/logoutlook"
     form: |
       Suporte à Configuração — Outlook
@@ -3653,11 +3662,11 @@ matches:
           - Cliente com dificuldades técnicas. Oferecido/Agendado acesso remoto.
           - Falha na validação. Chamado escalonado ou mantido para acompanhamento.
 
-# /logativacao — Log de encaminhamento para ativação de fibra (Venda Suporte)
+  # /logativacao — Log de encaminhamento para ativação de fibra (Venda Suporte)
   - trigger: "/logativacao"
     form: |
       Pedido de Ativação — Nova Contratação
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Solicitante: [[nome]]
@@ -3665,18 +3674,18 @@ matches:
       • Contato: [[telefone]]
       • Plano Contratado: [[plano]]
       • Vencimento: [[vencimento]]
-      
+
       DADOS DA INSTALAÇÃO
       • Endereço: [[endereco]]
       • CTO com Viabilidade: [[cto]]
       • Distância: [[distancia]]
-      
+
       VERIFICAÇÕES E PROCEDIMENTOS
       • Consulta de Protesto: Realizada e sem restrições impeditivas.
       • Lead / Oportunidade: Registrado.
       • Contrato Físico: Gerado, preenchido e impresso em duas vias.
       • Documentação: Documentos de identificação, comprovante de endereço e print da consulta de protesto devidamente anexados a este chamado.
-      
+
       SOLUÇÃO
       • Chamado classificado como "Pedido de Ativação" e encaminhado para a fila "Fibra Ativação - Fibra Ativação" para agendamento e execução da instalação.
     form_fields:
@@ -3718,20 +3727,20 @@ matches:
           - "15"
           - "20"
           - "25"
-# /logredefinirsenha — Log interno de redefinição de senha para contas @com4.com.br
+  # /logredefinirsenha — Log interno de redefinição de senha para contas @com4.com.br
   - trigger: "/logredefinirsenha"
     form: |
       Redefinição de Senha — E-mail Corporativo
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Solicitante: [[solicitante]]
       • Conta de E-mail: [[email]]
-      
+
       PROCEDIMENTOS REALIZADOS
       • Validação de Segurança: Dados cadastrais e titularidade confirmados com sucesso.
       • Motivo: Perda, bloqueio ou esquecimento do acesso atual.
-      
+
       SOLUÇÃO
       • Ação Realizada: Senha da conta redefinida no servidor corporativo (@com4.com.br).
       • Nova Senha: Foi aplicada a senha padrão temporária "Mudarsenha123**".
@@ -3748,23 +3757,23 @@ matches:
       email:
         type: text
 
-# /logretornovendas — Log de retorno ativo (Instabilidade de 40 dias - Contratação)
+  # /logretornovendas — Log de retorno ativo (Instabilidade de 40 dias - Contratação)
   - trigger: "/logretornovendas"
     form: |
       Retorno Ativo — Lista de Instabilidade (Comercial)
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: Blip
       • Solicitante: [[nome]]
       • Telefone: [[telefone]]
-      
+
       PROCEDIMENTOS REALIZADOS
       • Origem: Contato ativo realizado com base no relatório do Desenvolvimento (falha de retorno de leads nos últimos 40 dias).
       • Ação inicial: Disparo do template 'retorno_contato' efetuado no Blip.
-      
+
       RESULTADO DA ABORDAGEM
       • Interação do Cliente: [[resposta]]
-      
+
       SOLUÇÃO
       • Status Final: [[acao]]
     form_fields:
@@ -3786,24 +3795,24 @@ matches:
           - Chamado encerrado (Cliente sem interesse / Negócio perdido).
           - Chamado encerrado automaticamente por inatividade (Timeout).
 
- # /logmaxerro — Log de bloqueio automático por limite de falhas/adiamentos por hora (Max Defers)
+  # /logmaxerro — Log de bloqueio automático por limite de falhas/adiamentos por hora (Max Defers)
   - trigger: "/logmaxerro"
     form: |
       Bloqueio Automático — Max Defers and Failures
-      
+
       INFORMAÇÕES
       • Canal de Atendimento: [[canal]]
       • Solicitante: [[solicitante]]
       • Domínio Afetado: [[dominio]]
-      
+
       DIAGNÓSTICO E SINTOMA
       • Sintoma Relatado: Cliente recebe o retorno "exceeded the max defers and failures per hour" ao tentar enviar novos e-mails.
       • Análise NOC: Confirmado o acionamento da trava de segurança do servidor (Exim) devido a um alto índice de devoluções (envios para destinatários inválidos, incorretos ou com caixa cheia) dentro da mesma hora.
-      
+
       PROCEDIMENTOS E ORIENTAÇÕES
       • Status do Fluxo: O bloqueio é temporário e o contador reseta automaticamente na virada da hora. Testes confirmam que o fluxo de envios já se encontra normalizado no momento do atendimento.
       • Orientação Passada: Cliente instruído sobre o funcionamento do bloqueio protetivo (que evita que o domínio caia em Blacklists) e fortemente orientado a realizar a higienização da sua lista de contatos/mala direta.
-      
+
       SOLUÇÃO
       • Status Final: Serviços normalizados e cliente ciente das boas práticas de envio. Chamado encerrado.
     form_fields:
@@ -3816,32 +3825,25 @@ matches:
       solicitante:
         type: text
       dominio:
-        type: text         
+        type: text
 
-# /logencbloq — Log interno de encaminhamento para o N2 realizar bloqueio
+  # /logencbloq — Log interno de encaminhamento para o N2 realizar bloqueio
   - trigger: "/logencbloq"
     form: |
       Escalonamento para Nível 2 — Bloqueio de Serviço
-      
+
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
       • Origem: Chamado automático de inadimplência.
       • Serviço Afetado: [[servico]]
-      
+
       MOTIVO DO ESCALONAMENTO
       • Bloqueio/suspensão do serviço devido a pendência financeira.
       • Ação não realizada pelo NOC 1 por limitação de privilégios de acesso na infraestrutura/painel.
-      
+
       AÇÃO
       • Chamado encaminhado para a fila da Engenharia (Nível 2) para execução do bloqueio.
       • Por gentileza encaminhar o chamado para a fila financeiro após o bloqueio
     form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
       servico:
         type: text
 
@@ -3849,25 +3851,18 @@ matches:
   - trigger: "/logencdesbloq"
     form: |
       Escalonamento para Nível 2 — Desbloqueio de Serviço
-      
+
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
       • Origem: Chamado automático de inadimplência.
       • Serviço Afetado: [[servico]]
-      
+
       MOTIVO DO ESCALONAMENTO
       • Cliente solicitou a reativação/desbloqueio do serviço.
       • Ação não realizada pelo NOC 1 por limitação de privilégios de acesso na infraestrutura/painel.
-      
+
       AÇÃO
       • Chamado encaminhado para a fila da Engenharia (Nível 2) para execução do desbloqueio.
       • Por gentileza encaminhar o chamado para a fila financeiro após o desbloqueio
     form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
       servico:
         type: text
