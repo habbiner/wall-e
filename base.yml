@@ -6,6 +6,7 @@
 #
 # 1 · Saudação, Identificação e Encerramento
 #   /ola                Saudação inicial com horário dinâmico e coleta de dados obrigatórios
+#   /confirma           Agradece a confirmação dos dados, formata o nome (Title Case) e pergunta como ajudar
 #   /proto              Envia o número do protocolo ao cliente
 #   /retornocom         Retorno ativo de chamado repassado pelo Comercial
 #   /atraso             Pede desculpas por fila alta no plantão
@@ -301,6 +302,40 @@ matches:
         type: global
       - name: saudacao
         type: global
+
+  # /confirma — Agradece a confirmação dos dados, formata o nome (Title Case) e pergunta como ajudar
+  - trigger: "/confirma"
+    force_clipboard: true
+    replace: "{{resultado}}"
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: "Nome do Cliente (Pode estar em CAPS LOCK): [[nome]]"
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $nomeCru = "{{formulario.nome}}".Trim()
+
+            # Converte tudo para minúsculo (ex: BRUNO MOREIRA -> bruno moreira)
+            $nomeMin = $nomeCru.ToLower()
+
+            # Aplica maiúscula na primeira letra de cada palavra (bruno moreira -> Bruno Moreira)
+            $nomeFormatado = (Get-Culture).TextInfo.ToTitleCase($nomeMin)
+
+            # Extrai apenas o primeiro nome para uma saudação mais amigável
+            $primeiroNome = ($nomeFormatado -split ' ')[0]
+
+            if ($primeiroNome) {
+                $msg = "Agradeço pela confirmação dos dados, $primeiroNome! 😊`n`nComo posso te auxiliar hoje?"
+            } else {
+                $msg = "Agradeço pela confirmação dos dados! 😊`n`nComo posso te auxiliar hoje?"
+            }
+
+            Write-Output $msg
 
   # /proto — Envia o número do protocolo ao cliente
   - trigger: "/proto"
