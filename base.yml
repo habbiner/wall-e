@@ -154,6 +154,7 @@
 #   /logsenha           Log de visita técnica para alteração de senha/nome Wi-Fi
 #   /logonline          Log de confirmação de sinal restaurado após reparo
 #   /logcpfl            Log de abertura de chamado na CPFL por falta de energia
+#   /cpfl               Aviso de chamado na CPFL para os grupos de WhatsApp
 #   /logcpanel          Log de instrução para solicitação de credenciais do cPanel
 #   /logcenvio          Log de envio das credenciais do cPanel após formalização por e-mail
 #   /logpower           Log de abertura de visita técnica por falha elétrica (Luz Power / Hardware)
@@ -902,23 +903,25 @@ matches:
       email:
         type: text
 
-  # /cancelapf — Informa prazo de 24h úteis do Financeiro para cancelamento PF
+  # /cancelapf — Informa novo fluxo (NOC1 → Financeiro → Comercial) para cancelamento PF
   - trigger: "/cancelapf"
     force_clipboard: true
     replace: |-
-      Compreendo a sua solicitação. 
+      Compreendo a sua solicitação.
 
-      Vou registrar a sua solicitação e encaminhar ao setor responsável para validação dos dados antes da efetivação do cancelamento. O prazo de retorno para conclusão do processo ocorrerá em até 24 horas úteis.
+      Vou registrar as informações e encaminhar ao nosso setor Financeiro para validação contratual e financeira antes da efetivação do cancelamento. Poderá haver contato do Financeiro (e, se necessário, do nosso setor Comercial) para tratativas antes da conclusão.
+
+      O seu serviço não será bloqueado neste momento, e o retorno para conclusão do processo ocorrerá em até 24 horas úteis.
 
       Posso confirmar a abertura do chamado?
 
-  # /cancelapj — Solicita formalização por e-mail com dados obrigatórios para cancelamento PJ
+  # /cancelapj — Solicita formalização por e-mail (agora no primeiro contato) e informa novo fluxo PJ
   - trigger: "/cancelapj"
     force_clipboard: true
     replace: |-
-      Compreendo a sua solicitação. 
+      Compreendo a sua solicitação.
 
-      Como o seu cadastro é empresarial, para prosseguirmos com a solicitação, será necessário o envio da formalização através do e-mail cadastrado da empresa para {{email_atendimento}}.
+      Como o seu cadastro é empresarial, para prosseguirmos, será necessário o envio da formalização através de e-mail para {{email_atendimento}}.
 
       Por gentileza, o e-mail deve conter as seguintes informações:
       • Razão Social;
@@ -927,7 +930,7 @@ matches:
       • Motivo do cancelamento;
       • Nome e cargo do responsável pela solicitação.
 
-      Sua solicitação será encaminhada para o setor responsável e o retorno para conclusão do processo ocorrerá em até 24 horas úteis após o recebimento do e-mail. O serviço permanecerá ativo durante o processo.
+      Após o recebimento, a solicitação será encaminhada ao nosso setor Financeiro para validação contratual e financeira, podendo haver contato do Financeiro e do Consultor antes da efetivação. O serviço permanecerá ativo durante o processo, e o retorno para conclusão ocorrerá em até 24 horas úteis após o recebimento do e-mail.
     vars:
       - name: email_atendimento
         type: global
@@ -2182,7 +2185,7 @@ matches:
           - Ligação
           - E-mail
 
-  # /logcanc — Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
+  # /logcanc — Log de repasse de cancelamento para o Financeiro (Novo Fluxo atualizado 01/09/26)
   - trigger: "/logcanc"
     form: |
       DESCRIÇÃO
@@ -2191,12 +2194,14 @@ matches:
       • Canal de Atendimento: [[canal]]
       • Solicitante: [[solicitante]]
       • Perfil: [[perfil]]
+      • Serviço: [[servico]]
       • Motivo Alegado: [[motivo]]
-      • Tentativa de Retenção Técnica: [[retencao]]
+      • Tentativa de Retenção Técnica (NOC1): [[retencao]]
 
       SOLUÇÃO
-      • Ação Realizada: Cliente informado de que a solicitação passará por validação contratual e financeira antes da efetivação, com prazo de retorno de até 24 horas úteis. Conforme as regras vigentes, o serviço não foi bloqueado e não foram fornecidas informações sobre multas, débitos ou retirada de equipamentos.
+      • Ação Realizada: Cliente informado de que a solicitação passará por validação contratual e financeira, com tentativa de retenção pelo Financeiro e, se necessário, pelo Comercial/Consultor, antes da efetivação. Prazo de retorno informado: até 24 horas úteis. Serviço não bloqueado; não foram fornecidas informações sobre multa, débitos ou retirada de equipamentos.
       • Status de Formalização: [[formalizacao_pj]]
+      • Chamado aberto para a fila do Financeiro.
     form_fields:
       canal:
         type: choice
@@ -2211,6 +2216,11 @@ matches:
         values:
           - Pessoa Física (PF)
           - Pessoa Jurídica (PJ)
+      servico:
+        type: choice
+        values:
+          - Fibra Óptica
+          - Data Center (cPanel, Plesk, VPS)
       motivo:
         type: text
       retencao:
@@ -2222,9 +2232,9 @@ matches:
       formalizacao_pj:
         type: choice
         values:
-          - Não se aplica (Cliente é PF - Encaminhado à fila do Financeiro)
-          - Aguardando formalização (Chamado classificado como Pendente de E-mail)
-          - E-mail de formalização recebido (Encaminhado à fila do Financeiro)
+          - Não se aplica (Cliente é PF)
+          - Formalização por e-mail já enviada pelo cliente (registrado no chamado)
+          - Cliente orientado a enviar formalização para cancelamento@com4.com.br (registrado no chamado)
 
   # /logtransfereprotesto — Log de encaminhamento de título protestado ao Financeiro (carta de anuência)
   - trigger: "/logtransfereprotesto"
@@ -3953,3 +3963,29 @@ matches:
         type: text
       remetente:
         type: text
+
+  # /cpfl — Aviso de chamado na CPFL para os grupos de WhatsApp
+  - trigger: "/cpfl"
+    form: |
+      Chamado aberto na CPFL referente aos alertas de queda de energia no [[local]].
+
+      Protocolo: [[protocolo]]
+      Previsão: [[previsao]]
+      Canal: [[canal]]
+      Chamado Com4: [[chamado_com4]]
+    form_fields:
+      local:
+        type: choice
+        values:
+          - Chassi - São Sebastião
+          - Chassi - Vila Hipica
+          - Chassi - Apae
+          - Sitio - 01 (Altinópolis)
+          - Sitio - 02 (Altinópolis)
+          - Sitio - Paulo (Sede)
+      canal:
+        type: choice
+        values:
+          - Whatsapp
+          - Ligação
+          - Site
