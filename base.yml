@@ -2384,7 +2384,7 @@ matches:
       • Previsão de Retorno: [[previsao]]
 
       PROCEDIMENTOS E COMUNICAÇÃO
-      • Chamado aberto na CPFL via canais de atendimento.
+      • Chamado aberto na CPFL via [[canais]].
       • Informativo enviado aos e-mails de atendimento e datacenter, e repassado nos grupos do WhatsApp "Com4 Data Center" e "Alertas Com4 Nagios".
       • Chamado mantido na fila Nível 01 para acompanhamento até o desaparecimento dos alertas.
     form_fields:
@@ -2394,9 +2394,13 @@ matches:
           - Chassi - São Sebastião
           - Chassi - Vila Hipica
           - Chassi - Apae
-          - Sitio - 01 (Altinópolis)
-          - Sitio - 02 (Altinópolis)
-          - Sitio - Paulo (Sede)
+          - Sitio (Altinópolis)
+      canais:
+        type: choice
+        values:
+          - Telefone
+          - WhatsApp
+          - E-mail
 
   # /logcongelado — Log de domínio congelado no Registro.br com renovação e período
   - trigger: "/logcongelado"
@@ -3980,9 +3984,7 @@ matches:
           - Chassi - São Sebastião
           - Chassi - Vila Hipica
           - Chassi - Apae
-          - Sitio - 01 (Altinópolis)
-          - Sitio - 02 (Altinópolis)
-          - Sitio - Paulo (Sede)
+          - Sitio (Altinópolis)
       canal:
         type: choice
         values:
