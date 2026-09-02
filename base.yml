@@ -34,6 +34,7 @@
 #   /ofer               Oferece o desbloqueio em acordo (antes de executar); informa prazo D+2
 #   /acordo             Confirma que o desbloqueio em acordo foi realizado + prazo D+2
 #   /norm               Confirma desbloqueio concluído após baixa bancária confirmada
+#   /porn               Resposta informal de despedida
 #   /comp               Confirma recebimento e registro do comprovante de pagamento
 #   /emailcomp          Confirmação formal de recebimento de comprovante via e-mail
 #   /faltadados         Solicita CPF/CNPJ de comprovante recebido sem identificação via e-mail
@@ -666,6 +667,12 @@ matches:
       O desbloqueio dos seus serviços foi concluído.
 
       Sua conexão deve retornar à normalidade em instantes.
+
+  # /porn — Resposta informal de despedida
+  - trigger: "/porn"
+    force_clipboard: true
+    replace: |-
+      Por nada! Tenha um ótimo dia e excelente semana
 
   # /comp — Confirma recebimento e registro do comprovante de pagamento
   - trigger: "/comp"
