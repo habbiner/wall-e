@@ -178,9 +178,10 @@ global_vars:
     params:
       shell: pwsh
       cmd: |
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
-          $l = Get-Content $p | Where-Object { $_ -match '^\s*ATENDENTE_NOME\s*=' } | Select-Object -First 1
+          $l = Get-Content $p -Encoding utf8 | Where-Object { $_ -match '^\s*ATENDENTE_NOME\s*=' } | Select-Object -First 1
           if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { 'Bruno' }
         } else { 'Bruno' }
 
