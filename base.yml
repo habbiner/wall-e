@@ -175,7 +175,7 @@ global_vars:
   - name: atendente_nome
     type: shell
     params:
-      shell: powershell
+      shell: pwsh
       cmd: |
         $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
@@ -186,7 +186,7 @@ global_vars:
   - name: empresa_nome
     type: shell
     params:
-      shell: powershell
+      shell: pwsh
       cmd: |
         $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
@@ -197,7 +197,7 @@ global_vars:
   - name: email_atendimento
     type: shell
     params:
-      shell: powershell
+      shell: pwsh
       cmd: |
         $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
@@ -208,18 +208,29 @@ global_vars:
   - name: valor_mensalidade_fid
     type: shell
     params:
-      shell: powershell
-      cmd: "'499.90'" # ou lido do match.env, como os demais
+      shell: pwsh
+      cmd: |
+        $p = Join-Path $env:CONFIG 'match\.env'
+        if (Test-Path $p) {
+          $l = Get-Content $p | Where-Object { $_ -match '^\s*VALOR_MENSALIDADE_FID\s*=' } | Select-Object -First 1
+          if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { '499.90' }
+        } else { '499.90' }
+
   - name: multa_comodato
     type: shell
     params:
-      shell: powershell
-      cmd: "'525,00'"
+      shell: pwsh
+      cmd: |
+        $p = Join-Path $env:CONFIG 'match\.env'
+        if (Test-Path $p) {
+          $l = Get-Content $p | Where-Object { $_ -match '^\s*MULTA_COMODATO\s*=' } | Select-Object -First 1
+          if ($l) { (($l -split '=', 2)[1]).Trim().Trim('"').Trim("'") } else { '525,00' }
+        } else { '525,00' }
 
   - name: contato_registro_br
     type: shell
     params:
-      shell: powershell
+      shell: pwsh
       cmd: |
         $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
@@ -231,21 +242,21 @@ global_vars:
   - name: saudacao
     type: shell
     params:
-      shell: powershell
+      shell: pwsh
       cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'bom dia' } elseif ($h -lt 18) { 'boa tarde' } else { 'boa noite' }"
 
   # Saudação capitalizada — uso no início de frase: "{{saudacao_cap}}! Aqui é..."
   - name: saudacao_cap
     type: shell
     params:
-      shell: powershell
+      shell: pwsh
       cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'Bom dia' } elseif ($h -lt 18) { 'Boa tarde' } else { 'Boa noite' }"
 
   # Despedida dinâmica — uso em /tchau (inline, sem .ps1 — evita ExecutionPolicy)
   - name: despedida
     type: shell
     params:
-      shell: powershell
+      shell: pwsh
       cmd: |
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $p = Join-Path $env:CONFIG 'match\.env'
@@ -259,25 +270,25 @@ global_vars:
   - name: data_hoje
     type: shell
     params:
-      shell: powershell
+      shell: pwsh
       cmd: "(Get-Date).ToString('dd/MM/yyyy')"
 
   - name: hora_atual
     type: shell
     params:
-      shell: powershell
+      shell: pwsh
       cmd: "(Get-Date).ToString('HH:mm')"
 
   - name: data_2d_uteis
     type: shell
     params:
-      shell: powershell
+      shell: pwsh
       cmd: "$d = Get-Date; $c = 2; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
 
   - name: data_1d_util
     type: shell
     params:
-      shell: powershell
+      shell: pwsh
       cmd: "$d = Get-Date; $c = 1; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
 
 matches:
@@ -317,7 +328,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: powershell
+          shell: pwsh
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $nomeCru = "{{formulario.nome}}".Trim()
@@ -416,19 +427,25 @@ matches:
 
   # /prazo — Informa SLA de retorno
   - trigger: "/prazo"
-    form: |
-      A sua solicitação foi registrada com sucesso. O nosso prazo de retorno para este tipo de atendimento é de até [[horas]] horas úteis.
+    force_clipboard: true
+    replace: |-
+      A sua solicitação foi registrada com sucesso. O nosso prazo de retorno para este tipo de atendimento é de até {{formulario.horas}} horas úteis.
 
       Assim que tivermos uma atualização, entraremos em contato por aqui.
-    form_fields:
-      horas:
-        type: choice
-        values:
-          - "4"
-          - "8"
-          - "24"
-          - "48"
-          - "72"
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: "Prazo (horas): [[horas]]"
+          fields:
+            horas:
+              type: choice
+              values:
+                - "4"
+                - "8"
+                - "24"
+                - "48"
+                - "72"
 
   # /aux — Pergunta se precisa de mais alguma ajuda antes de encerrar
   - trigger: "/aux"
@@ -529,40 +546,61 @@ matches:
 
   # /aniversario — Mensagem padrão de feliz aniversário para o grupo da Com4
   - trigger: "/aniversario"
-    form: "Parabéns [[nome]]! Muitos anos de vida, saúde e felicidades! 🥳🎉"
-    form_fields:
-      nome:
-        type: text
+    force_clipboard: true
+    replace: "Parabéns {{formulario.nome}}! Muitos anos de vida, saúde e felicidades! 🥳🎉"
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: "Nome do aniversariante: [[nome]]"
   # =============================================================================
   # 2 · Financeiro — Cliente
   # =============================================================================
 
   # /bloqueado — Informa suspensão por fatura em aberto; oferece 2ª via ou aguarda comprovante
   - trigger: "/bloqueado"
-    form: |
-      Ao consultar seu cadastro, identifiquei que os serviços estão temporariamente suspensos devido a uma fatura com vencimento em [[vencimento]] que consta em aberto em nosso sistema.
+    force_clipboard: true
+    replace: |-
+      Ao consultar seu cadastro, identifiquei que os serviços estão temporariamente suspensos devido a uma fatura com vencimento em {{formulario.vencimento}} que consta em aberto em nosso sistema.
 
       Para restaurarmos o seu acesso, envie por aqui o comprovante, caso o pagamento já tenha sido realizado.
 
       Ou, se preferir, posso emitir a 2ª via atualizada agora mesmo.
 
       Como deseja seguir?
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: "Vencimento em aberto: [[vencimento]]"
 
   # /2via — Envia 2ª via do boleto com data de vencimento
   - trigger: "/2via"
-    form: |
-      Conforme solicitado, segue em anexo a segunda via do boleto, com vencimento em [[vencimento]].
+    force_clipboard: true
+    replace: |-
+      Conforme solicitado, segue em anexo a segunda via do boleto, com vencimento em {{formulario.vencimento}}.
 
       Por gentileza, revise os dados antes de pagar.
 
       Se possível, envie o comprovante por aqui para agilizarmos a baixa em nosso sistema.
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: "Vencimento: [[vencimento]]"
 
   # /nfe — Envia a Nota Fiscal (NFe) solicitada pelo cliente
   - trigger: "/nfe"
-    form: |
-      Conforme solicitado, segue em anexo a sua Nota Fiscal referente ao mês de [[mes_referencia]].
+    force_clipboard: true
+    replace: |-
+      Conforme solicitado, segue em anexo a sua Nota Fiscal referente ao mês de {{formulario.mes_referencia}}.
 
       Qualquer dúvida, sigo à disposição!
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: "Mês de referência: [[mes_referencia]]"
 
   # /agendamento — Informa que o documento enviado é comprovante de agendamento, não pagamento
   - trigger: "/agendamento"
@@ -640,6 +678,7 @@ matches:
 
   # /emailcomp — Confirmação formal de recebimento de comprovante via e-mail
   - trigger: "/emailcomp"
+    force_clipboard: true
     form: |
       Olá, [[nome]], {{saudacao}}!
 
@@ -656,6 +695,7 @@ matches:
 
   # /faltadados — Solicita CPF/CNPJ de comprovante recebido sem identificação via e-mail
   - trigger: "/faltadados"
+    force_clipboard: true
     form: |
       Olá, [[nome]], {{saudacao}}!
 
@@ -685,78 +725,12 @@ matches:
 
             Confira no sistema a data do ÚLTIMO boleto já gerado:
             Data (dd/mm ou dd/mm/aaaa): [[ultimo_gerado]]
-
       - name: resultado
         type: shell
         params:
-          shell: powershell
+          shell: pwsh
           cmd: |
-            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-            $OutputEncoding = [System.Text.Encoding]::UTF8
-            $atualStr = "{{atual}}"
-            $novoStr  = "{{novo}}"
-            $atual = [int]$atualStr
-            $novo  = [int]$novoStr
-
-            $mesesPt = @("janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro")
-
-            $entrada = "{{formulario.ultimo_gerado}}".Trim()
-            $ultimoDue = $null
-            try {
-                $ultimoDue = [datetime]::ParseExact($entrada, "dd/MM/yyyy", $null)
-            } catch {
-                try {
-                    $parcial = [datetime]::ParseExact($entrada, "dd/MM", $null)
-                    $ultimoDue = Get-Date -Year (Get-Date).Year -Month $parcial.Month -Day $parcial.Day
-                } catch {
-                    Write-Output "Data inválida ('$entrada'). Use o formato dd/mm ou dd/mm/aaaa e rode o atalho novamente."
-                    exit
-                }
-            }
-
-            if ($atual -eq $novo) {
-                Write-Output "O dia informado como atual e o novo são iguais (dia $novoStr). Não há alteração de vencimento a ser feita."
-                exit
-            }
-
-            # 1. Descobre a Data Base do Mês de Referência do Último Boleto
-            if ($atual -in 5,10,15) {
-                $lastRefDate = $ultimoDue.AddMonths(-1)
-            } else {
-                $lastRefDate = $ultimoDue
-            }
-
-            # 2. O Mês de Referência do Próximo Boleto é estritamente +1 mês
-            $nextRefDate = $lastRefDate.AddMonths(1)
-
-            # 3. Calcula quando esse próximo boleto vai vencer baseado no Novo Dia
-            if ($novo -in 5,10,15) {
-                $nextDueDateMonth = $nextRefDate.AddMonths(1)
-            } else {
-                $nextDueDateMonth = $nextRefDate
-            }
-
-            $proximoDue = Get-Date -Year $nextDueDateMonth.Year -Month $nextDueDateMonth.Month -Day $novo
-
-            # 4. Define a Regra de Texto
-            if (($atual -in 5,10,15) -and ($novo -in 20,25)) {
-                $regra = "📅 Você pagará 2 boletos no mesmo mês: como o vencimento mudou para o mês vigente, você pagará o referente ao mês passado no início do mês e o deste mês no final."
-            } elseif (($atual -in 20,25) -and ($novo -in 5,10,15)) {
-                $regra = "📅 Haverá um intervalo maior entre vencimentos: o próximo boleto será referente ao mês anterior e só vencerá no mês seguinte, gerando um intervalo de quase 40 dias sem boleto."
-            } else {
-                $regra = "📅 Apenas ajuste no dia: a referência do mês de cobrança continuará a mesma, alterando apenas o dia exato do pagamento dentro do mês."
-            }
-
-            # 5. Pega os nomes dos meses em Português
-            $mesUltimo  = $mesesPt[$lastRefDate.Month - 1]
-            $mesProximo = $mesesPt[$nextRefDate.Month - 1]
-
-            $ultimoStr  = $ultimoDue.ToString("dd/MM")
-            $proximoStr = $proximoDue.ToString("dd/MM")
-
-            $mensagem = "Compreendo a sua solicitação para alterar a data de vencimento para o dia $novoStr.`n`nPara alinharmos as expectativas, como as nossas datas possuem referências de cobrança diferentes (mês anterior vs. mês vigente), essa mudança gerará o seguinte ajuste no seu faturamento:`n`n$regra`n`nO cenário da sua assinatura ficará assim:`n• Último boleto gerado: vencimento em $ultimoStr (referente ao mês de $mesUltimo).`n• Próximo boleto a faturar: vencimento em $proximoStr (referente ao mês de $mesProximo).`n`nVocê está de acordo com este ajuste para que eu possa encaminhar a solicitação de alteração ao nosso setor Financeiro?"
-
-            Write-Output $mensagem
+            & "$env:CONFIG\match\scripts\calc_vencimento.ps1" -Atual "{{atual}}" -Novo "{{novo}}" -UltimoGerado "{{formulario.ultimo_gerado}}" -Modo cliente
 
   # /transfereprotesto — Explica o processo e encaminha o cliente ciente do título protestado ao Financeiro
   - trigger: "/transfereprotesto"
@@ -783,23 +757,31 @@ matches:
 
   # /doctroca — Solicita documentos (PF ou PJ) para iniciar troca de titularidade
   - trigger: "/doctroca"
-    form: |
-      Para darmos andamento à troca de titularidade, por gentileza, nos envie os seguintes dados e documentos do **[[tipo_titular]]**:
+    force_clipboard: true
+    replace: |-
+      Para darmos andamento à troca de titularidade, por gentileza, nos envie os seguintes dados e documentos do **{{formulario.tipo_titular}}**:
 
-      [[documentos]]
+      {{formulario.documentos}}
 
       Você pode nos enviar as fotos ou arquivos em PDF por aqui mesmo.
-    form_fields:
-      tipo_titular:
-        type: choice
-        values:
-          - novo titular
-          - titular atual
-      documentos:
-        type: choice
-        values:
-          - "• Documento com foto (RG ou CNH)\n• CPF\n• Data de nascimento\n• E-mail\n• Endereço completo"
-          - "• Cartão CNPJ\n• Razão social\n• Comprovante de inscrição e situação cadastral\n• E-mail\n• Endereço completo"
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Tipo de titular: [[tipo_titular]]
+            Documentos: [[documentos]]
+          fields:
+            tipo_titular:
+              type: choice
+              values:
+                - novo titular
+                - titular atual
+            documentos:
+              type: choice
+              values:
+                - "• Documento com foto (RG ou CNH)\n• CPF\n• Data de nascimento\n• E-mail\n• Endereço completo"
+                - "• Cartão CNPJ\n• Razão social\n• Comprovante de inscrição e situação cadastral\n• E-mail\n• Endereço completo"
 
   # /fid — Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
   # Uso: /fid [meses ativos] — Exemplo: /fid 5 (para um cliente com 5 meses de uso)
@@ -812,7 +794,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: powershell
+          shell: pwsh
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -851,6 +833,7 @@ matches:
 
   # /pague — Lembrete proativo de fatura em aberto antes do bloqueio ocorrer
   - trigger: "/pague"
+    force_clipboard: true
     form: |
       Aproveitando o nosso contato, notei ao consultar o seu cadastro que a fatura com vencimento em [[vencimento]] consta como pendente em nosso sistema.
 
@@ -891,6 +874,7 @@ matches:
 
   # /correios — Explica o atraso na entrega física da fatura e reforça os canais digitais
   - trigger: "/correios"
+    force_clipboard: true
     form: |
       Verifiquei o seu cadastro e confirmo que as faturas estão sendo enviadas normalmente de forma digital para o e-mail registrado: [[email]].
 
@@ -1051,6 +1035,7 @@ matches:
 
   # /romp — Informa rompimento grave de fibra óptica na região (acidente/evento externo)
   - trigger: "/romp"
+    force_clipboard: true
     form: |
       Pedimos sinceras desculpas pela paralisação dos serviços de internet ocorrida hoje.
 
@@ -1127,6 +1112,7 @@ matches:
 
   # /reset — Confirma sinal normal e propõe reconfiguração lógica remota do modem
   - trigger: "/reset"
+    force_clipboard: true
     form: |
       Realizei uma análise detalhada da sua conexão e confirmo que os serviços até o modem da Com4 estão operando com total normalidade.
 
@@ -1140,6 +1126,7 @@ matches:
 
   # /fast — Explica limitação do roteador Fast (100Mbps) e sugere troca por Gigabit
   - trigger: "/fast"
+    force_clipboard: true
     form: |
       Realizei uma análise detalhada da sua conexão e confirmo que os serviços até o modem da Com4 estão operando com total normalidade. O sinal da fibra óptica encontra-se excelente e dentro dos padrões ideais de operação, com consumo regular de banda larga. O seu modem, inclusive, está ativo e sem quedas há [[uptime]].
 
@@ -1383,6 +1370,7 @@ matches:
 
   # /viabilidade — Informa cliente (Lead) que há viabilidade de fibra no endereço (Padrão BDC)
   - trigger: "/viabilidade"
+    force_clipboard: true
     form: |
       Olá, [[nome]], {{saudacao}}!
 
@@ -1401,6 +1389,7 @@ matches:
 
   # /semviabilidade — Informa cliente (Lead) sobre falta de viabilidade de fibra no endereço (Padrão BDC)
   - trigger: "/semviabilidade"
+    force_clipboard: true
     form: |
       Olá, [[nome]], {{saudacao}}!
 
@@ -1553,7 +1542,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: powershell
+          shell: pwsh
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $plat = "{{formulario.plataforma}}"
@@ -1677,15 +1666,24 @@ matches:
 
   # /renova — Envia boleto para renovação de registro de domínio
   - trigger: "/renova"
-    form: |
+    force_clipboard: true
+    replace: |-
       Olá,
 
-      Conforme solicitado, segue em anexo o boleto para a renovação de registro do domínio [[dominio]].
+      Conforme solicitado, segue em anexo o boleto para a renovação de registro do domínio {{formulario.dominio}}.
 
-      Período: [[periodo]] anos.
-      Valor: R$ [[valor]].
+      Período: {{formulario.periodo}} anos.
+      Valor: R$ {{formulario.valor}}.
 
       Obrigado pelo contato. Conte sempre conosco!
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Domínio: [[dominio]]
+            Período (anos): [[periodo]]
+            Valor: [[valor]]
 
   # /dnsemail — Envia todos os apontamentos DNS necessários para e-mail com site em provedor externo
   - trigger: "/dnsemail"
@@ -1845,21 +1843,17 @@ matches:
             Telefone: [[telefone]]
             Tipo de Serviço: [[tipo]]
           fields:
-            canal:
-              type: choice
-              values:
-                - Blip
-                - Ligação
-                - E-mail
-            tipo:
-              type: choice
-              values:
-                - Data Center (cPanel, Plesk, VPS)
-                - Fibra Óptica
+            canal: &canal_padrao
+              - Blip
+              - Ligação
+              - E-mail
+            tipo: &tipo_servico_padrao
+              - Data Center (cPanel, Plesk, VPS)
+              - Fibra Óptica
       - name: resultado
         type: shell
         params:
-          shell: powershell
+          shell: pwsh
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
@@ -1896,19 +1890,14 @@ matches:
           fields:
             canal:
               type: choice
-              values:
-                - Blip
-                - Ligação
-                - E-mail
+              values: *canal_padrao
             tipo:
               type: choice
-              values:
-                - Data Center (cPanel, Plesk, VPS)
-                - Fibra Óptica
+              values: *tipo_servico_padrao
       - name: resultado
         type: shell
         params:
-          shell: powershell
+          shell: pwsh
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
@@ -1940,13 +1929,11 @@ matches:
           fields:
             tipo:
               type: choice
-              values:
-                - Data Center (cPanel, Plesk, VPS)
-                - Fibra Óptica
+              values: *tipo_servico_padrao
       - name: resultado
         type: shell
         params:
-          shell: powershell
+          shell: pwsh
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
@@ -1974,13 +1961,11 @@ matches:
           fields:
             tipo:
               type: choice
-              values:
-                - Data Center (cPanel, Plesk, VPS)
-                - Fibra Óptica
+              values: *tipo_servico_padrao
       - name: resultado
         type: shell
         params:
-          shell: powershell
+          shell: pwsh
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
@@ -1998,6 +1983,7 @@ matches:
 
   # /log2via — Log completo de atendimento de emissão de 2ª via de boleto
   - trigger: "/log2via"
+    force_clipboard: true
     form: |
       Segunda Via de Boleto
       INFORMAÇÕES
@@ -2017,10 +2003,7 @@ matches:
     form_fields:
       canal:
         type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
+        values: *canal_padrao
       status_boleto:
         type: choice
         values:
@@ -2040,45 +2023,54 @@ matches:
 
   # /lognfe — Log completo de atendimento de envio de Nota Fiscal
   - trigger: "/lognfe"
-    form: |
+    force_clipboard: true
+    replace: |-
       Envio de Nota Fiscal (NFe)
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Contrato: [[contrato]]
-      • Mês de Referência: [[referencia]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Contrato: {{formulario.contrato}}
+      • Mês de Referência: {{formulario.referencia}}
 
       SITUAÇÃO FINANCEIRA E VERIFICAÇÕES
-      • Status do Boleto: [[status_boleto]]
-      • Status do Serviço: [[status_servico]]
+      • Status do Boleto: {{formulario.status_boleto}}
+      • Status do Serviço: {{formulario.status_servico}}
 
       ENVIO E DADOS DE ACESSO
-      • Meio de Envio: [[envio]]
+      • Meio de Envio: {{formulario.envio}}
 
       SOLUÇÃO
       • Ação Realizada: Nota fiscal enviada ao cliente com sucesso.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      status_boleto:
-        type: choice
-        values:
-          - Aberto
-          - Vencido
-      status_servico:
-        type: choice
-        values:
-          - Ativo
-          - Bloqueado
-          - Cancelado
-      envio:
-        type: choice
-        values:
-          - Blip
-          - E-mail
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Contrato: [[contrato]]
+            Mês de referência: [[referencia]]
+            Status do boleto: [[status_boleto]]
+            Status do serviço: [[status_servico]]
+            Meio de envio: [[envio]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            status_boleto:
+              type: choice
+              values:
+                - Aberto
+                - Vencido
+            status_servico:
+              type: choice
+              values:
+                - Ativo
+                - Bloqueado
+                - Cancelado
+            envio:
+              type: choice
+              values:
+                - Blip
+                - E-mail
 
   # /logvenc — Log de abertura de chamado ao Financeiro (alteração de vencimento) — cálculo automático
   # Uso: /logvenc [dia atual] [dia novo] — Exemplo: /logvenc 25 10
@@ -2098,239 +2090,218 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: powershell
+          shell: pwsh
           cmd: |
-            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-            $OutputEncoding = [System.Text.Encoding]::UTF8
-            $atualStr = "{{atual}}"
-            $novoStr  = "{{novo}}"
-            $atual = [int]$atualStr
-            $novo  = [int]$novoStr
-
-            $mesesPt = @("janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro")
-
-            $entrada = "{{formulario.ultimo_gerado}}".Trim()
-            $ultimoDue = $null
-            try {
-                $ultimoDue = [datetime]::ParseExact($entrada, "dd/MM/yyyy", $null)
-            } catch {
-                try {
-                    $parcial = [datetime]::ParseExact($entrada, "dd/MM", $null)
-                    $ultimoDue = Get-Date -Year (Get-Date).Year -Month $parcial.Month -Day $parcial.Day
-                } catch {
-                    Write-Output "Data inválida ('$entrada'). Use o formato dd/mm ou dd/mm/aaaa e rode o atalho novamente."
-                    exit
-                }
-            }
-
-            if ($atual -eq $novo) {
-                Write-Output "O dia informado como atual e o novo são iguais (dia $novoStr). Não há alteração de vencimento a ser feita."
-                exit
-            }
-
-            # 1. Descobre a Data Base do Mês de Referência do Último Boleto
-            if ($atual -in 5,10,15) {
-                $lastRefDate = $ultimoDue.AddMonths(-1)
-            } else {
-                $lastRefDate = $ultimoDue
-            }
-
-            # 2. O Mês de Referência do Próximo Boleto é estritamente +1 mês
-            $nextRefDate = $lastRefDate.AddMonths(1)
-
-            # 3. Calcula quando esse próximo boleto vai vencer baseado no Novo Dia
-            if ($novo -in 5,10,15) {
-                # Vencimento Anterior: cobra o mês seguinte à referência
-                $nextDueDateMonth = $nextRefDate.AddMonths(1)
-            } else {
-                # Vencimento Vigente: cobra dentro do próprio mês de referência
-                $nextDueDateMonth = $nextRefDate
-            }
-
-            $proximoDue = Get-Date -Year $nextDueDateMonth.Year -Month $nextDueDateMonth.Month -Day $novo
-
-            # 4. Pega os nomes dos meses em Português
-            $mesUltimo  = $mesesPt[$lastRefDate.Month - 1]
-            $mesProximo = $mesesPt[$nextRefDate.Month - 1]
-
-            $ultimoStr  = $ultimoDue.ToString("dd/MM")
-            $proximoStr = $proximoDue.ToString("dd/MM")
-
-            $mensagem = "Alteração Data Vencimento`n`nCliente entrou em contato solicitando para alterar a data de vencimento de seus boletos do dia $atualStr para todo dia $novoStr.`n`nForam passadas as seguintes informações ao cliente:`nÚltimo boleto gerado: $ultimoStr - Referente ao mês de $mesUltimo`nPróximo boleto gerado: $proximoStr - Referente ao mês de $mesProximo`n`nPor gentileza, verificar."
-
-            Write-Output $mensagem
+            & "$env:CONFIG\match\scripts\calc_vencimento.ps1" -Atual "{{atual}}" -Novo "{{novo}}" -UltimoGerado "{{formulario.ultimo_gerado}}" -Modo interno
 
   # /loginvertido — Log interno de pagamento de fatura do mês incorreto
   - trigger: "/loginvertido"
-    form: |
+    force_clipboard: true
+    replace: |-
       Pagamento Invertido de Fatura
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[nome]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.nome}}
 
       OCORRÊNCIA
-      • O cliente efetuou o pagamento da fatura com vencimento em [[vencimento_pago]] (mês posterior) em vez da fatura pendente com vencimento em [[vencimento_atual]].
+      • O cliente efetuou o pagamento da fatura com vencimento em {{formulario.vencimento_pago}} (mês posterior) em vez da fatura pendente com vencimento em {{formulario.vencimento_atual}}.
 
       PROCEDIMENTOS
       • Cliente orientado de que a fatura atual continua em aberto e requer pagamento para evitar a suspensão dos serviços.
 
       AÇÃO
       • Chamado mantido na fila do Financeiro aguardando a baixa bancária do boleto pago e a regularização do boleto pendente.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[nome]]
+            Vencimento pago (errado): [[vencimento_pago]]
+            Vencimento pendente (atual): [[vencimento_atual]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
 
   # /logcanc — Log de repasse de cancelamento para o Financeiro (Novo Fluxo atualizado 01/09/26)
   - trigger: "/logcanc"
-    form: |
+    force_clipboard: true
+    replace: |-
       DESCRIÇÃO
       Cliente entrou em contato solicitando o cancelamento dos serviços.
 
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[solicitante]]
-      • Perfil: [[perfil]]
-      • Serviço: [[servico]]
-      • Motivo Alegado: [[motivo]]
-      • Tentativa de Retenção Técnica (NOC1): [[retencao]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.solicitante}}
+      • Perfil: {{formulario.perfil}}
+      • Serviço: {{formulario.servico}}
+      • Motivo Alegado: {{formulario.motivo}}
+      • Tentativa de Retenção Técnica (NOC1): {{formulario.retencao}}
 
       SOLUÇÃO
       • Ação Realizada: Cliente informado de que a solicitação passará por validação contratual e financeira, com tentativa de retenção pelo Financeiro e, se necessário, pelo Comercial/Consultor, antes da efetivação. Prazo de retorno informado: até 24 horas úteis. Serviço não bloqueado; não foram fornecidas informações sobre multa, débitos ou retirada de equipamentos.
-      • Status de Formalização: [[formalizacao_pj]]
+      • Status de Formalização: {{formulario.formalizacao_pj}}
       • Chamado aberto para a fila do Financeiro.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      solicitante:
-        type: text
-      perfil:
-        type: choice
-        values:
-          - Pessoa Física (PF)
-          - Pessoa Jurídica (PJ)
-      servico:
-        type: choice
-        values:
-          - Fibra Óptica
-          - Data Center (cPanel, Plesk, VPS)
-      motivo:
-        type: text
-      retencao:
-        type: choice
-        values:
-          - Não se aplica (Motivo não técnico)
-          - Tentativa de reversão técnica sem sucesso
-          - Reversão bem-sucedida (Cancelamento abortado)
-      formalizacao_pj:
-        type: choice
-        values:
-          - Não se aplica (Cliente é PF)
-          - Formalização por e-mail já enviada pelo cliente (registrado no chamado)
-          - Cliente orientado a enviar formalização para cancelamento@com4.com.br (registrado no chamado)
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[solicitante]]
+            Perfil: [[perfil]]
+            Serviço: [[servico]]
+            Motivo alegado: [[motivo]]
+            Tentativa de retenção: [[retencao]]
+            Formalização PJ: [[formalizacao_pj]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            solicitante:
+              type: text
+            perfil:
+              type: choice
+              values:
+                - Pessoa Física (PF)
+                - Pessoa Jurídica (PJ)
+            servico:
+              type: choice
+              values: *tipo_servico_padrao
+            motivo:
+              type: text
+            retencao:
+              type: choice
+              values:
+                - Não se aplica (Motivo não técnico)
+                - Tentativa de reversão técnica sem sucesso
+                - Reversão bem-sucedida (Cancelamento abortado)
+            formalizacao_pj:
+              type: choice
+              values:
+                - Não se aplica (Cliente é PF)
+                - Formalização por e-mail já enviada pelo cliente (registrado no chamado)
+                - Cliente orientado a enviar formalização para cancelamento@com4.com.br (registrado no chamado)
 
   # /logtransfereprotesto — Log de encaminhamento de título protestado ao Financeiro (carta de anuência)
   - trigger: "/logtransfereprotesto"
-    form: |
+    force_clipboard: true
+    replace: |-
       Tratativa de Boleto Protestado
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[nome]]
-      • Contrato / CPF ou CNPJ: [[doc]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.nome}}
+      • Contrato / CPF ou CNPJ: {{formulario.doc}}
 
       SOLICITAÇÃO
       • Cliente entrou em contato solicitando a regularização de título protestado e a emissão de carta de anuência.
 
       ESCALONAMENTO
       • Chamado transferido para a fila do Financeiro para negociação, emissão do boleto atualizado e tratativas de cartório.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[nome]]
+            Contrato / CPF ou CNPJ: [[doc]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
 
   # /loglead — Log de oportunidade comercial identificada; encaminha lead ao Comercial
   - trigger: "/loglead"
-    form: |
+    force_clipboard: true
+    replace: |-
       Oportunidade Comercial Identificada
 
       INFORMAÇÕES DO LEAD
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[nome]]
-      • Telefone/WhatsApp: [[telefone]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.nome}}
+      • Telefone/WhatsApp: {{formulario.telefone}}
 
       DETALHES DO INTERESSE
-      • Serviço Desejado: [[servico]]
-      • Nível de Interesse: [[interesse]]
-      • Observações: [[obs]]
+      • Serviço Desejado: {{formulario.servico}}
+      • Nível de Interesse: {{formulario.interesse}}
+      • Observações: {{formulario.obs}}
 
       Ação: Chamado encaminhado para a fila do Comercial para prospecção e envio de proposta.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      servico:
-        type: choice
-        values:
-          - Banda Larga Fibra Óptica
-          - Novo Servidor / VPS
-          - Hospedagem / Domínio
-      interesse:
-        type: choice
-        values:
-          - Alto (Urgente)
-          - Médio (Pesquisando valores)
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[nome]]
+            Telefone/WhatsApp: [[telefone]]
+            Serviço desejado: [[servico]]
+            Nível de interesse: [[interesse]]
+            Observações: [[obs]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            servico:
+              type: choice
+              values:
+                - Banda Larga Fibra Óptica
+                - Novo Servidor / VPS
+                - Hospedagem / Domínio
+            interesse:
+              type: choice
+              values:
+                - Alto (Urgente)
+                - Médio (Pesquisando valores)
 
   # /logcorreios — Log de orientação sobre atraso de fatura impressa (Correios)
   - trigger: "/logcorreios"
-    form: |
+    force_clipboard: true
+    replace: |-
       Atraso na Entrega de Fatura Impressa — Correios
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • E-mail de cadastro confirmado: [[email]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • E-mail de cadastro confirmado: {{formulario.email}}
 
       PROCEDIMENTOS
       • Cliente orientado sobre atrasos/extravios nos Correios e reforçados os canais digitais (e-mail, WhatsApp, 2ª via).
       • Oferecido envio imediato da fatura por canal digital.
 
       SOLUÇÃO
-      • [[status]]
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      status:
-        type: choice
-        values:
-          - 2ª via enviada. Chamado encerrado.
-          - Cliente optou por aguardar correspondência. Chamado encerrado.
-          - Cliente não retornou.
+      • {{formulario.status}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            E-mail confirmado: [[email]]
+            Status: [[status]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            status:
+              type: choice
+              values:
+                - 2ª via enviada. Chamado encerrado.
+                - Cliente optou por aguardar correspondência. Chamado encerrado.
+                - Cliente não retornou.
 
   # /logprotestoboleto — Log de abertura de chamado para o Financeiro gerar boleto de protesto
   - trigger: "/logprotestoboleto"
-    form: |
+    force_clipboard: true
+    replace: |-
       Geração de Boleto — Título Protestado
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[nome]]
-      • CPF / CNPJ: [[doc]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.nome}}
+      • CPF / CNPJ: {{formulario.doc}}
 
       SOLICITAÇÃO
       • Cliente entrou em contato solicitando a regularização de um título que se encontra protestado em cartório.
@@ -2338,228 +2309,296 @@ matches:
       PROCEDIMENTOS E ESCALONAMENTO
       • Cliente orientado de que o setor responsável fará o levantamento das custas e enviará o boleto atualizado.
       • Ação: Chamado transferido para a fila do Financeiro solicitando a geração e o envio do boleto protestado ao cliente, para posterior liberação da carta de anuência.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      nome:
-        type: text
-      doc:
-        type: text
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[nome]]
+            CPF/CNPJ: [[doc]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            nome:
+              type: text
+            doc:
+              type: text
 
   # /cha — Notificação padronizada de encaminhamento de chamados no WhatsApp
   - trigger: "/cha"
-    form: "[[prefixo]] [[cliente]] | [[assunto]]"
-    form_fields:
-      prefixo:
-        type: choice
-        values:
-          - "Chamado aberto para a fila 02 ➥"
-          - "Chamado aberto para fila Manutenção ➥"
-          - "Chamado aberto para fila de Ativação ➥"
-          - "Chamado aberto para fila Consultoria ➥"
-          - "Blip transferido para a consultoria ➥"
-      cliente:
-        type: text
-        multiline: false
-      assunto:
-        type: text
-        multiline: false
+    force_clipboard: true
+    replace: "{{formulario.prefixo}} {{formulario.cliente}} | {{formulario.assunto}}"
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Prefixo: [[prefixo]]
+            Cliente: [[cliente]]
+            Assunto: [[assunto]]
+          fields:
+            prefixo:
+              type: choice
+              values:
+                - "Chamado aberto para a fila 02 ➥"
+                - "Chamado aberto para fila Manutenção ➥"
+                - "Chamado aberto para fila de Ativação ➥"
+                - "Chamado aberto para fila Consultoria ➥"
+                - "Blip transferido para a consultoria ➥"
+            cliente:
+              type: text
+              multiline: false
+            assunto:
+              type: text
+              multiline: false
 
   # =============================================================================
   # 6 · Registros Internos — NOC / Técnico
   # =============================================================================
 
   # /logcpfl — Log de abertura de chamado na CPFL por falta de energia
+  # /logcpfl — Log de abertura de chamado na CPFL por falta de energia
   - trigger: "/logcpfl"
-    form: |
+    force_clipboard: true
+    replace: |-
       Queda de Energia — Acionamento CPFL
 
       INFORMAÇÕES
-      • Endereço Afetado: [[local]]
-      • Protocolo CPFL: [[protocolo]]
-      • Previsão de Retorno: [[previsao]]
+      • Endereço Afetado: {{formulario.local}}
+      • Protocolo CPFL: {{formulario.protocolo}}
+      • Previsão de Retorno: {{formulario.previsao}}
 
       PROCEDIMENTOS E COMUNICAÇÃO
-      • Chamado aberto na CPFL via [[canais]].
+      • Chamado aberto na CPFL via {{formulario.canais}}.
       • Informativo enviado aos e-mails de atendimento e datacenter, e repassado nos grupos do WhatsApp "Com4 Data Center" e "Alertas Com4 Nagios".
       • Chamado mantido na fila Nível 01 para acompanhamento até o desaparecimento dos alertas.
-    form_fields:
-      local:
-        type: choice
-        values:
-          - Chassi - São Sebastião
-          - Chassi - Vila Hipica
-          - Chassi - Apae
-          - Sitio (Altinópolis)
-      canais:
-        type: choice
-        values:
-          - Telefone
-          - WhatsApp
-          - E-mail
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Local: [[local]]
+            Protocolo: [[protocolo]]
+            Previsão: [[previsao]]
+            Canais: [[canais]]
+          fields:
+            local:
+              type: choice
+              values:
+                - Chassi - São Sebastião
+                - Chassi - Vila Hipica
+                - Chassi - Apae
+                - Sitio (Altinópolis)
+            canais:
+              type: choice
+              values:
+                - Telefone
+                - WhatsApp
+                - E-mail
 
   # /logcongelado — Log de domínio congelado no Registro.br com renovação e período
   - trigger: "/logcongelado"
-    form: |
+    force_clipboard: true
+    replace: |-
       Domínio Congelado
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Domínio: [[dominio]]
-      • IP do Servidor: [[ip_servidor]]
-      • Status: [[status]]
-      • Vencimento Registro: [[vencimento]]
-      • Data Congelamento: [[data_cong]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Domínio: {{formulario.dominio}}
+      • IP do Servidor: {{formulario.ip_servidor}}
+      • Status: {{formulario.status}}
+      • Vencimento Registro: {{formulario.vencimento}}
+      • Data Congelamento: {{formulario.data_cong}}
 
       VERIFICAÇÕES E PROCEDIMENTOS
-      • Auxílio na Renovação: [[renovacao]]
+      • Auxílio na Renovação: {{formulario.renovacao}}
 
       PERÍODO
-      • Prazo: [[prazo]]
-      • Valor: R$ [[valor]]
-      • E-mail: [[email]]
+      • Prazo: {{formulario.prazo}}
+      • Valor: R$ {{formulario.valor}}
+      • E-mail: {{formulario.email}}
 
       SOLUÇÃO
       • Ações e Orientações Realizadas: 
-      [[acao]]
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      status:
-        type: choice
-        values:
-          - Ativo
-          - Congelado
-          - Inativo
-      renovacao:
-        type: choice
-        values:
-          - Sim
-          - Não
-      acao:
-        type: text
-        multiline: true
+      {{formulario.acao}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Domínio: [[dominio]]
+            IP do servidor: [[ip_servidor]]
+            Status: [[status]]
+            Vencimento registro: [[vencimento]]
+            Data congelamento: [[data_cong]]
+            Auxílio na renovação: [[renovacao]]
+            Prazo: [[prazo]]
+            Valor: [[valor]]
+            E-mail: [[email]]
+            Ação: [[acao]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            status:
+              type: choice
+              values:
+                - Ativo
+                - Congelado
+                - Inativo
+            renovacao:
+              type: choice
+              values:
+                - Sim
+                - Não
+            acao:
+              type: text
+              multiline: true
 
   # /logfalha — Log de falha de acesso aos serviços Com4 com testes de DNS e Imunify360
   - trigger: "/logfalha"
-    form: |
+    force_clipboard: true
+    replace: |-
       Sem Acesso aos Serviços Com4
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Domínio: [[dominio]]
-      • Servidor: [[server]]
-      • Escopo da Falha: [[escopo]]
-      • Erro Apresentado: [[erro]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Domínio: {{formulario.dominio}}
+      • Servidor: {{formulario.server}}
+      • Escopo da Falha: {{formulario.escopo}}
+      • Erro Apresentado: {{formulario.erro}}
 
       TESTES E VERIFICAÇÕES
-      • Acesso ao site Com4: [[site_com4]]
-      • IP Público do Cliente: [[ip_cliente]]
-      • Ping / Tracert: [[ping]]
-      • Verificação de Bloqueios Imunify360: [[bloqueios]]
+      • Acesso ao site Com4: {{formulario.site_com4}}
+      • IP Público do Cliente: {{formulario.ip_cliente}}
+      • Ping / Tracert: {{formulario.ping}}
+      • Verificação de Bloqueios Imunify360: {{formulario.bloqueios}}
 
       SOLUÇÃO
       • Ação Realizada e Diagnóstico Final: 
-      [[acao]]
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      server:
-        type: choice
-        values: &lista_servidores_com4
-          - "Cpanel 1 — 189.90.130.2"
-          - "Cpanel 2 — 189.90.130.58"
-          - "Cpanel 3 — 189.90.130.60"
-          - "Cpanel 4 — 189.90.130.100"
-          - "Cpanel 5 — 189.90.130.52"
-          - "Cpanel 6 — 189.90.130.200"
-          - "Cpanel 7 — 189.90.130.138"
-          - "Cpanel 9 — 189.90.130.102"
-          - "Cpanel 12 — 189.90.130.154"
-          - "Cpanel 15 — 189.90.130.16"
-          - "Cloud CPanel 1 — 189.90.130.140"
-          - "Cloud CPanel 2 (152) — 189.90.130.152"
-          - "Cloud CPanel 2 (232) — 189.90.130.232"
-          - "Cpanel Email Corp1 (120) — 189.90.130.120"
-          - "Cpanel Email Corp1 (129) — 189.90.130.129"
-          - "Cpanel Email Corp2 — 189.90.131.130"
-          - "Cpanel Email Com4 — 189.90.130.10"
-          - "Cpanel Rev1 — 189.90.130.208"
-          - "Cpanel Rev2 — 189.90.130.210"
-          - "Cpanel Rev3 — 189.90.130.212"
-          - "Outro Servidor / Externo (Especificar no chamado)"
-      escopo:
-        type: choice
-        values:
-          - Isolado (Apenas na rede do cliente)
-          - Geral (Todos os acessos)
-      site_com4:
-        type: choice
-        values:
-          - Sim
-          - Não
-      bloqueios:
-        type: choice
-        values:
-          - Não constam bloqueios
-          - IP Bloqueado pelo Firewall
-      acao:
-        type: text
-        multiline: true
+      {{formulario.acao}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Domínio: [[dominio]]
+            Servidor: [[server]]
+            Escopo da falha: [[escopo]]
+            Erro apresentado: [[erro]]
+            Acesso site Com4: [[site_com4]]
+            IP público do cliente: [[ip_cliente]]
+            Ping/Tracert: [[ping]]
+            Bloqueios Imunify360: [[bloqueios]]
+            Ação: [[acao]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            server:
+              type: choice
+              values: &lista_servidores_com4
+                - "Cpanel 1 — 189.90.130.2"
+                - "Cpanel 2 — 189.90.130.58"
+                - "Cpanel 3 — 189.90.130.60"
+                - "Cpanel 4 — 189.90.130.100"
+                - "Cpanel 5 — 189.90.130.52"
+                - "Cpanel 6 — 189.90.130.200"
+                - "Cpanel 7 — 189.90.130.138"
+                - "Cpanel 9 — 189.90.130.102"
+                - "Cpanel 12 — 189.90.130.154"
+                - "Cpanel 15 — 189.90.130.16"
+                - "Cloud CPanel 1 — 189.90.130.140"
+                - "Cloud CPanel 2 (152) — 189.90.130.152"
+                - "Cloud CPanel 2 (232) — 189.90.130.232"
+                - "Cpanel Email Corp1 (120) — 189.90.130.120"
+                - "Cpanel Email Corp1 (129) — 189.90.130.129"
+                - "Cpanel Email Corp2 — 189.90.131.130"
+                - "Cpanel Email Com4 — 189.90.130.10"
+                - "Cpanel Rev1 — 189.90.130.208"
+                - "Cpanel Rev2 — 189.90.130.210"
+                - "Cpanel Rev3 — 189.90.130.212"
+                - "Outro Servidor / Externo (Especificar no chamado)"
+            escopo:
+              type: choice
+              values:
+                - Isolado (Apenas na rede do cliente)
+                - Geral (Todos os acessos)
+            site_com4:
+              type: choice
+              values:
+                - Sim
+                - Não
+            bloqueios:
+              type: choice
+              values:
+                - Não constam bloqueios
+                - IP Bloqueado pelo Firewall
+            acao:
+              type: text
+              multiline: true
 
   # /loglos — Log de abertura de visita técnica de fibra (LOS ou atenuação)
   - trigger: "/loglos"
-    form: |
-      Motivo da Visita: [[problema]]
+    force_clipboard: true
+    replace: |-
+      Motivo da Visita: {{formulario.problema}}
 
       PROCEDIMENTOS REALIZADOS
       • Orientações Passadas: Realizada orientação para verificação visual do cabo drop interno, confirmando a ausência de dobras, rompimentos ou objetos pressionando a fibra.
       • Retorno do Cliente: Confirmou que o conector está devidamente encaixado na ONU e a falha persiste. Solicito o envio de técnico ao local para verificação presencial.
 
-      Endereço Confirmado: [[endereco]]
-      Disponibilidade: [[disponibilidade]]
-    form_fields:
-      problema:
-        type: choice
-        values:
-          - Luz LOS
-          - Fibra Atenuada
+      Endereço Confirmado: {{formulario.endereco}}
+      Disponibilidade: {{formulario.disponibilidade}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Problema: [[problema]]
+            Endereço confirmado: [[endereco]]
+            Disponibilidade: [[disponibilidade]]
+          fields:
+            problema:
+              type: choice
+              values:
+                - Luz LOS
+                - Fibra Atenuada
 
   # /logmassivo — Log de cliente atendido durante ocorrência massiva em área
   - trigger: "/logmassivo"
-    form: |
+    force_clipboard: true
+    replace: |-
       Evento Massivo — Ocorrência em Área
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • CTO / Região Afetada: [[cto]]
-      • Previsão de Regularização: [[previsao]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • CTO / Região Afetada: {{formulario.cto}}
+      • Previsão de Regularização: {{formulario.previsao}}
 
       PROCEDIMENTOS REALIZADOS
       • Clientes atendidos orientados sobre a ocorrência massiva e prazo de normalização.
 
       SOLUÇÃO
       • Resposta do Cliente / Ação: 
-      [[acao]]
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      acao:
-        type: text
-        multiline: true
+      {{formulario.acao}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            CTO/Região: [[cto]]
+            Previsão: [[previsao]]
+            Ação: [[acao]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            acao:
+              type: text
+              multiline: true
 
   # /logsemretorno — Log de tentativa de retorno telefônico sem resposta do cliente
   - trigger: "/logsemretorno"
@@ -2588,331 +2627,423 @@ matches:
 
   # /logvps — Log de suporte a servidor VPS com testes, acesso e autorização de reinício
   - trigger: "/logvps"
-    form: |
+    force_clipboard: true
+    replace: |-
       Suporte a Servidor Virtual (VPS)
       INFORMAÇÕES
-      • IP do Servidor: [[ip]]
-      • Erro: [[erro]]
-      • Tipo de Acesso: [[tipo_acesso]]
-      • Frequência do Erro: [[frequencia]]
+      • IP do Servidor: {{formulario.ip}}
+      • Erro: {{formulario.erro}}
+      • Tipo de Acesso: {{formulario.tipo_acesso}}
+      • Frequência do Erro: {{formulario.frequencia}}
 
       TESTES
-      • Ping / Tracert: [[ping]]
-      • Teste de Acesso: [[teste_acesso]]
+      • Ping / Tracert: {{formulario.ping}}
+      • Teste de Acesso: {{formulario.teste_acesso}}
 
       DADOS DE ACESSO
-      • Usuário: [[user]]
-      • Senha: [[senha]]
+      • Usuário: {{formulario.user}}
+      • Senha: {{formulario.senha}}
 
       AUTORIZAÇÃO
-      • Cliente autoriza reiniciar a máquina se necessário? [[autorizacao]]
+      • Cliente autoriza reiniciar a máquina se necessário? {{formulario.autorizacao}}
 
       SOLUÇÃO E AÇÕES EXECUTADAS
       • Procedimentos realizados pelo NOC no servidor:
-      [[acao]]
-    form_fields:
-      ping:
-        type: choice
-        values:
-          - Sucesso
-          - Falha
-      teste_acesso:
-        type: choice
-        values:
-          - Sucesso
-          - Falha
-      autorizacao:
-        type: choice
-        values:
-          - Sim
-          - Não
-      acao:
-        type: text
-        multiline: true
+      {{formulario.acao}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            IP do servidor: [[ip]]
+            Erro: [[erro]]
+            Tipo de acesso: [[tipo_acesso]]
+            Frequência do erro: [[frequencia]]
+            Ping/Tracert: [[ping]]
+            Teste de acesso: [[teste_acesso]]
+            Usuário: [[user]]
+            Senha: [[senha]]
+            Autorização: [[autorizacao]]
+            Ação: [[acao]]
+          fields:
+            ping:
+              type: choice
+              values:
+                - Sucesso
+                - Falha
+            teste_acesso:
+              type: choice
+              values:
+                - Sucesso
+                - Falha
+            autorizacao:
+              type: choice
+              values:
+                - Sim
+                - Não
+            acao:
+              type: text
+              multiline: true
 
   # /logsite — Log de suporte a site com diagnóstico de DNS, disco e banco de dados
   - trigger: "/logsite"
-    form: |
+    force_clipboard: true
+    replace: |-
       Suporte a Site
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Domínio: [[dominio]]
-      • Servidor: [[server]]
-      • Erro: [[erro]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Domínio: {{formulario.dominio}}
+      • Servidor: {{formulario.server}}
+      • Erro: {{formulario.erro}}
 
       TESTES E VERIFICAÇÕES
-      • Status do Domínio (Whois): [[whois]]
-      • Status no cPanel/Servidor: [[cpanel]]
-      • Uso de Disco: [[disco]]
-      • Largura de Banda: [[banda]]
-      • Apontamentos DNS: [[dns]]
-      • Frequência do Erro: [[frequencia]]
-      • Teste de Conectividade: [[conectividade]]
+      • Status do Domínio (Whois): {{formulario.whois}}
+      • Status no cPanel/Servidor: {{formulario.cpanel}}
+      • Uso de Disco: {{formulario.disco}}
+      • Largura de Banda: {{formulario.banda}}
+      • Apontamentos DNS: {{formulario.dns}}
+      • Frequência do Erro: {{formulario.frequencia}}
+      • Teste de Conectividade: {{formulario.conectividade}}
 
       DADOS DE ACESSO (REVENDA OU WORDPRESS)
-      • Usuário: [[user]]
-      • Senha: [[senha]]
+      • Usuário: {{formulario.user}}
+      • Senha: {{formulario.senha}}
 
       SOLUÇÃO
       • Tratativa Realizada pelo Suporte: 
-      [[acao]]
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      server:
-        type: choice
-        values: *lista_servidores_com4
-      whois:
-        type: choice
-        values:
-          - Publicado
-          - Congelado
-          - Inativo
-      cpanel:
-        type: choice
-        values:
-          - Ativo
-          - Bloqueado
-      dns:
-        type: choice
-        values:
-          - Regular
-          - Irregular
-      conectividade:
-        type: choice
-        values:
-          - Regular
-          - Irregular
-      acao:
-        type: text
-        multiline: true
+      {{formulario.acao}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Domínio: [[dominio]]
+            Servidor: [[server]]
+            Erro: [[erro]]
+            Whois: [[whois]]
+            Status cPanel: [[cpanel]]
+            Uso de disco: [[disco]]
+            Largura de banda: [[banda]]
+            DNS: [[dns]]
+            Frequência do erro: [[frequencia]]
+            Conectividade: [[conectividade]]
+            Usuário: [[user]]
+            Senha: [[senha]]
+            Ação: [[acao]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            server:
+              type: choice
+              values: *lista_servidores_com4
+            whois:
+              type: choice
+              values:
+                - Publicado
+                - Congelado
+                - Inativo
+            cpanel:
+              type: choice
+              values:
+                - Ativo
+                - Bloqueado
+            dns:
+              type: choice
+              values:
+                - Regular
+                - Irregular
+            conectividade:
+              type: choice
+              values:
+                - Regular
+                - Irregular
+            acao:
+              type: text
+              multiline: true
 
   # /logemail — Log de suporte a e-mail com testes de webmail, DNS e configuração IMAP/POP
   - trigger: "/logemail"
-    form: |
+    force_clipboard: true
+    replace: |-
       Suporte a E-mail
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Domínio: [[dominio]]
-      • Servidor: [[server]]
-      • Contas Afetadas: [[contas]]
-      • Gerenciador Utilizado: [[gerenciador]]
-      • Tipo de Configuração: [[tipo_conf]]
-      • Sintoma / Erro: [[sintoma]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Domínio: {{formulario.dominio}}
+      • Servidor: {{formulario.server}}
+      • Contas Afetadas: {{formulario.contas}}
+      • Gerenciador Utilizado: {{formulario.gerenciador}}
+      • Tipo de Configuração: {{formulario.tipo_conf}}
+      • Sintoma / Erro: {{formulario.sintoma}}
 
       TESTES E VERIFICAÇÕES
-      • Status do Domínio (Whois): [[whois]]
-      • Status no cPanel/Servidor: [[cpanel]]
-      • Uso de Disco: [[disco]]
-      • Largura de Banda: [[banda]]
-      • Apontamentos DNS: [[dns]]
-      • Frequência do Erro: [[frequencia]]
-      • Teste pelo Webmail: [[teste_webmail]]
-      • Envio/Recebimento: [[envio_receb]]
+      • Status do Domínio (Whois): {{formulario.whois}}
+      • Status no cPanel/Servidor: {{formulario.cpanel}}
+      • Uso de Disco: {{formulario.disco}}
+      • Largura de Banda: {{formulario.banda}}
+      • Apontamentos DNS: {{formulario.dns}}
+      • Frequência do Erro: {{formulario.frequencia}}
+      • Teste pelo Webmail: {{formulario.teste_webmail}}
+      • Envio/Recebimento: {{formulario.envio_receb}}
 
       DADOS DE ACESSO
-      • E-mail: [[email_acesso]]
-      • Senha: [[senha_acesso]]
+      • E-mail: {{formulario.email_acesso}}
+      • Senha: {{formulario.senha_acesso}}
 
       SOLUÇÃO
       • Ações e Configurações Ajustadas: 
-      [[acao]]
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      server:
-        type: choice
-        values: *lista_servidores_com4
-      tipo_conf:
-        type: choice
-        values:
-          - POP3
-          - IMAP
-          - Apenas Webmail
-      whois:
-        type: choice
-        values:
-          - Publicado
-          - Congelado
-          - Inativo
-      cpanel:
-        type: choice
-        values:
-          - Ativo
-          - Bloqueado
-      dns:
-        type: choice
-        values:
-          - Regular
-          - Irregular
-      teste_webmail:
-        type: choice
-        values:
-          - Regular
-          - Irregular
-      envio_receb:
-        type: choice
-        values:
-          - Regular
-          - Irregular
-      acao:
-        type: text
-        multiline: true
+      {{formulario.acao}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Domínio: [[dominio]]
+            Servidor: [[server]]
+            Contas afetadas: [[contas]]
+            Gerenciador: [[gerenciador]]
+            Tipo de configuração: [[tipo_conf]]
+            Sintoma/Erro: [[sintoma]]
+            Whois: [[whois]]
+            Status cPanel: [[cpanel]]
+            Uso de disco: [[disco]]
+            Largura de banda: [[banda]]
+            DNS: [[dns]]
+            Frequência do erro: [[frequencia]]
+            Teste webmail: [[teste_webmail]]
+            Envio/Recebimento: [[envio_receb]]
+            E-mail de acesso: [[email_acesso]]
+            Senha de acesso: [[senha_acesso]]
+            Ação: [[acao]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            server:
+              type: choice
+              values: *lista_servidores_com4
+            tipo_conf:
+              type: choice
+              values:
+                - POP3
+                - IMAP
+                - Apenas Webmail
+            whois:
+              type: choice
+              values:
+                - Publicado
+                - Congelado
+                - Inativo
+            cpanel:
+              type: choice
+              values:
+                - Ativo
+                - Bloqueado
+            dns:
+              type: choice
+              values:
+                - Regular
+                - Irregular
+            teste_webmail:
+              type: choice
+              values:
+                - Regular
+                - Irregular
+            envio_receb:
+              type: choice
+              values:
+                - Regular
+                - Irregular
+            acao:
+              type: text
+              multiline: true
 
   # /logtroca — Log de troca de titularidade com dados do titular atual e do novo
   - trigger: "/logtroca"
-    form: |
+    force_clipboard: true
+    replace: |-
       Troca de Titularidade
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Contrato: [[contrato]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Contrato: {{formulario.contrato}}
 
       DADOS DO TITULAR ATUAL
-      • Tipo de Perfil: [[tipo_atual]]
-      • Nome / Razão Social: [[nome_atual]]
-      • CPF / CNPJ: [[doc_atual]]
+      • Tipo de Perfil: {{formulario.tipo_atual}}
+      • Nome / Razão Social: {{formulario.nome_atual}}
+      • CPF / CNPJ: {{formulario.doc_atual}}
 
       DADOS DO NOVO TITULAR
-      • Tipo de Perfil: [[tipo_novo]]
-      • Nome / Razão Social: [[nome_novo]]
-      • CPF / CNPJ: [[cpf_novo]]
-      • RG / Inscrição Estadual: [[rg_novo]]
-      • E-mail: [[email_novo]]
-      • Telefone: [[tel_novo]]
-      • Endereço: [[end_novo]]
+      • Tipo de Perfil: {{formulario.tipo_novo}}
+      • Nome / Razão Social: {{formulario.nome_novo}}
+      • CPF / CNPJ: {{formulario.cpf_novo}}
+      • RG / Inscrição Estadual: {{formulario.rg_novo}}
+      • E-mail: {{formulario.email_novo}}
+      • Telefone: {{formulario.tel_novo}}
+      • Endereço: {{formulario.end_novo}}
 
       VERIFICAÇÕES
-      • Análise de Restrição: [[restricao]]
-      • Documentos Anexados: [[docs_anexos]]
+      • Análise de Restrição: {{formulario.restricao}}
+      • Documentos Anexados: {{formulario.docs_anexos}}
 
       SOLUÇÃO E ENCAMINHAMENTO
       • Parecer e Setor de Destino: 
-      [[acao]]
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      tipo_atual:
-        type: choice
-        values:
-          - Pessoa Física
-          - Pessoa Jurídica
-      tipo_novo:
-        type: choice
-        values:
-          - Pessoa Física
-          - Pessoa Jurídica
-      restricao:
-        type: choice
-        values:
-          - Sem Restrição
-          - Com Restrição
-      acao:
-        type: text
-        multiline: true
+      {{formulario.acao}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Contrato: [[contrato]]
+            Tipo perfil atual: [[tipo_atual]]
+            Nome/Razão atual: [[nome_atual]]
+            Doc atual: [[doc_atual]]
+            Tipo perfil novo: [[tipo_novo]]
+            Nome/Razão novo: [[nome_novo]]
+            CPF/CNPJ novo: [[cpf_novo]]
+            RG/IE novo: [[rg_novo]]
+            E-mail novo: [[email_novo]]
+            Telefone novo: [[tel_novo]]
+            Endereço novo: [[end_novo]]
+            Restrição: [[restricao]]
+            Docs anexados: [[docs_anexos]]
+            Ação: [[acao]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            tipo_atual:
+              type: choice
+              values:
+                - Pessoa Física
+                - Pessoa Jurídica
+            tipo_novo:
+              type: choice
+              values:
+                - Pessoa Física
+                - Pessoa Jurídica
+            restricao:
+              type: choice
+              values:
+                - Sem Restrição
+                - Com Restrição
+            acao:
+              type: text
+              multiline: true
 
   # /logpmg — Log detalhado de orientação sobre o Gateway Antispam PMG
   - trigger: "/logpmg"
-    form: |
+    force_clipboard: true
+    replace: |-
       DESCRIÇÃO
       Cliente entrou em contato com dúvidas sobre a retenção de mensagens e o uso do filtro Antispam (PMG), relatando ter e-mails bloqueados na quarentena.
 
-      • Canal de Atendimento: [[canal]]
-      • E-mail do Solicitante: [[email]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • E-mail do Solicitante: {{formulario.email}}
 
       SOLUÇÃO
       • Ações e Orientações: Encaminhado e-mail com o relatório atualizado de quarentena. Cliente instruído sobre o acesso à interface web, alteração do idioma para português e o significado do Spam Score. Orientado também sobre o uso correto das ações de gestão manual (Welcomelist, Blocklist, Enviar e Apagar) e enviado o PDF com o passo a passo.
-      • Observações Adicionais: [[observacoes]]
+      • Observações Adicionais: {{formulario.observacoes}}
       • Atendimento concluído. Cliente ciente dos procedimentos de gestão da quarentena.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      email:
-        type: text
-      observacoes:
-        type: text
-        multiline: true
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            E-mail: [[email]]
+            Observações: [[observacoes]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            email:
+              type: text
+            observacoes:
+              type: text
+              multiline: true
 
   # /logoffpmg — Log de desativação do filtro antispam PMG para um domínio
   - trigger: "/logoffpmg"
-    form: |
+    force_clipboard: true
+    replace: |-
       Desativação de Gateway Antispam (PMG)
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Domínio / E-mail Afetado: [[dominio]]
-      • Solicitante: [[solicitante]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Domínio / E-mail Afetado: {{formulario.dominio}}
+      • Solicitante: {{formulario.solicitante}}
 
       PROCEDIMENTOS 
-      • Método de desativação utilizado: [[metodo]]
+      • Método de desativação utilizado: {{formulario.metodo}}
       • Solicitante foi formalmente alertado sobre os riscos de segurança (aumento de spam e malwares).
 
       SOLUÇÃO
       • Filtro antispam desativado com sucesso conforme solicitação. Chamado encerrado.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      dominio:
-        type: text
-      solicitante:
-        type: text
-      metodo:
-        type: choice
-        values:
-          - Adição da regra global *@* na Whitelist do PMG
-          - Alteração dos apontamentos MX (Bypass direto para a hospedagem)
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Domínio/E-mail: [[dominio]]
+            Solicitante: [[solicitante]]
+            Método: [[metodo]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            dominio:
+              type: text
+            solicitante:
+              type: text
+            metodo:
+              type: choice
+              values:
+                - Adição da regra global *@* na Whitelist do PMG
+                - Alteração dos apontamentos MX (Bypass direto para a hospedagem)
 
   # /logonpmg — Log de reativação do filtro antispam PMG para um domínio
   - trigger: "/logonpmg"
-    form: |
+    force_clipboard: true
+    replace: |-
       Reativação de Gateway Antispam (PMG)
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Domínio / E-mail Afetado: [[dominio]]
-      • Solicitante: [[solicitante]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Domínio / E-mail Afetado: {{formulario.dominio}}
+      • Solicitante: {{formulario.solicitante}}
 
       PROCEDIMENTOS 
-      • Método de reativação utilizado: [[metodo]]
+      • Método de reativação utilizado: {{formulario.metodo}}
       • Solicitante instruído de que as políticas de segurança e a retenção de mensagens em quarentena voltaram a atuar ativamente no domínio.
 
       SOLUÇÃO
       • Filtro antispam reativado com sucesso conforme solicitação. Chamado encerrado.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      dominio:
-        type: text
-      solicitante:
-        type: text
-      metodo:
-        type: choice
-        values:
-          - Remoção da regra global *@* da Whitelist do PMG
-          - Restauração dos apontamentos MX para o Gateway Antispam (mx1/mx2)
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Domínio/E-mail: [[dominio]]
+            Solicitante: [[solicitante]]
+            Método: [[metodo]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            dominio:
+              type: text
+            solicitante:
+              type: text
+            metodo:
+              type: choice
+              values:
+                - Remoção da regra global *@* da Whitelist do PMG
+                - Restauração dos apontamentos MX para o Gateway Antispam (mx1/mx2)
 
   # /logtimeout — Log de encerramento automático por timeout (inatividade no Blip)
   - trigger: "/logtimeout"
@@ -2937,16 +3068,14 @@ matches:
           fields:
             tipo:
               type: choice
-              values:
-                - Data Center (cPanel, Plesk, VPS)
-                - Fibra Óptica
+              values: *tipo_servico_padrao
             server:
               type: choice
               values: *lista_servidores_com4
       - name: resultado
         type: shell
         params:
-          shell: powershell
+          shell: pwsh
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
@@ -2980,16 +3109,14 @@ matches:
           fields:
             tipo:
               type: choice
-              values:
-                - Data Center (cPanel, Plesk, VPS)
-                - Fibra Óptica
+              values: *tipo_servico_padrao
             server:
               type: choice
               values: *lista_servidores_com4
       - name: resultado
         type: shell
         params:
-          shell: powershell
+          shell: pwsh
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
@@ -3009,6 +3136,7 @@ matches:
 
   # /logfin — Log de bloqueio não efetuado; escala para o Financeiro para validação
   - trigger: "/logfin"
+    force_clipboard: true
     form: |
       Análise de Suspensão de Serviço
       INFORMAÇÕES
@@ -3022,19 +3150,20 @@ matches:
 
   # /logmudanca — Log de mudança de endereço; encaminha para fila de Ativação da Fibra
   - trigger: "/logmudanca"
-    form: |
+    force_clipboard: true
+    replace: |-
       Mudança de Endereço
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[nome]]
-      • CPF / CNPJ: [[doc]]
-      • Telefone: [[telefone]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.nome}}
+      • CPF / CNPJ: {{formulario.doc}}
+      • Telefone: {{formulario.telefone}}
 
       DADOS DA MUDANÇA
-      • Endereço Antigo: [[end_antigo]]
-      • Endereço Novo (com CEP e Referência): [[end_novo]]
-      • Tipo de Imóvel: [[tipo_imovel]]
-      • Previsão: [[status_mudanca]]
+      • Endereço Antigo: {{formulario.end_antigo}}
+      • Endereço Novo (com CEP e Referência): {{formulario.end_novo}}
+      • Tipo de Imóvel: {{formulario.tipo_imovel}}
+      • Previsão: {{formulario.status_mudanca}}
 
       VERIFICAÇÕES E PROCEDIMENTOS
       • Viabilidade Técnica: Confirmada no Ozmap/Google Maps.
@@ -3042,71 +3171,101 @@ matches:
 
       SOLUÇÃO
       • Chamado encaminhado para a fila Fibra Ativação para contato e agendamento da instalação.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      tipo_imovel:
-        type: choice
-        values:
-          - Residência
-          - Comércio
-          - Prédio/Condomínio
-      status_mudanca:
-        type: choice
-        values:
-          - Cliente já se mudou
-          - Cliente ainda vai se mudar
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[nome]]
+            CPF/CNPJ: [[doc]]
+            Telefone: [[telefone]]
+            Endereço antigo: [[end_antigo]]
+            Endereço novo: [[end_novo]]
+            Tipo de imóvel: [[tipo_imovel]]
+            Status mudança: [[status_mudanca]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            tipo_imovel:
+              type: choice
+              values:
+                - Residência
+                - Comércio
+                - Prédio/Condomínio
+            status_mudanca:
+              type: choice
+              values:
+                - Cliente já se mudou
+                - Cliente ainda vai se mudar
 
   # /logozmap — Log de análise de viabilidade técnica com coordenadas e CTO no Ozmap
   - trigger: "/logozmap"
-    form: |
+    force_clipboard: true
+    replace: |-
       Análise de Viabilidade Técnica (Ozmap)
-      • Endereço Consultado: [[endereco]]
-      • Coordenadas: [[lat_long]]
+      • Endereço Consultado: {{formulario.endereco}}
+      • Coordenadas: {{formulario.lat_long}}
 
       RESULTADO DA ANÁLISE
-      • Status: [[status]]
-      • CTO mais próxima: [[cto]]
-      • Distância aproximada: [[distancia]] metros
+      • Status: {{formulario.status}}
+      • CTO mais próxima: {{formulario.cto}}
+      • Distância aproximada: {{formulario.distancia}} metros
 
-      Observações: [[obs]]
-    form_fields:
-      status:
-        type: choice
-        values:
-          - Viável (Portas disponíveis na CTO)
-          - Inviável (Fora da área de cobertura)
-          - Necessita ampliação de rede (Caixa lotada)
+      Observações: {{formulario.obs}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Endereço: [[endereco]]
+            Coordenadas: [[lat_long]]
+            Status: [[status]]
+            CTO mais próxima: [[cto]]
+            Distância (m): [[distancia]]
+            Observações: [[obs]]
+          fields:
+            status:
+              type: choice
+              values:
+                - Viável (Portas disponíveis na CTO)
+                - Inviável (Fora da área de cobertura)
+                - Necessita ampliação de rede (Caixa lotada)
 
   # /logromp — Log padronizado de atendimento de cliente afetado por rompimento de fibra
   - trigger: "/logromp"
-    form: |
-      Rompimento CTO: [[cto]]
+    force_clipboard: true
+    replace: |-
+      Rompimento CTO: {{formulario.cto}}
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
+      • Canal de Atendimento: {{formulario.canal}}
       • Sintoma Relatado: Cliente informa indisponibilidade de acesso à internet. Equipamento apresenta luz LOS ativa (vermelha).
 
       PROCEDIMENTOS E ORIENTAÇÕES
       • Diagnóstico: Identificado que o cliente foi afetado por um rompimento de fibra óptica de grande proporção na região.
-      • Orientação: Cliente devidamente posicionado sobre o incidente em larga escala e informado sobre a previsão de normalização para as [[previsao]].
+      • Orientação: Cliente devidamente posicionado sobre o incidente em larga escala e informado sobre a previsão de normalização para as {{formulario.previsao}}.
 
       SOLUÇÃO
       • Ação Realizada: Cliente ciente da indisponibilidade sistêmica e do prazo de reparo estipulado pela Engenharia/Equipe de Campo.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      cto:
-        type: text
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            CTO: [[cto]]
+            Canal: [[canal]]
+            Previsão: [[previsao]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            cto:
+              type: text
+
   # /logfimromp — Log de encerramento de chamado após reparo do rompimento concluído
   - trigger: "/logfimromp"
+    force_clipboard: true
     form: |
       • Incidente: Rompimento de fibra óptica na região.
 
@@ -3118,96 +3277,122 @@ matches:
 
   # /loginviavel — Log de inviabilidade técnica; encaminha estudo de expansão para Projetos
   - trigger: "/loginviavel"
-    form: |
+    force_clipboard: true
+    replace: |-
       Estudo de Expansão de Rede - Inviabilidade Técnica
 
       INFORMAÇÕES OBRIGATÓRIAS DO LEAD
-      • Canal de Atendimento: [[canal]]
-      • ID do Lead Criado: [[id_cliente]]
-      • Nome do cliente: [[nome]]
-      • Telefone de contato: [[telefone]]
-      • Endereço completo (rua, nº, bairro, cidade e referência): [[endereco]]
-      • Coordenadas exatas (Google Maps): [[coordenadas]]
-      • CTO mais próxima: [[cto]]
-      • Distância aproximada: [[distancia]] metros
-      • Tipo de imóvel: [[tipo_imovel]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • ID do Lead Criado: {{formulario.id_cliente}}
+      • Nome do cliente: {{formulario.nome}}
+      • Telefone de contato: {{formulario.telefone}}
+      • Endereço completo (rua, nº, bairro, cidade e referência): {{formulario.endereco}}
+      • Coordenadas exatas (Google Maps): {{formulario.coordenadas}}
+      • CTO mais próxima: {{formulario.cto}}
+      • Distância aproximada: {{formulario.distancia}} metros
+      • Tipo de imóvel: {{formulario.tipo_imovel}}
 
       • Observações Adicionais: 
-      [[obs]]
+      {{formulario.obs}}
 
       Ação: A equipe de Projetos receberá este chamado e fará o estudo de expansão de rede para a região.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      tipo_imovel:
-        type: choice
-        values:
-          - Residência
-          - Comércio
-          - Prédio
-      obs:
-        type: text
-        multiline: true
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            ID do lead: [[id_cliente]]
+            Nome: [[nome]]
+            Telefone: [[telefone]]
+            Endereço: [[endereco]]
+            Coordenadas: [[coordenadas]]
+            CTO mais próxima: [[cto]]
+            Distância (m): [[distancia]]
+            Tipo de imóvel: [[tipo_imovel]]
+            Observações: [[obs]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            tipo_imovel:
+              type: choice
+              values:
+                - Residência
+                - Comércio
+                - Prédio
+            obs:
+              type: text
+              multiline: true
 
   # /logreinicia — Log de reinício remoto de servidor ou serviço solicitado pelo cliente
   - trigger: "/logreinicia"
-    form: |
+    force_clipboard: true
+    replace: |-
       Reinício de Servidor/Serviço
       INFORMAÇÕES
-      • Domínio/Serviço: [[dominio]]
-      • IP do Servidor: [[ip]]
-      • Plataforma: [[plataforma]]
+      • Domínio/Serviço: {{formulario.dominio}}
+      • IP do Servidor: {{formulario.ip}}
+      • Plataforma: {{formulario.plataforma}}
 
       AUTORIZAÇÃO
-      • Cliente autorizou o reinício? [[autorizacao]]
+      • Cliente autorizou o reinício? {{formulario.autorizacao}}
 
       PROCEDIMENTOS
-      • Ação executada: [[acao]]
+      • Ação executada: {{formulario.acao}}
 
       SOLUÇÃO
-      • Status após reinício: [[status]]
-    form_fields:
-      plataforma:
-        type: choice
-        values:
-          - cPanel / WHM
-          - Plesk
-          - VPS / Proxmox
-      autorizacao:
-        type: choice
-        values:
-          - Sim
-          - Não
-      acao:
-        type: choice
-        values:
-          - Reinício do serviço web (Apache/Nginx)
-          - Reinício do servidor completo
-          - Reinício do serviço de e-mail
-      status:
-        type: choice
-        values:
-          - Serviço normalizado
-          - Falha persiste — escalonado
+      • Status após reinício: {{formulario.status}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Domínio/Serviço: [[dominio]]
+            IP do servidor: [[ip]]
+            Plataforma: [[plataforma]]
+            Autorização: [[autorizacao]]
+            Ação executada: [[acao]]
+            Status: [[status]]
+          fields:
+            plataforma:
+              type: choice
+              values:
+                - cPanel / WHM
+                - Plesk
+                - VPS / Proxmox
+            autorizacao:
+              type: choice
+              values:
+                - Sim
+                - Não
+            acao:
+              type: choice
+              values:
+                - Reinício do serviço web (Apache/Nginx)
+                - Reinício do servidor completo
+                - Reinício do serviço de e-mail
+            status:
+              type: choice
+              values:
+                - Serviço normalizado
+                - Falha persiste — escalonado
 
   # /logfast — Log de diagnóstico de roteador Fast (100Mbps) com orientação de troca
   - trigger: "/logfast"
-    form: |
+    force_clipboard: true
+    replace: |-
       Diagnóstico de Equipamento Particular — Roteador Fast
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Sintoma Relatado: [[sintoma]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Sintoma Relatado: {{formulario.sintoma}}
 
       TESTES E PROCEDIMENTOS
       • Análise: Link com parâmetros normais até a ONU da Com4. Identificado via monitoramento (Nagios) que o roteador do cliente está negociando a 100 Mbps (tecnologia Fast), o que causa gargalo na banda e quedas na rede local.
 
       • Ações Executadas no Suporte:
-      [[acoes]]
+      {{formulario.acoes}}
 
       ORIENTAÇÕES REPASSADAS AO CLIENTE
       • Reforçada a normalidade e estabilidade dos serviços até o modem da Com4.
@@ -3218,26 +3403,32 @@ matches:
 
       SOLUÇÃO
       • Chamado encerrado. Cliente ciente da necessidade de upgrade do equipamento particular para normalização definitiva.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      sintoma:
-        type: choice
-        values:
-          - Quedas frequentes / Instabilidade
-          - Sem acesso à internet
-          - Lentidão / Não atinge a velocidade do plano
-      acoes:
-        type: text
-        multiline: true
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Sintoma: [[sintoma]]
+            Ações executadas: [[acoes]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            sintoma:
+              type: choice
+              values:
+                - Quedas frequentes / Instabilidade
+                - Sem acesso à internet
+                - Lentidão / Não atinge a velocidade do plano
+            acoes:
+              type: text
+              multiline: true
 
   # /logvisitarot — Log de abertura de visita técnica para configuração de novo roteador
   - trigger: "/logvisitarot"
-    form: |
+    force_clipboard: true
+    replace: |-
       Agendamento de Visita Técnica — Configuração de Roteador
 
       MOTIVO DA VISITA
@@ -3245,71 +3436,87 @@ matches:
 
       PROCEDIMENTOS E INFORMAÇÕES
       • Histórico: Cliente adquiriu um novo equipamento para substituir o antigo (Fast), conforme orientação técnica prévia para sanar gargalo/limitação de banda.
-      • Equipamento Adquirido (Modelo): [[modelo]]
+      • Equipamento Adquirido (Modelo): {{formulario.modelo}}
       • Ação: Solicito o envio da equipe técnica ao local para realizar a instalação física e a configuração lógica (PPPoE/IP/Wi-Fi) do novo roteador. 
       • Faturamento: Visita isenta de taxa de configuração, conforme padrão de upgrade.
 
       AGENDAMENTO E LOCAL
-      • Endereço Confirmado: [[endereco]]
-      • Disponibilidade do Cliente: [[disponibilidade]]
+      • Endereço Confirmado: {{formulario.endereco}}
+      • Disponibilidade do Cliente: {{formulario.disponibilidade}}
 
       • Observações Adicionais: 
-      [[obs]]
-    form_fields:
-      modelo:
-        type: text
-      endereco:
-        type: text
-      disponibilidade:
-        type: text
-      obs:
-        type: text
-        multiline: true
+      {{formulario.obs}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Modelo adquirido: [[modelo]]
+            Endereço: [[endereco]]
+            Disponibilidade: [[disponibilidade]]
+            Observações: [[obs]]
+          fields:
+            modelo:
+              type: text
+            endereco:
+              type: text
+            disponibilidade:
+              type: text
+            obs:
+              type: text
+              multiline: true
 
   # /logpppoe — Log de envio de credenciais PPPoE ao cliente
   - trigger: "/logpppoe"
-    form: |
+    force_clipboard: true
+    replace: |-
       Envio de Credenciais PPPoE
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[solicitante]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.solicitante}}
       • Validação de Segurança: Dados cadastrais/titularidade confirmados com sucesso.
 
       PROCEDIMENTOS E ORIENTAÇÕES
-      • Motivo da solicitação: [[motivo]]
+      • Motivo da solicitação: {{formulario.motivo}}
       • Cliente instruído sobre o uso seguro das credenciais PPPoE para discagem/autenticação em seu equipamento.
 
       SOLUÇÃO
       • Dados de acesso (Usuário e Senha) repassados ao cliente com sucesso. Chamado encerrado.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      solicitante:
-        type: text
-      motivo:
-        type: choice
-        values:
-          - Configuração de roteador próprio (Bridge)
-          - Reset acidental do equipamento particular
-          - Troca de roteador (Upgrade)
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[solicitante]]
+            Motivo: [[motivo]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            solicitante:
+              type: text
+            motivo:
+              type: choice
+              values:
+                - Configuração de roteador próprio (Bridge)
+                - Reset acidental do equipamento particular
+                - Troca de roteador (Upgrade)
 
   # /logreset — Log interno de reconfiguração lógica / reset remoto da ONU
   - trigger: "/logreset"
-    form: |
+    force_clipboard: true
+    replace: |-
       Reconfiguração Lógica / Reset de Equipamento
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Sintoma Relatado: [[sintoma]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Sintoma Relatado: {{formulario.sintoma}}
 
       DIAGNÓSTICO E VERIFICAÇÕES
       • Sinal Óptico: Dentro dos padrões ideais.
-      • Uptime da ONU: [[uptime]]
+      • Uptime da ONU: {{formulario.uptime}}
       • Análise: Link físico estável. Sintoma relatado apontava para travamento lógico ou falha de roteamento no equipamento da Com4.
 
       PROCEDIMENTOS REALIZADOS
@@ -3317,36 +3524,43 @@ matches:
       • Ações executadas: Realizado o reboot remoto da ONU e a recriação das configurações lógicas (regras de roteamento/bridge).
 
       SOLUÇÃO
-      • Status após reconfiguração: [[status]]
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      sintoma:
-        type: choice
-        values:
-          - Lentidão
-          - Quedas frequentes / Instabilidade
-          - Sem navegação (mas com equipamento online)
-      uptime:
-        type: text
-      status:
-        type: choice
-        values:
-          - Conexão normalizada com sucesso. Chamado encerrado.
-          - Falha persiste — Aberta visita técnica para verificação/troca no local.
-          - Falha persiste — Chamado escalonado para a Engenharia.
+      • Status após reconfiguração: {{formulario.status}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Sintoma: [[sintoma]]
+            Uptime da ONU: [[uptime]]
+            Status: [[status]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            sintoma:
+              type: choice
+              values:
+                - Lentidão
+                - Quedas frequentes / Instabilidade
+                - Sem navegação (mas com equipamento online)
+            uptime:
+              type: text
+            status:
+              type: choice
+              values:
+                - Conexão normalizada com sucesso. Chamado encerrado.
+                - Falha persiste — Aberta visita técnica para verificação/troca no local.
+                - Falha persiste — Chamado escalonado para a Engenharia.
 
   # /logiptv — Log interno de diagnóstico de instabilidade isolada em TV Box/IPTV
   - trigger: "/logiptv"
-    form: |
+    force_clipboard: true
+    replace: |-
       Diagnóstico de Instabilidade — TV Box / IPTV
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
+      • Canal de Atendimento: {{formulario.canal}}
       • Sintoma Relatado: Cliente relata lentidão/travamentos na conexão, isolados no uso de TV Box/IPTV.
 
       TESTES E VERIFICAÇÕES
@@ -3361,21 +3575,24 @@ matches:
 
       SOLUÇÃO
       • Infraestrutura Com4 validada e sem falhas. Chamado encerrado.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: "Canal: [[canal]]"
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
 
   # /logrotoff — Log de roteador do cliente desligado/desconectado da ONU
   - trigger: "/logrotoff"
-    form: |
+    force_clipboard: true
+    replace: |-
       Diagnóstico de Equipamento Particular — Roteador Inacessível
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
+      • Canal de Atendimento: {{formulario.canal}}
       • Sintoma Relatado: Cliente informa falta de conexão à internet.
 
       TESTES E PROCEDIMENTOS
@@ -3387,177 +3604,217 @@ matches:
       • Cliente orientado a verificar a alimentação de energia do roteador próprio e o encaixe físico do cabo de rede entre a ONU e a porta WAN.
 
       SOLUÇÃO
-      • Status: [[status]]
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      status:
-        type: choice
-        values:
-          - Equipamento religado/reconectado. Conexão normalizada com sucesso.
-          - Falha física no roteador do cliente constatada. Orientado a acionar suporte de TI.
-          - Cliente não retornou após orientações. Mantido em aberto.
+      • Status: {{formulario.status}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Status: [[status]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            status:
+              type: choice
+              values:
+                - Equipamento religado/reconectado. Conexão normalizada com sucesso.
+                - Falha física no roteador do cliente constatada. Orientado a acionar suporte de TI.
+                - Cliente não retornou após orientações. Mantido em aberto.
 
   # /logsenha — Log interno para abertura de visita técnica (Troca de senha Wi-Fi)
   - trigger: "/logsenha"
-    form: |
+    force_clipboard: true
+    replace: |-
       Abertura de Visita Técnica — Configuração Wi-Fi
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[solicitante]]
-      • Contato atualizado: [[contato]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.solicitante}}
+      • Contato atualizado: {{formulario.contato}}
 
       DIAGNÓSTICO E SOLICITAÇÃO
       • Motivo da Visita: Cliente solicita a alteração do nome da rede (SSID) e/ou senha do Wi-Fi.
-      • Justificativa para visita: [[justificativa]]
+      • Justificativa para visita: {{formulario.justificativa}}
 
       AGENDAMENTO
-      • Disponibilidade do Cliente: [[turno]]
-      • Observações Adicionais: [[obs]]
+      • Disponibilidade do Cliente: {{formulario.turno}}
+      • Observações Adicionais: {{formulario.obs}}
 
       SOLUÇÃO
       • Chamado aberto e encaminhado para a equipe de Agendamento/Campo.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      solicitante:
-        type: text
-      contato:
-        type: text
-      justificativa:
-        type: choice
-        values:
-          - Acesso remoto indisponível (equipamento sem gerência externa).
-          - Cliente não conseguiu realizar o procedimento via instrução remota.
-          - Equipamento sofreu reset e perdeu as configurações.
-      turno:
-        type: choice
-        values:
-          - Qualquer horário
-          - Manhã (08h às 12h)
-          - Tarde (13h às 18h)
-      obs:
-        type: text
-        multiline: true
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[solicitante]]
+            Contato: [[contato]]
+            Justificativa: [[justificativa]]
+            Turno: [[turno]]
+            Observações: [[obs]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            solicitante:
+              type: text
+            contato:
+              type: text
+            justificativa:
+              type: choice
+              values:
+                - Acesso remoto indisponível (equipamento sem gerência externa).
+                - Cliente não conseguiu realizar o procedimento via instrução remota.
+                - Equipamento sofreu reset e perdeu as configurações.
+            turno:
+              type: choice
+              values:
+                - Qualquer horário
+                - Manhã (08h às 12h)
+                - Tarde (13h às 18h)
+            obs:
+              type: text
+              multiline: true
 
   # /logonline — Log de confirmação de sinal restaurado após reparo
   - trigger: "/logonline"
-    form: |
+    force_clipboard: true
+    replace: |-
       Sinal Restaurado — Confirmação com Cliente
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Contexto: [[contexto]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Contexto: {{formulario.contexto}}
 
       PROCEDIMENTOS
       • Monitoramento NOC confirmou sinal normalizado.
       • Cliente orientado a reiniciar equipamentos e validar navegação.
 
       SOLUÇÃO
-      • Retorno do cliente: [[status]]
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      contexto:
-        type: choice
-        values:
-          - Reparo de rompimento concluído
-          - Ocorrência massiva resolvida
-          - Reconfiguração remota da ONU
-      status:
-        type: choice
-        values:
-          - Conexão normalizada. Chamado encerrado.
-          - Falha persiste — escalonado para campo.
-          - Cliente não retornou após orientação.
+      • Retorno do cliente: {{formulario.status}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Contexto: [[contexto]]
+            Status: [[status]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            contexto:
+              type: choice
+              values:
+                - Reparo de rompimento concluído
+                - Ocorrência massiva resolvida
+                - Reconfiguração remota da ONU
+            status:
+              type: choice
+              values:
+                - Conexão normalizada. Chamado encerrado.
+                - Falha persiste — escalonado para campo.
+                - Cliente não retornou após orientação.
 
   # /logcpanel — Log de instrução para solicitação de credenciais do cPanel
   - trigger: "/logcpanel"
-    form: |
+    force_clipboard: true
+    replace: |-
       Instrução de Solicitação de Acesso cPanel
 
       DESCRIÇÃO
       Cliente entrou em contato solicitando o envio das credenciais de acesso ao painel de hospedagem (cPanel).
 
-      • Canal de Atendimento: [[canal]]
-      • Domínio / Cliente: [[cliente]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Domínio / Cliente: {{formulario.cliente}}
 
       SOLUÇÃO
       • Ação Realizada: Cliente instruído sobre o procedimento de segurança obrigatório para liberação de acessos ao painel de hospedagem (cPanel). Informado sobre a necessidade de envio de solicitação formal através de uma conta de e-mail corporativa, contendo os dados cadastrais de validação.
       • Próximo Passo: Aguardando a formalização da solicitação via e-mail pelo cliente para darmos andamento ao encaminhamento das credenciais.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      cliente:
-        type: text
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Domínio/Cliente: [[cliente]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            cliente:
+              type: text
 
   # /logcenvio — Log de envio das credenciais do cPanel após formalização por e-mail
   - trigger: "/logcenvio"
-    form: |
+    force_clipboard: true
+    replace: |-
       Solicitação de Acesso cPanel (Enviado)
 
       DESCRIÇÃO
       Cliente realizou o envio do e-mail formal solicitando os dados de acesso ao painel de hospedagem (cPanel), fornecendo os dados cadastrais exigidos para a validação de segurança.
 
-      • Canal de Atendimento: [[canal]]
-      • Domínio / Cliente: [[cliente]]
-      • E-mail do Solicitante: [[email]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Domínio / Cliente: {{formulario.cliente}}
+      • E-mail do Solicitante: {{formulario.email}}
 
       SOLUÇÃO
       • Ação Realizada: Os dados enviados pelo cliente foram validados e conferem com o cadastro do titular. Após a confirmação, as credenciais de acesso ao cPanel foram encaminhadas com sucesso em resposta ao e-mail corporativo do cliente.
       • Chamado encerrado.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - E-mail
-          - Blip
-          - Ligação
-      cliente:
-        type: text
-      email:
-        type: text
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Domínio/Cliente: [[cliente]]
+            E-mail solicitante: [[email]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            cliente:
+              type: text
+            email:
+              type: text
 
   # /logpower — Log de abertura de visita técnica por falha elétrica (Luz Power / Hardware)
   - trigger: "/logpower"
-    form: |
-      Motivo da Visita: [[problema]]
+    force_clipboard: true
+    replace: |-
+      Motivo da Visita: {{formulario.problema}}
 
       PROCEDIMENTOS REALIZADOS
       • Orientações Passadas: Solicitado o reinício elétrico (1 minuto fora da tomada), troca de tomada (direto na parede) e verificação física do encaixe da fonte.
       • Retorno do Cliente: Testes realizados, mas a falha persiste. Equipamento não inicia o sistema lógico. Suspeita de falha na fonte de alimentação ou defeito no hardware da ONU.
-      • Evidências: [[evidencias]]
+      • Evidências: {{formulario.evidencias}}
 
-      Endereço Confirmado: [[endereco]]
-      Disponibilidade: [[disponibilidade]]
-    form_fields:
-      problema:
-        type: choice
-        values:
-          - Luz Power Piscando
-          - Somente Luz Power Acesa Constante
-      evidencias:
-        type: choice
-        values:
-          - Foto recebida anexada ao chamado.
-          - Relato descritivo do cliente no chat.
+      Endereço Confirmado: {{formulario.endereco}}
+      Disponibilidade: {{formulario.disponibilidade}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Problema: [[problema]]
+            Evidências: [[evidencias]]
+            Endereço: [[endereco]]
+            Disponibilidade: [[disponibilidade]]
+          fields:
+            problema:
+              type: choice
+              values:
+                - Luz Power Piscando
+                - Somente Luz Power Acesa Constante
+            evidencias:
+              type: choice
+              values:
+                - Foto recebida anexada ao chamado.
+                - Relato descritivo do cliente no chat.
 
   # /logbackup — Log interno de solicitação de restauração de backup (Hospedagem ou VPS)
   - trigger: "/logbackup"
@@ -3596,10 +3853,7 @@ matches:
           fields:
             canal:
               type: choice
-              values:
-                - Blip
-                - Ligação
-                - E-mail
+              values: *canal_padrao
             origem:
               type: choice
               values:
@@ -3628,7 +3882,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: powershell
+          shell: pwsh
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $canal = "{{formulario.canal}}"
@@ -3672,82 +3926,95 @@ matches:
 
   # /logoutlook — Log interno de auxílio na configuração de e-mail no Outlook
   - trigger: "/logoutlook"
-    form: |
+    force_clipboard: true
+    replace: |-
       Suporte à Configuração — Outlook
 
       DESCRIÇÃO
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[solicitante]]
-      • Domínio: [[dominio]]
-      • Conta(s) de E-mail: [[email]]
-      • Versão do Aplicativo: [[versao_outlook]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.solicitante}}
+      • Domínio: {{formulario.dominio}}
+      • Conta(s) de E-mail: {{formulario.email}}
+      • Versão do Aplicativo: {{formulario.versao_outlook}}
 
       PROCEDIMENTOS REALIZADOS
-      • Protocolo de Sincronização: [[protocolo]]
-      • Teste de Envio/Recebimento: [[teste]]
+      • Protocolo de Sincronização: {{formulario.protocolo}}
+      • Teste de Envio/Recebimento: {{formulario.teste}}
       • Detalhes da Tratativa: 
-      [[detalhes]]
+      {{formulario.detalhes}}
 
       SOLUÇÃO
-      • Status: [[status]]
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      solicitante:
-        type: text
-      dominio:
-        type: text
-      email:
-        type: text
-      versao_outlook:
-        type: choice
-        values:
-          - Outlook Clássico (Office 365 / 2016 / 2019)
-          - Novo Outlook (New Outlook do Windows)
-          - Outlook Mobile (Android/iOS)
-          - Não identificado / Outro
-      protocolo:
-        type: choice
-        values:
-          - IMAP (Recomendado)
-          - POP3
-      teste:
-        type: choice
-        values:
-          - Sucesso (Envio e Recebimento OK)
-          - Falha (Erro de Autenticação/Senha)
-          - Falha (Erro de Servidor/Porta)
-      detalhes:
-        type: text
-        multiline: true
-      status:
-        type: choice
-        values:
-          - Conta configurada com sucesso. Chamado encerrado.
-          - Cliente com dificuldades técnicas. Oferecido/Agendado acesso remoto.
-          - Falha na validação. Chamado escalonado ou mantido para acompanhamento.
+      • Status: {{formulario.status}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[solicitante]]
+            Domínio: [[dominio]]
+            E-mail: [[email]]
+            Versão Outlook: [[versao_outlook]]
+            Protocolo: [[protocolo]]
+            Teste: [[teste]]
+            Detalhes: [[detalhes]]
+            Status: [[status]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            solicitante:
+              type: text
+            dominio:
+              type: text
+            email:
+              type: text
+            versao_outlook:
+              type: choice
+              values:
+                - Outlook Clássico (Office 365 / 2016 / 2019)
+                - Novo Outlook (New Outlook do Windows)
+                - Outlook Mobile (Android/iOS)
+                - Não identificado / Outro
+            protocolo:
+              type: choice
+              values:
+                - IMAP (Recomendado)
+                - POP3
+            teste:
+              type: choice
+              values:
+                - Sucesso (Envio e Recebimento OK)
+                - Falha (Erro de Autenticação/Senha)
+                - Falha (Erro de Servidor/Porta)
+            detalhes:
+              type: text
+              multiline: true
+            status:
+              type: choice
+              values:
+                - Conta configurada com sucesso. Chamado encerrado.
+                - Cliente com dificuldades técnicas. Oferecido/Agendado acesso remoto.
+                - Falha na validação. Chamado escalonado ou mantido para acompanhamento.
 
   # /logativacao — Log de encaminhamento para ativação de fibra (Venda Suporte)
   - trigger: "/logativacao"
-    form: |
+    force_clipboard: true
+    replace: |-
       Pedido de Ativação — Nova Contratação
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[nome]]
-      • CPF / CNPJ: [[doc]]
-      • Contato: [[telefone]]
-      • Plano Contratado: [[plano]]
-      • Vencimento: [[vencimento]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.nome}}
+      • CPF / CNPJ: {{formulario.doc}}
+      • Contato: {{formulario.telefone}}
+      • Plano Contratado: {{formulario.plano}}
+      • Vencimento: {{formulario.vencimento}}
 
       DADOS DA INSTALAÇÃO
-      • Endereço: [[endereco]]
-      • CTO com Viabilidade: [[cto]]
-      • Distância: [[distancia]]
+      • Endereço: {{formulario.endereco}}
+      • CTO com Viabilidade: {{formulario.cto}}
+      • Distância: {{formulario.distancia}}
 
       VERIFICAÇÕES E PROCEDIMENTOS
       • Consulta de Protesto: Realizada e sem restrições impeditivas.
@@ -3757,54 +4024,67 @@ matches:
 
       SOLUÇÃO
       • Chamado classificado como "Pedido de Ativação" e encaminhado para a fila "Fibra Ativação - Fibra Ativação" para agendamento e execução da instalação.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      nome:
-        type: text
-      doc:
-        type: text
-      telefone:
-        type: text
-      plano:
-        type: choice
-        values:
-          - 100 Mb / 10 Mb
-          - 100 Mb / 100 Mb
-          - 200 Mb / 20 Mb
-          - 200 Mb / 200 Mb
-          - 300 Mb / 30 Mb
-          - 300 Mb / 300 Mb
-          - 600 Mb / 60 Mb
-          - 600 Mb / 600 Mb
-          - Outro (Plano Corporativo / Promocional / Customizado)
-      endereco:
-        type: text
-      cto:
-        type: text
-      distancia:
-        type: text
-      vencimento:
-        type: choice
-        values:
-          - "05"
-          - "10"
-          - "15"
-          - "20"
-          - "25"
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[nome]]
+            CPF/CNPJ: [[doc]]
+            Telefone: [[telefone]]
+            Plano: [[plano]]
+            Vencimento: [[vencimento]]
+            Endereço: [[endereco]]
+            CTO: [[cto]]
+            Distância: [[distancia]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            nome:
+              type: text
+            doc:
+              type: text
+            telefone:
+              type: text
+            plano:
+              type: choice
+              values:
+                - 100 Mb / 10 Mb
+                - 100 Mb / 100 Mb
+                - 200 Mb / 20 Mb
+                - 200 Mb / 200 Mb
+                - 300 Mb / 30 Mb
+                - 300 Mb / 300 Mb
+                - 600 Mb / 60 Mb
+                - 600 Mb / 600 Mb
+                - Outro (Plano Corporativo / Promocional / Customizado)
+            endereco:
+              type: text
+            cto:
+              type: text
+            distancia:
+              type: text
+            vencimento:
+              type: choice
+              values:
+                - "05"
+                - "10"
+                - "15"
+                - "20"
+                - "25"
+
   # /logredefinirsenha — Log interno de redefinição de senha para contas @com4.com.br
   - trigger: "/logredefinirsenha"
-    form: |
+    force_clipboard: true
+    replace: |-
       Redefinição de Senha — E-mail Corporativo
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[solicitante]]
-      • Conta de E-mail: [[email]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.solicitante}}
+      • Conta de E-mail: {{formulario.email}}
 
       PROCEDIMENTOS REALIZADOS
       • Validação de Segurança: Dados cadastrais e titularidade confirmados com sucesso.
@@ -3814,65 +4094,81 @@ matches:
       • Ação Realizada: Senha da conta redefinida no servidor corporativo (@com4.com.br).
       • Nova Senha: Foi aplicada a senha padrão temporária "Mudarsenha123**".
       • Status: Cliente orientado a realizar o acesso pelo Webmail e alterar a senha imediatamente por motivos de segurança. Chamado encerrado.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      solicitante:
-        type: text
-      email:
-        type: text
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[solicitante]]
+            E-mail: [[email]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            solicitante:
+              type: text
+            email:
+              type: text
 
   # /logretornovendas — Log de retorno ativo (Instabilidade de 40 dias - Contratação)
   - trigger: "/logretornovendas"
-    form: |
+    force_clipboard: true
+    replace: |-
       Retorno Ativo — Lista de Instabilidade (Comercial)
 
       INFORMAÇÕES
       • Canal de Atendimento: Blip
-      • Solicitante: [[nome]]
-      • Telefone: [[telefone]]
+      • Solicitante: {{formulario.nome}}
+      • Telefone: {{formulario.telefone}}
 
       PROCEDIMENTOS REALIZADOS
       • Origem: Contato ativo realizado com base no relatório do Desenvolvimento (falha de retorno de leads nos últimos 40 dias).
       • Ação inicial: Disparo do template 'retorno_contato' efetuado no Blip.
 
       RESULTADO DA ABORDAGEM
-      • Interação do Cliente: [[resposta]]
+      • Interação do Cliente: {{formulario.resposta}}
 
       SOLUÇÃO
-      • Status Final: [[acao]]
-    form_fields:
-      nome:
-        type: text
-      telefone:
-        type: text
-      resposta:
-        type: choice
-        values:
-          - Cliente clicou em "Sim" no template e manteve interesse.
-          - Cliente clicou em "Não" / Informou que já contratou outro provedor.
-          - Sem interação ou retorno do cliente após o disparo do template.
-      acao:
-        type: choice
-        values:
-          - Atendimento em andamento (Consultando viabilidade / Criando PN).
-          - Oportunidade (Lead) registrada e transferida para a fila do Comercial.
-          - Chamado encerrado (Cliente sem interesse / Negócio perdido).
-          - Chamado encerrado automaticamente por inatividade (Timeout).
+      • Status Final: {{formulario.acao}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Solicitante: [[nome]]
+            Telefone: [[telefone]]
+            Resposta: [[resposta]]
+            Status final: [[acao]]
+          fields:
+            nome:
+              type: text
+            telefone:
+              type: text
+            resposta:
+              type: choice
+              values:
+                - Cliente clicou em "Sim" no template e manteve interesse.
+                - Cliente clicou em "Não" / Informou que já contratou outro provedor.
+                - Sem interação ou retorno do cliente após o disparo do template.
+            acao:
+              type: choice
+              values:
+                - Atendimento em andamento (Consultando viabilidade / Criando PN).
+                - Oportunidade (Lead) registrada e transferida para a fila do Comercial.
+                - Chamado encerrado (Cliente sem interesse / Negócio perdido).
+                - Chamado encerrado automaticamente por inatividade (Timeout).
 
   # /logmaxerro — Log de bloqueio automático por limite de falhas/adiamentos por hora (Max Defers)
   - trigger: "/logmaxerro"
-    form: |
+    force_clipboard: true
+    replace: |-
       Bloqueio Automático — Max Defers and Failures
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[solicitante]]
-      • Domínio Afetado: [[dominio]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.solicitante}}
+      • Domínio Afetado: {{formulario.dominio}}
 
       DIAGNÓSTICO E SINTOMA
       • Sintoma Relatado: Cliente recebe o retorno "exceeded the max defers and failures per hour" ao tentar enviar novos e-mails.
@@ -3884,26 +4180,32 @@ matches:
 
       SOLUÇÃO
       • Status Final: Serviços normalizados e cliente ciente das boas práticas de envio. Chamado encerrado.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      solicitante:
-        type: text
-      dominio:
-        type: text
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[solicitante]]
+            Domínio: [[dominio]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            solicitante:
+              type: text
+            dominio:
+              type: text
 
   # /logencbloq — Log interno de encaminhamento para o N2 realizar bloqueio
   - trigger: "/logencbloq"
-    form: |
+    force_clipboard: true
+    replace: |-
       Escalonamento para Nível 2 — Bloqueio de Serviço
 
       INFORMAÇÕES
       • Origem: Chamado automático de inadimplência.
-      • Serviço Afetado: [[servico]]
+      • Serviço Afetado: {{formulario.servico}}
 
       MOTIVO DO ESCALONAMENTO
       • Bloqueio/suspensão do serviço devido a pendência financeira.
@@ -3912,18 +4214,24 @@ matches:
       AÇÃO
       • Chamado encaminhado para a fila da Engenharia (Nível 2) para execução do bloqueio.
       • Por gentileza encaminhar o chamado para a fila financeiro após o bloqueio
-    form_fields:
-      servico:
-        type: text
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: "Serviço afetado: [[servico]]"
+          fields:
+            servico:
+              type: text
 
   # /logencdesbloq — Log interno de encaminhamento para o N2 realizar desbloqueio
   - trigger: "/logencdesbloq"
-    form: |
+    force_clipboard: true
+    replace: |-
       Escalonamento para Nível 2 — Desbloqueio de Serviço
 
       INFORMAÇÕES
       • Origem: Chamado automático de inadimplência.
-      • Serviço Afetado: [[servico]]
+      • Serviço Afetado: {{formulario.servico}}
 
       MOTIVO DO ESCALONAMENTO
       • Cliente solicitou a reativação/desbloqueio do serviço.
@@ -3932,20 +4240,26 @@ matches:
       AÇÃO
       • Chamado encaminhado para a fila da Engenharia (Nível 2) para execução do desbloqueio.
       • Por gentileza encaminhar o chamado para a fila financeiro após o desbloqueio
-    form_fields:
-      servico:
-        type: text
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: "Serviço afetado: [[servico]]"
+          fields:
+            servico:
+              type: text
 
   # /logliberapmg — Log de liberação manual de e-mails na quarentena do PMG
   - trigger: "/logliberapmg"
-    form: |
+    force_clipboard: true
+    replace: |-
       Liberação de Quarentena (PMG)
 
       INFORMAÇÕES
-      • Canal de Atendimento: [[canal]]
-      • Solicitante: [[solicitante]]
-      • E-mail Afetado: [[email]]
-      • Remetente(s) Liberado(s): [[remetente]]
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.solicitante}}
+      • E-mail Afetado: {{formulario.email}}
+      • Remetente(s) Liberado(s): {{formulario.remetente}}
 
       PROCEDIMENTOS REALIZADOS
       • Acesso ao painel do Gateway Antispam (PMG).
@@ -3954,40 +4268,57 @@ matches:
 
       SOLUÇÃO
       • Liberação executada com sucesso e cliente posicionado. Chamado encerrado.
-    form_fields:
-      canal:
-        type: choice
-        values:
-          - Blip
-          - Ligação
-          - E-mail
-      solicitante:
-        type: text
-      email:
-        type: text
-      remetente:
-        type: text
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[solicitante]]
+            E-mail afetado: [[email]]
+            Remetente(s): [[remetente]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            solicitante:
+              type: text
+            email:
+              type: text
+            remetente:
+              type: text
 
   # /cpfl — Aviso de chamado na CPFL para os grupos de WhatsApp
   - trigger: "/cpfl"
-    form: |
-      Chamado aberto na CPFL referente aos alertas de queda de energia no [[local]].
+    force_clipboard: true
+    replace: |-
+      Chamado aberto na CPFL referente aos alertas de queda de energia no {{formulario.local}}.
 
-      Protocolo: [[protocolo]]
-      Previsão: [[previsao]]
-      Canal: [[canal]]
-      Chamado Com4: [[chamado_com4]]
-    form_fields:
-      local:
-        type: choice
-        values:
-          - Chassi - São Sebastião
-          - Chassi - Vila Hipica
-          - Chassi - Apae
-          - Sitio (Altinópolis)
-      canal:
-        type: choice
-        values:
-          - Whatsapp
-          - Ligação
-          - Site
+      Protocolo: {{formulario.protocolo}}
+      Previsão: {{formulario.previsao}}
+      Canal: {{formulario.canal}}
+      Chamado Com4: {{formulario.chamado_com4}}
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Local: [[local]]
+            Protocolo: [[protocolo]]
+            Previsão: [[previsao]]
+            Canal: [[canal]]
+            Chamado Com4: [[chamado_com4]]
+          fields:
+            local:
+              type: choice
+              values:
+                - Chassi - São Sebastião
+                - Chassi - Vila Hipica
+                - Chassi - Apae
+                - Sitio (Altinópolis)
+            canal:
+              type: choice
+              values:
+                - Whatsapp
+                - Ligação
+                - Site
