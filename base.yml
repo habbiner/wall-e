@@ -1851,13 +1851,17 @@ matches:
             Telefone: [[telefone]]
             Tipo de Serviço: [[tipo]]
           fields:
-            canal: &canal_padrao
-              - Blip
-              - Ligação
-              - E-mail
-            tipo: &tipo_servico_padrao
-              - Data Center (cPanel, Plesk, VPS)
-              - Fibra Óptica
+            canal:
+              type: choice
+              values: &canal_padrao
+                - Blip
+                - Ligação
+                - E-mail
+            tipo:
+              type: choice
+              values: &tipo_servico_padrao
+                - Data Center (cPanel, Plesk, VPS)
+                - Fibra Óptica
       - name: resultado
         type: shell
         params:
