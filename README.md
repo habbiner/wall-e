@@ -47,7 +47,11 @@ Exemplo: `C:\Users\SEU_USUARIO\AppData\Roaming\espanso`
 
 ### 2.1 Baixar e instalar
 
-> ⚠️ **Pré-requisito:** este projeto usa `shell: pwsh` nos scripts internos (mais rápido que o Windows PowerShell 5.1 padrão). Instale o **PowerShell 7** antes de usar o `base.yml`: https://aka.ms/powershell-release?tag=stable
+> ⚠️ **Pré-requisito:** este projeto usa `shell: pwsh` nos scripts internos (mais rápido que o Windows PowerShell 5.1 padrão). Instale o **PowerShell 7** antes de usar o `base.yml`: instalação pode ser realizada via Winget
+  winget search --id Microsoft.PowerShell --exact
+> winget install --id Microsoft.PowerShell --source winget
+> winget install --id Microsoft.PowerShell --source winget --installer-type wix
+> 
 
 1. Acesse [espanso.org/install](https://espanso.org/install/) e baixe o instalador para Windows.
 2. Execute o instalador e conclua a instalação.
