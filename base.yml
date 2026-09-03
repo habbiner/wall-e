@@ -2553,13 +2553,12 @@ matches:
     force_clipboard: true
     replace: |-
       Motivo da Visita: {{formulario.problema}}
+      Endereço Confirmado: {{formulario.endereco}}
+      Disponibilidade: {{formulario.disponibilidade}}
 
       PROCEDIMENTOS REALIZADOS
       • Orientações Passadas: Realizada orientação para verificação visual do cabo drop interno, confirmando a ausência de dobras, rompimentos ou objetos pressionando a fibra.
       • Retorno do Cliente: Confirmou que o conector está devidamente encaixado na ONU e a falha persiste. Solicito o envio de técnico ao local para verificação presencial.
-
-      Endereço Confirmado: {{formulario.endereco}}
-      Disponibilidade: {{formulario.disponibilidade}}
     vars:
       - name: formulario
         type: form
@@ -3163,15 +3162,13 @@ matches:
       Mudança de Endereço
       INFORMAÇÕES
       • Canal de Atendimento: {{formulario.canal}}
-      • Solicitante: {{formulario.nome}}
-      • CPF / CNPJ: {{formulario.doc}}
-      • Telefone: {{formulario.telefone}}
-
-      DADOS DA MUDANÇA
       • Endereço Antigo: {{formulario.end_antigo}}
       • Endereço Novo (com CEP e Referência): {{formulario.end_novo}}
       • Tipo de Imóvel: {{formulario.tipo_imovel}}
       • Previsão: {{formulario.status_mudanca}}
+      • Solicitante: {{formulario.nome}}
+      • CPF / CNPJ: {{formulario.doc}}
+      • Telefone: {{formulario.telefone}}
 
       VERIFICAÇÕES E PROCEDIMENTOS
       • Viabilidade Técnica: Confirmada no Ozmap/Google Maps.
@@ -3291,13 +3288,13 @@ matches:
 
       INFORMAÇÕES OBRIGATÓRIAS DO LEAD
       • Canal de Atendimento: {{formulario.canal}}
-      • ID do Lead Criado: {{formulario.id_cliente}}
-      • Nome do cliente: {{formulario.nome}}
-      • Telefone de contato: {{formulario.telefone}}
       • Endereço completo (rua, nº, bairro, cidade e referência): {{formulario.endereco}}
       • Coordenadas exatas (Google Maps): {{formulario.coordenadas}}
       • CTO mais próxima: {{formulario.cto}}
       • Distância aproximada: {{formulario.distancia}} metros
+      • ID do Lead Criado: {{formulario.id_cliente}}
+      • Nome do cliente: {{formulario.nome}}
+      • Telefone de contato: {{formulario.telefone}}
       • Tipo de imóvel: {{formulario.tipo_imovel}}
 
       • Observações Adicionais: 
@@ -3439,6 +3436,10 @@ matches:
     replace: |-
       Agendamento de Visita Técnica — Configuração de Roteador
 
+      AGENDAMENTO E LOCAL
+      • Endereço Confirmado: {{formulario.endereco}}
+      • Disponibilidade do Cliente: {{formulario.disponibilidade}}
+
       MOTIVO DA VISITA
       • Instalação e configuração de novo roteador particular (Padrão Gigabit).
 
@@ -3447,10 +3448,6 @@ matches:
       • Equipamento Adquirido (Modelo): {{formulario.modelo}}
       • Ação: Solicito o envio da equipe técnica ao local para realizar a instalação física e a configuração lógica (PPPoE/IP/Wi-Fi) do novo roteador. 
       • Faturamento: Visita isenta de taxa de configuração, conforme padrão de upgrade.
-
-      AGENDAMENTO E LOCAL
-      • Endereço Confirmado: {{formulario.endereco}}
-      • Disponibilidade do Cliente: {{formulario.disponibilidade}}
 
       • Observações Adicionais: 
       {{formulario.obs}}
@@ -3795,14 +3792,13 @@ matches:
     force_clipboard: true
     replace: |-
       Motivo da Visita: {{formulario.problema}}
+      Endereço Confirmado: {{formulario.endereco}}
+      Disponibilidade: {{formulario.disponibilidade}}
 
       PROCEDIMENTOS REALIZADOS
       • Orientações Passadas: Solicitado o reinício elétrico (1 minuto fora da tomada), troca de tomada (direto na parede) e verificação física do encaixe da fonte.
       • Retorno do Cliente: Testes realizados, mas a falha persiste. Equipamento não inicia o sistema lógico. Suspeita de falha na fonte de alimentação ou defeito no hardware da ONU.
       • Evidências: {{formulario.evidencias}}
-
-      Endereço Confirmado: {{formulario.endereco}}
-      Disponibilidade: {{formulario.disponibilidade}}
     vars:
       - name: formulario
         type: form
@@ -4013,16 +4009,14 @@ matches:
 
       INFORMAÇÕES
       • Canal de Atendimento: {{formulario.canal}}
+      • Endereço: {{formulario.endereco}}
+      • CTO com Viabilidade: {{formulario.cto}}
+      • Distância: {{formulario.distancia}}
       • Solicitante: {{formulario.nome}}
       • CPF / CNPJ: {{formulario.doc}}
       • Contato: {{formulario.telefone}}
       • Plano Contratado: {{formulario.plano}}
       • Vencimento: {{formulario.vencimento}}
-
-      DADOS DA INSTALAÇÃO
-      • Endereço: {{formulario.endereco}}
-      • CTO com Viabilidade: {{formulario.cto}}
-      • Distância: {{formulario.distancia}}
 
       VERIFICAÇÕES E PROCEDIMENTOS
       • Consulta de Protesto: Realizada e sem restrições impeditivas.
