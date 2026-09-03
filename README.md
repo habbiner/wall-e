@@ -47,6 +47,8 @@ Exemplo: `C:\Users\SEU_USUARIO\AppData\Roaming\espanso`
 
 ### 2.1 Baixar e instalar
 
+> ⚠️ **Pré-requisito:** este projeto usa `shell: pwsh` nos scripts internos (mais rápido que o Windows PowerShell 5.1 padrão). Instale o **PowerShell 7** antes de usar o `base.yml`: https://aka.ms/powershell-release?tag=stable
+
 1. Acesse [espanso.org/install](https://espanso.org/install/) e baixe o instalador para Windows.
 2. Execute o instalador e conclua a instalação.
 3. Inicie o Espanso pelo **Menu Iniciar** (ícone na bandeja do sistema).
@@ -184,10 +186,12 @@ espanso restart
 ```text
 %AppData%\espanso\
 ├── config\
-│   └── default.yml      ← comportamento global (opcionalmente ajuste backend, etc.)
+│ └── default.yml ← comportamento global (opcionalmente ajuste backend, etc.)
 └── match\
-    ├── base.yml         ← atalhos (este projeto)
-    └── .env             ← opcional mas recomendado: nome / empresa / e-mail
+├── base.yml ← atalhos (este projeto)
+├── .env ← recomendado: nome / empresa / e-mail / valores financeiros
+└── scripts\
+└── calc_vencimento.ps1 ← lógica de cálculo de vencimento (/venc e /logvenc)
 ```
 
 Pacotes do Hub ficam em `match\packages\` se você instalar algo extra.
@@ -200,12 +204,14 @@ O projeto permite trocar **nome do atendente**, **empresa** e **e-mail** sem alt
 
 ### 4.1 Como funciona
 
-O Espanso **não lê `.env` nativamente**. Neste projeto, cada valor é obtido assim:
+O Espanso não lê .env nativamente, e **não existe uma forma de tratar o conteúdo de `match\.env` como variáveis de ambiente reais do Windows** — o tipo de variável `type: environment` do Espanso só enxerga variáveis de ambiente do sistema operacional, nunca esse arquivo. Por isso, cada valor é obtido assim:
 
-1. Você mantém um arquivo **`.env`** na pasta **`match`** (ao lado do `base.yml`).
-2. No topo do `base.yml`, há três **`global_vars`** do tipo **`shell`** (PowerShell) que **leem o arquivo** `match\.env` e extraem linhas como `CHAVE=valor`.
-3. Os triggers usam `{{atendente_nome}}`, `{{empresa_nome}}` e `{{email_atendimento}}` no texto expandido.
-4. Onde não houver arquivo ou não houver a linha da chave, entram os **valores padrão** definidos dentro do próprio script (na prática: `Bruno`, `COM4`, `atendimento@com4.com.br`).
+1. Você mantém um arquivo `.env` na pasta `match` (ao lado do `base.yml`).
+2. No topo do `base.yml`, há seis `global_vars` do tipo `shell` (rodando via **PowerShell 7 / `pwsh`**, não o Windows PowerShell padrão) que leem o arquivo `match\.env` e extraem linhas como `CHAVE=valor`.
+3. Os triggers usam `{{atendente_nome}}`, `{{empresa_nome}}`, `{{email_atendimento}}`, `{{valor_mensalidade_fid}}`, `{{multa_comodato}}` e `{{contato_registro_br}}` no texto expandido.
+4. Onde não houver arquivo ou não houver a linha da chave, entram os valores padrão definidos dentro do próprio script (fallback), então mantenha o `.env` sempre completo.
+
+> ⚠️ Já tentamos migrar essas variáveis para `type: environment` para evitar abrir processos PowerShell — **não funciona**, porque isso quebra a leitura do `.env` (as variáveis vêm vazias e o rendering do trigger é abortado). Fica registrado aqui para não repetir o erro.
 
 ```text
 match\.env  →  PowerShell em global_vars  →  {{...}} nos textos
@@ -225,11 +231,17 @@ O `.env` deve ficar **na mesma pasta** que `base.yml` dentro de `match\`.
 
 ### 4.3 Variáveis disponíveis
 
-| Variável no `.env` | Obrigatória | Padrão se ausente | Onde aparece nos atalhos |
-|--------------------|-------------|-------------------|---------------------------|
-| `ATENDENTE_NOME` | Não | `Bruno` | `/dia` (“Sou … e darei sequência…”); é referenciado via variável global |
-| `EMPRESA_NOME` | Não | `COM4` | `/tchau`, `/loss` |
-| `EMAIL_ATENDIMENTO` | Não | `atendimento@com4.com.br` | `/cpanel` |
+| Variável no .env | Obrigatória | Padrão se ausente | Onde aparece nos atalhos |
+|---|---|---|---|
+| ATENDENTE_NOME | Não | Bruno | `/ola` ("Sou … e darei sequência…") |
+| EMPRESA_NOME | Não | COM4 | `/tchau`, `/los`, `/roteadores`, `/senhaemail`, `/senhacp` |
+| EMAIL_ATENDIMENTO | Não | atendimento@com4.com.br | `/cpanel`, `/cancelapj` |
+| VALOR_MENSALIDADE_FID | Não | 499.90 | `/fid` (cálculo de multa de fidelidade) |
+| MULTA_COMODATO | Não | 525,00 | `/comodato` |
+| CONTATO_REGISTRO_BR | Não | PHF5 | `/migracontato` |
+| DESPEDIDA_MANHA | Não | Tenha um ótimo dia | `/tchau` (despedida dinâmica pela hora) |
+| DESPEDIDA_TARDE | Não | Tenha uma ótima tarde | `/tchau` |
+| DESPEDIDA_NOITE | Não | Tenha uma ótima noite | `/tchau` |
 
 ### 4.4 Formato do `.env`
 
@@ -462,6 +474,24 @@ Salve, recarregue o Espanso e teste. Use **indentação por espaços** (2 espaç
 
 ---
 
+### 7.7 Script externo para cálculo de vencimento (`/venc` e `/logvenc`)
+
+A lógica de cálculo de mudança de dia de vencimento (usada tanto na mensagem ao cliente quanto no log interno do Financeiro) foi extraída para um único arquivo `scripts\calc_vencimento.ps1`, para não duplicar ~80 linhas de PowerShell em dois triggers.
+
+Uso no `base.yml`:
+
+```yaml
+cmd: |
+  & "$env:CONFIG\match\scripts\calc_vencimento.ps1" -Atual "{{atual}}" -Novo "{{novo}}" -UltimoGerado "{{formulario.ultimo_gerado}}" -Modo cliente
+```
+
+O parâmetro `-Modo` aceita `cliente` (texto para enviar ao cliente) ou `interno` (texto para o log do Financeiro).
+
+> ⚠️ Não use `%CONFIG%` (sintaxe de variável do CMD/batch) dentro do `cmd:` — o Espanso executa esse bloco via PowerShell, então a sintaxe correta é `$env:CONFIG`, chamada com o operador `&` (call operator) já que o caminho está entre aspas.
+
+Se editar a regra de cálculo, mexa apenas em `scripts\calc_vencimento.ps1` — nenhum dos dois triggers precisa mudar.
+
+---
 ## 8. Atalhos de teclado do Espanso
 
 | Atalho | Ação |
@@ -489,6 +519,8 @@ Na Search Bar, comandos que começam com `>` mostram opções de controle do Esp
 | `espanso` não reconhecido no terminal | Use `espansod.exe` ou `espanso.cmd` sob `%LOCALAPPDATA%\Programs\Espanso\` |
 | Conflitos só em um app (Blip x outro) | Considere [configurações por aplicativo](https://espanso.org/docs/configuration/app-specific-configurations/) |
 | Scripts shell lentos ou falhos | Use `debug: true` dentro de `params` do shell e `espanso log` |
+| Erro "program not found" ao rodar shell | Confirme que o **PowerShell 7** está instalado e que `pwsh` funciona no terminal; o `base.yml` usa `shell: pwsh`, não `shell: powershell` |
+| `{{variavel}}` do .env sempre vazia após trocar para `type: environment` | Não use `type: environment` para ler o `.env` — o Espanso não carrega esse arquivo como variáveis de ambiente do sistema. Mantenha `type: shell` lendo `match\.env` via `Get-Content` |
 
 **YAML inválido (erro grave):** valide com [yamllint.com](https://www.yamllint.com/) — um arquivo quebrado impede todos os triggers de carregar.
 
