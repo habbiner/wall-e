@@ -61,6 +61,7 @@
 #   /fibra              Orienta verificação visual do cabo de fibra e do conector
 #   /fotos              Solicita fotos do equipamento (painel de luzes e cabeamento)
 #   /los                Explica luz LOS (vermelha) e abre chamado para equipe de campo
+#   /testelink          Informa verificações remotas e necessidade de teste de link presencial
 #   /romp               Informa rompimento grave de fibra óptica na região (acidente/evento externo)
 #   /resolvido          Notifica o cliente que a falha massiva foi resolvida pela equipe de campo
 #   /clima              Informa interrupção causada por condições climáticas severas na área
@@ -127,6 +128,7 @@
 #   /logcongelado       Log de domínio congelado no Registro.br com renovação e período
 #   /logfalha           Log de falha de acesso aos serviços Com4 com testes de DNS e Imunify360
 #   /loglos             Log de abertura de visita técnica de fibra (LOS ou atenuação)
+#   /logtestelink       Log de abertura de teste de link presencial
 #   /logmassivo         Log de cliente atendido durante ocorrência massiva em área
 #   /logsemretorno      Log de tentativa de retorno telefônico sem resposta do cliente
 #   /logvps             Log de suporte a servidor VPS com testes, acesso e autorização de reinício
@@ -1040,6 +1042,14 @@ matches:
     vars:
       - name: empresa_nome
         type: global
+
+  # /testelink — Informa verificações remotas e necessidade de teste de link presencial
+  - trigger: "/testelink"
+    force_clipboard: true
+    replace: |-
+      Realizei uma análise detalhada dos parâmetros da sua conexão em nosso sistema de monitoramento, verificando o sinal óptico, o histórico de estabilidade e o comportamento do seu equipamento até este momento.
+
+      Como as verificações remotas não são suficientes para identificar a causa exata desta ocorrência, será necessário o envio de um técnico até o local para realizar um teste de link presencial (aferição direta de sinal na ONU e no cabeamento de fibra).
 
   # /romp — Informa rompimento grave de fibra óptica na região (acidente/evento externo)
   - trigger: "/romp"
@@ -2578,6 +2588,41 @@ matches:
                 - Luz LOS
                 - Fibra Atenuada
 
+  # /logtestelink — Log de abertura de teste de link presencial
+  - trigger: "/logtestelink"
+    force_clipboard: true
+    replace: |-
+      Motivo da Visita: Teste de Link Presencial
+      Endereço Confirmado: {{formulario.endereco}}
+      Disponibilidade: {{formulario.disponibilidade}}
+
+      PROCEDIMENTOS REALIZADOS
+      • Verificações Remotas: Sinal óptico, uptime da ONU e histórico de eventos analisados via monitoramento — {{formulario.resultado_remoto}}.
+      • Diagnóstico: {{formulario.diagnostico}}
+
+      SOLUÇÃO
+      • Ação: Solicito envio de técnico ao local para realizar teste de link presencial (aferição direta de sinal na ONU e na fibra).
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Endereço confirmado: [[endereco]]
+            Disponibilidade: [[disponibilidade]]
+            Resultado remoto: [[resultado_remoto]]
+            Diagnóstico: [[diagnostico]]
+          fields:
+            resultado_remoto:
+              type: choice
+              values:
+                - Dentro dos padrões ideais
+                - Fora dos padrões (sinal degradado/instável)
+            diagnostico:
+              type: choice
+              values:
+                - Causa não identificável remotamente — necessária aferição física
+                - Suspeita de falha intermitente de hardware na ONU
+
   # /logmassivo — Log de cliente atendido durante ocorrência massiva em área
   - trigger: "/logmassivo"
     force_clipboard: true
@@ -2948,6 +2993,8 @@ matches:
   - trigger: "/logpmg"
     force_clipboard: true
     replace: |-
+      Instruções de Gestão do Gateway Antispam (PMG)
+
       DESCRIÇÃO
       Cliente entrou em contato com dúvidas sobre a retenção de mensagens e o uso do filtro Antispam (PMG), relatando ter e-mails bloqueados na quarentena.
 
