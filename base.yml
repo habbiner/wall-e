@@ -178,7 +178,7 @@ global_vars:
   - name: atendente_nome
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: |
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $p = Join-Path $env:CONFIG 'match\.env'
@@ -190,7 +190,7 @@ global_vars:
   - name: empresa_nome
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: |
         $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
@@ -201,7 +201,7 @@ global_vars:
   - name: email_atendimento
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: |
         $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
@@ -212,7 +212,7 @@ global_vars:
   - name: valor_mensalidade_fid
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: |
         $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
@@ -223,7 +223,7 @@ global_vars:
   - name: multa_comodato
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: |
         $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
@@ -234,7 +234,7 @@ global_vars:
   - name: contato_registro_br
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: |
         $p = Join-Path $env:CONFIG 'match\.env'
         if (Test-Path $p) {
@@ -246,21 +246,21 @@ global_vars:
   - name: saudacao
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'bom dia' } elseif ($h -lt 18) { 'boa tarde' } else { 'boa noite' }"
 
   # Saudação capitalizada — uso no início de frase: "{{saudacao_cap}}! Aqui é..."
   - name: saudacao_cap
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: "$h = (Get-Date).Hour; if ($h -lt 12) { 'Bom dia' } elseif ($h -lt 18) { 'Boa tarde' } else { 'Boa noite' }"
 
   # Despedida dinâmica — uso em /tchau (inline, sem .ps1 — evita ExecutionPolicy)
   - name: despedida
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: |
         [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         $p = Join-Path $env:CONFIG 'match\.env'
@@ -274,25 +274,25 @@ global_vars:
   - name: data_hoje
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: "(Get-Date).ToString('dd/MM/yyyy')"
 
   - name: hora_atual
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: "(Get-Date).ToString('HH:mm')"
 
   - name: data_2d_uteis
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: "$d = Get-Date; $c = 2; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
 
   - name: data_1d_util
     type: shell
     params:
-      shell: pwsh
+      shell: powershell
       cmd: "$d = Get-Date; $c = 1; while($c -gt 0){ $d = $d.AddDays(1); if($d.DayOfWeek -ne 'Saturday' -and $d.DayOfWeek -ne 'Sunday'){ $c-- } }; $d.ToString('dd/MM/yyyy')"
 
 matches:
@@ -332,7 +332,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: pwsh
+          shell: powershell
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $nomeCru = "{{formulario.nome}}".Trim()
@@ -738,7 +738,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: pwsh
+          shell: powershell
           cmd: |
             & "$env:CONFIG\match\scripts\calc_vencimento.ps1" -Atual "{{atual}}" -Novo "{{novo}}" -UltimoGerado "{{formulario.ultimo_gerado}}" -Modo cliente
 
@@ -804,7 +804,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: pwsh
+          shell: powershell
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $OutputEncoding = [System.Text.Encoding]::UTF8
@@ -1560,7 +1560,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: pwsh
+          shell: powershell
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $plat = "{{formulario.plataforma}}"
@@ -1875,7 +1875,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: pwsh
+          shell: powershell
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
@@ -1919,7 +1919,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: pwsh
+          shell: powershell
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
@@ -1955,7 +1955,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: pwsh
+          shell: powershell
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
@@ -1987,7 +1987,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: pwsh
+          shell: powershell
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
@@ -2112,7 +2112,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: pwsh
+          shell: powershell
           cmd: |
             & "$env:CONFIG\match\scripts\calc_vencimento.ps1" -Atual "{{atual}}" -Novo "{{novo}}" -UltimoGerado "{{formulario.ultimo_gerado}}" -Modo interno
 
@@ -3133,7 +3133,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: pwsh
+          shell: powershell
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
@@ -3174,7 +3174,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: pwsh
+          shell: powershell
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $tipo = "{{formulario.tipo}}"
@@ -3937,7 +3937,7 @@ matches:
       - name: resultado
         type: shell
         params:
-          shell: pwsh
+          shell: powershell
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
             $canal = "{{formulario.canal}}"
