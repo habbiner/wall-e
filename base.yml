@@ -107,8 +107,10 @@
 #   /senhacp            Orienta redefinição de senha de e-mail via cPanel (cliente)
 #   /popimap            Explica a diferença entre os protocolos POP e IMAP
 #
-# 5 · Registros Internos — Financeiro
+# 5 · Registros Internos — Administrativos e Financeiros
 #   /lognada            Log rápido: nenhuma ação no escopo do analista
+#   /logimprocedente    Registro de contato por engano ou sem continuidade no atendimento
+#   /logblipencerrado   Registro de atendimento encerrado por troca de turno ou horário de almoço
 #   /logacordo          Registra desbloqueio em acordo e assume chamado para acompanhamento
 #   /logbaixa           Registra recebimento de comprovante e previsão de compensação D+1 útil
 #   /logpagou           Registra pagamento compensado e encaminha ao Financeiro (se DC) ou encerra (se Fibra)
@@ -118,13 +120,13 @@
 #   /logvenc            Log de abertura de chamado ao Financeiro (alteração de vencimento)
 #   /loginvertido       Log interno de pagamento de fatura do mês incorreto
 #   /logcanc            Log de repasse de cancelamento para o Financeiro (Novo Fluxo)
-#   /logtransfereprotesto        Log de encaminhamento do cliente e de título protestado ao Financeiro (carta de anuência)
+#   /logtransfereprotesto Log de encaminhamento do cliente e de título protestado ao Financeiro (carta de anuência)
 #   /loglead            Log de oportunidade comercial identificada; encaminha lead ao Comercial
 #   /logcorreios        Log de orientação sobre atraso de fatura impressa (Correios)
 #   /logprotestoboleto  Log de abertura de chamado para o Financeiro gerar boleto de protesto
 #   /cha                Notificação padronizada de encaminhamento de chamados no WhatsApp
 #
-# 6 · Registros Internos — NOC / Técnico
+# 6 · Registros Internos — NOC, Técnico e Predial
 #   /logcongelado       Log de domínio congelado no Registro.br com renovação e período
 #   /logfalha           Log de falha de acesso aos serviços Com4 com testes de DNS e Imunify360
 #   /loglos             Log de abertura de visita técnica de fibra (LOS ou atenuação)
@@ -158,6 +160,9 @@
 #   /logonline          Log de confirmação de sinal restaurado após reparo
 #   /logcpfl            Log de abertura de chamado na CPFL por falta de energia
 #   /cpfl               Aviso de chamado na CPFL para os grupos de WhatsApp
+#   /logsabesp          Log de abertura de chamado na SABESP por falta de água
+#   /logparceiro        Abertura de chamado para visita de fornecedores/terceirizados (Predial/Colocation)
+#   /logalarme          Log de acionamento e verificação do alarme da Casa do Paulo (HelpNet)
 #   /logcpanel          Log de instrução para solicitação de credenciais do cPanel
 #   /logcenvio          Log de envio das credenciais do cPanel após formalização por e-mail
 #   /logpower           Log de abertura de visita técnica por falha elétrica (Luz Power / Hardware)
@@ -909,13 +914,13 @@ matches:
 
       Posso confirmar a abertura do chamado?
 
-  # /cancelapj — Solicita formalização por e-mail (agora no primeiro contato) e informa novo fluxo PJ
+  # /cancelapj — Solicita formalização por e-mail para cancelamento PJ
   - trigger: "/cancelapj"
     force_clipboard: true
     replace: |-
       Compreendo a sua solicitação.
 
-      Como o seu cadastro é empresarial, para prosseguirmos, será necessário o envio da formalização através de e-mail para {{email_atendimento}}.
+      Como o seu cadastro é empresarial, para prosseguirmos, será necessário o envio da formalização através de e-mail para cancelamento@com4.com.br.
 
       Por gentileza, o e-mail deve conter as seguintes informações:
       • Razão Social;
@@ -924,10 +929,7 @@ matches:
       • Motivo do cancelamento;
       • Nome e cargo do responsável pela solicitação.
 
-      Após o recebimento, a solicitação será encaminhada ao nosso setor Financeiro para validação contratual e financeira, podendo haver contato do Financeiro e do Consultor antes da efetivação. O serviço permanecerá ativo durante o processo, e o retorno para conclusão ocorrerá em até 24 horas úteis após o recebimento do e-mail.
-    vars:
-      - name: email_atendimento
-        type: global
+      Após o recebimento, a solicitação será encaminhada ao nosso setor Financeiro para validação contratual e financeira. O serviço permanecerá ativo durante o processo, e o retorno para conclusão ocorrerá em até 24 horas úteis após o recebimento do e-mail no setor responsável.
 
   # /solcomp — Cliente bloqueado informa que já pagou; solicita o comprovante para liberação
   - trigger: "/solcomp"
@@ -4341,6 +4343,34 @@ matches:
             remetente:
               type: text
 
+  # /logimprocedente — Registro de contato por engano ou sem continuidade
+  - trigger: "/logimprocedente"
+    force_clipboard: true
+    form: |
+      Registro de Ligação/Blip — Contato Improcedente
+
+      INFORMAÇÕES
+      • Origem: [[origem]]
+      • Ocorrência: [[descricao]]
+
+      AÇÃO
+      • Atendimento encerrado sem continuidade de suporte/serviço (Contato Improcedente).
+    form_fields:
+      origem:
+        type: choice
+        values:
+          - Blip
+          - Ligação
+      descricao:
+        type: text
+
+  # /logblipencerrado — Registro para troca de turno, almoço ou assumido por outro
+  - trigger: "/logblipencerrado"
+    force_clipboard: true
+    replace: |-
+      Blip Encerrado
+      • Motivo: Atendimento já iniciado/finalizado por outro colaborador ou encerrado operacionalmente devido a troca de turno/horário de almoço. Não se trata de contato improcedente.
+
   # /cpfl — Aviso de chamado na CPFL para os grupos de WhatsApp
   - trigger: "/cpfl"
     force_clipboard: true
@@ -4375,3 +4405,97 @@ matches:
                 - Whatsapp
                 - Ligação
                 - Site
+
+  # /logsabesp — Log de abertura de chamado na SABESP por falta de água
+  - trigger: "/logsabesp"
+    force_clipboard: true
+    form: |
+      Falta de Água — Acionamento SABESP
+
+      INFORMAÇÕES
+      • Protocolo SABESP: [[protocolo]]
+      • Previsão de Normalização: [[previsao]]
+      • Canal Utilizado: [[canal]]
+
+      PROCEDIMENTOS REALIZADOS
+      • Validado que o problema não é interno (caixa vazia, registro fechado).
+      • Confirmada falha no abastecimento da rua e chamado aberto junto à concessionária.
+      • Comunicado interno realizado para a equipe da Com4.
+    form_fields:
+      protocolo:
+        type: text
+      previsao:
+        type: text
+      canal:
+        type: choice
+        values:
+          - Telefone (0800)
+          - Site / App
+  # /logparceiro — Abertura de chamado para visita de terceirizados (Predial/Colocation)
+  - trigger: "/logparceiro"
+    force_clipboard: true
+    form: |
+      Visita empresa [[empresa]] - [[tipo]]
+
+      INFORMAÇÕES DO AGENDAMENTO
+      • Empresa: [[empresa]]
+      • Visitante (Nome/CPF): [[visitante]]
+      • Data e Horário: [[data]] às [[hora]]
+      • Motivo da Visita: [[motivo]]
+
+      ACOMPANHAMENTO E COMUNICAÇÃO
+      • Setor Responsável pelo acompanhamento: [[acompanhamento]]
+      • Recepção e Grupo 'Alertas Com4 Nagios' devidamente notificados.
+    form_fields:
+      tipo:
+        type: choice
+        values:
+          - PREDIAL
+          - COLOCATION
+      empresa:
+        type: text
+      visitante:
+        type: text
+      data:
+        type: text
+      hora:
+        type: text
+      motivo:
+        type: text
+      acompanhamento:
+        type: choice
+        values:
+          - Setor Predial
+          - N2 / N3
+
+  # /logalarme — Log de acionamento do alarme e verificação visual (HelpNet)
+  - trigger: "/logalarme"
+    force_clipboard: true
+    form: |
+      Acionamento de Alarme — HelpNet
+
+      INFORMAÇÕES
+      • Local: Residência (Paulo)
+      • Contato Recebido: Central de Monitoramento (HelpNet)
+      • Ponto de Acionamento informado pela central: [[ponto]]
+
+      PROCEDIMENTOS E VERIFICAÇÕES
+      • Realizada a verificação visual (apenas externa/corredor de acesso), cumprindo os protocolos de segurança.
+      • Análise visual: [[analise]]
+
+      SOLUÇÃO
+      • Ação Realizada: [[acao]]
+    form_fields:
+      ponto:
+        type: text
+      analise:
+        type: choice
+        values:
+          - Tudo normal. Nenhum indício de invasão ou dano. Possível disparo natural.
+          - Suspeita de invasão / Risco de segurança identificado.
+      acao:
+        type: choice
+        values:
+          - Retorno repassado à HelpNet confirmando falso alarme. Chamado finalizado.
+          - Viatura da HelpNet acionada para o local para averiguação presencial.
+          - Polícia Militar (190) acionada imediatamente devido a risco real.
