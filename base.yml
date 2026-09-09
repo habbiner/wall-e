@@ -91,6 +91,7 @@
 #   /luzpower           Explica falha elétrica/hardware e abre chamado para visita técnica
 #   /agendafibra        Informa encaminhamento para o setor de fibra agendar instalação
 #   /liberapmg          Informa liberação de e-mails retidos no PMG
+#   /mudanca            Orienta o cliente e solicita dados para mudança de endereço
 #
 # 4 · E-mail, Hospedagem e Migração
 #   /ativhosp           Envia dados de acesso ao cPanel, FTP, Webmail e DNS (ativação de hospedagem)
@@ -1473,6 +1474,23 @@ matches:
         type: form
         params:
           layout: "Remetente liberado: [[remetente]]"
+
+# /mudanca — Orienta o cliente e solicita dados para mudança de endereço
+  - trigger: "/mudanca"
+    force_clipboard: true
+    replace: |-
+      Compreendo a sua solicitação para a mudança de endereço da sua conexão! 😊
+
+      Para que possamos verificar a viabilidade técnica da fibra óptica no novo local e prosseguir com o seu agendamento, por gentileza, me confirme:
+
+      📍 Endereço novo completo (com CEP e ponto de referência):
+      🏠 Tipo de imóvel (Casa, Comércio ou Prédio/Condomínio):
+      📦 Você já se mudou para o novo local ou qual a data prevista?
+
+      ⚠️ Aviso Importante sobre os Equipamentos:
+      A nossa equipe de rua não realiza a retirada dos aparelhos no endereço antigo. É necessário que você leve o equipamento atual da Com4 (modem e fonte na tomada) para o novo endereço, onde o técnico fará a reinstalação e ativação da rede.
+
+      Assim que me confirmar os dados acima, farei a validação no sistema e encaminharei o seu atendimento para a nossa equipe de Ativação agendar a visita técnica com você!
 
   # =============================================================================
   # 4 · E-mail, Hospedagem e Migração
