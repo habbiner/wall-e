@@ -44,6 +44,7 @@
 #   /transfereprotesto  Explica o processo e encaminha o solicitante ao financeiro ciente do título protestado
 #   /comodato           Informa regras de devolução do equipamento e multa por extravio
 #   /titularidade       Solicita documentos (PF ou PJ) para iniciar troca de titularidade
+#   /trocarestricao     Informa negativa de troca de titularidade devido a protesto no CPF/CNPJ do novo titular
 #   /fid                Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
 #   /retirada           Agenda recolha do modem após cancelamento
 #   /pague              Lembrete proativo de fatura em aberto antes do bloqueio ocorrer
@@ -177,6 +178,7 @@
 #   /logtransbloq       Log interno de encaminhamento para o N2 realizar bloqueio
 #   /logtransdesbloq    Log interno de encaminhamento para o N2 realizar desbloqueio
 #   /logdns             Log interno de criação, edição ou remoção de apontamentos DNS
+#   /garcia          Cobrança dos pedidos do Garcia para a equipe do Suporte
 #
 # =============================================================================
 
@@ -827,6 +829,14 @@ matches:
 
             $msg = "Para darmos andamento à troca de titularidade, por gentileza, nos envie os seguintes dados e documentos do novo titular:`n`n$docs`n`nVocê pode nos enviar as fotos ou arquivos em PDF por aqui mesmo."
             Write-Output $msg
+
+  # /trocarestricao — Informa negativa de troca de titularidade devido a protesto no CPF/CNPJ do novo titular
+  - trigger: "/trocarestricao"
+    force_clipboard: true
+    replace: |-
+      Realizamos a análise dos dados encaminhados para a troca de titularidade.
+
+      Identificamos que consta uma restrição ativa (protesto) vinculada ao documento (CPF/CNPJ) do novo titular. Conforme os nossos procedimentos internos, a transferência do contrato não pode ser aprovada e concluída enquanto houver pendências ativas no nome do novo responsável.
 
   # /fid — Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
   # Uso: /fid [meses ativos] — Exemplo: /fid 5 (para um cliente com 5 meses de uso)
@@ -3057,6 +3067,40 @@ matches:
             $msg = "Troca de Titularidade`n`nINFORMAÇÕES`n• Canal de Atendimento: $canal`n• Contrato: $contrato`n`nDADOS DO TITULAR ATUAL`n• Tipo de Perfil: $tipoAtual`n• Nome / Razão Social: $nomeAtual`n• CPF / CNPJ: $docAtual`n`nDADOS DO NOVO TITULAR`n• Tipo de Perfil: $tipoNovo`n• Nome / Razão Social: $nomeNovo`n• CPF / CNPJ: $cpfNovo`n• RG / Inscrição Estadual: $rgNovo`n• E-mail: $emailNovo`n• Telefone: $telNovo`n• Endereço: $endNovo`n`nVERIFICAÇÕES`n• Documentos Anexados: $docsAnexos`n• Análise de Restrição: $restricao`n`nSOLUÇÃO E ENCAMINHAMENTO`n• $acao"
             Write-Output $msg
 
+  # /logtrocarestricao — Log interno de troca de titularidade negada por restrição (protesto) no CPF/CNPJ
+  - trigger: "/logtrocarestricao"
+    force_clipboard: true
+    replace: |-
+      Troca de Titularidade Negada — Restrição de Crédito
+
+      INFORMAÇÕES
+      • Canal de Atendimento: {{formulario.canal}}
+      • Contrato: {{formulario.contrato}}
+
+      VERIFICAÇÕES E PROCEDIMENTOS
+      • Documento do Novo Titular: {{formulario.doc_novo}}
+      • Análise de Restrição: Identificada restrição (protesto) ativa vinculada ao CPF/CNPJ do novo titular.
+      • Procedimento: Troca de titularidade reprovada conforme as diretrizes contratuais da empresa.
+
+      SOLUÇÃO
+      • Ação Realizada: Cliente formalmente posicionado sobre a impossibilidade de transferência de titularidade no momento devido às pendências ativas. O serviço será mantido sob a titularidade atual. Chamado encerrado.
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Contrato atual: [[contrato]]
+            CPF/CNPJ do novo titular: [[doc_novo]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            contrato:
+              type: text
+            doc_novo:
+              type: text
+
   # /logpmg — Log detalhado de orientação sobre o Gateway Antispam PMG
   - trigger: "/logpmg"
     force_clipboard: true
@@ -4616,3 +4660,30 @@ matches:
             registros:
               type: text
               multiline: true
+
+  # /garcia — Cobrança dos pedidos do Garcia para a equipe do Suporte
+  - trigger: "/garcia"
+    force_clipboard: true
+    replace: |-
+      🍺 PEDIDO GARCIA 🍺
+
+      Resumo dos valores:
+      {{formulario.pedidos}}
+
+      💰 DADOS PARA PAGAMENTO (PIX)
+      Chave: 45983980866
+      Nome: Bruno Senne Moreira
+
+      Valeu! 👊
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Cobrança do Garcia
+            Lista de Pessoas e Valores (Ex: João - R$ 15,00):
+            [[pedidos]]
+          fields:
+            pedidos:
+              type: text
+              multiline: true              
