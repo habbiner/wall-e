@@ -9,6 +9,7 @@
 #   /confirma           Agradece a confirmação dos dados, formata o nome (Title Case) e pergunta como ajudar
 #   /proto              Envia o número do protocolo ao cliente
 #   /retornocom         Retorno ativo de chamado repassado pelo Comercial
+#   /contatosite        Resposta para leads recebidos através do formulário do site
 #   /atraso             Pede desculpas por fila alta no plantão
 #   /espera             Solicita pausa breve para consultar o sistema (obrigatório monitoria)
 #   /analise            Informa pausa longa para análise técnica aprofundada nos logs
@@ -42,7 +43,7 @@
 #   /venc               Alteração de vencimento com cálculo automático para o CLIENTE (BDC)
 #   /transfereprotesto  Explica o processo e encaminha o solicitante ao financeiro ciente do título protestado
 #   /comodato           Informa regras de devolução do equipamento e multa por extravio
-#   /doctroca           Solicita documentos (PF ou PJ) para iniciar troca de titularidade
+#   /titularidade       Solicita documentos (PF ou PJ) para iniciar troca de titularidade
 #   /fid                Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
 #   /retirada           Agenda recolha do modem após cancelamento
 #   /pague              Lembrete proativo de fatura em aberto antes do bloqueio ocorrer
@@ -107,6 +108,7 @@
 #   /senhaemail         Informa que suporte não acessa senhas de e-mail (segurança)
 #   /senhacp            Orienta redefinição de senha de e-mail via cPanel (cliente)
 #   /popimap            Explica a diferença entre os protocolos POP e IMAP
+#   /dns                Solicita dados para criação/alteração de apontamentos DNS
 #
 # 5 · Registros Internos — Administrativos e Financeiros
 #   /lognada            Log rápido: nenhuma ação no escopo do analista
@@ -137,7 +139,7 @@
 #   /logvps             Log de suporte a servidor VPS com testes, acesso e autorização de reinício
 #   /logsite            Log de suporte a site com diagnóstico de DNS, disco e banco de dados
 #   /logemail           Log de suporte a e-mail com testes de webmail, DNS e configuração IMAP/POP
-#   /logtroca           Log de troca de titularidade com dados do titular atual e do novo
+#   /logtitularidade    Log de troca de titularidade com dados do titular atual e do novo
 #   /logpmg             Log detalhado de orientação sobre o Gateway Antispam PMG
 #   /logoffpmg          Log de desativação do filtro antispam PMG para um domínio
 #   /logonpmg           Log de reativação do filtro antispam PMG para um domínio
@@ -172,8 +174,9 @@
 #   /logativacao        Log de encaminhamento para ativação de fibra (Venda Suporte)
 #   /logredefinirsenha  Log interno de redefinição de senha para contas @com4.com.br
 #   /logmaxerro         Log de bloqueio automático por limite de falhas/adiamentos por hora (Max Defers)
-#   /logencbloq         Log interno de encaminhamento para o N2 realizar bloqueio
-#   /logencdesbloq      Log interno de encaminhamento para o N2 realizar desbloqueio
+#   /logtransbloq       Log interno de encaminhamento para o N2 realizar bloqueio
+#   /logtransdesbloq    Log interno de encaminhamento para o N2 realizar desbloqueio
+#   /logdns             Log interno de criação, edição ou remoção de apontamentos DNS
 #
 # =============================================================================
 
@@ -391,6 +394,28 @@ matches:
       - name: empresa_nome
         type: global
       - name: saudacao
+        type: global
+
+  # /contatosite — Resposta para leads recebidos através do formulário do site
+  - trigger: "/contatosite"
+    force_clipboard: true
+    form: |
+      Olá, [[nome_cliente]], {{saudacao}}!
+
+      Recebemos o seu contato através do formulário do nosso site. Agradecemos o interesse na {{empresa_nome}}!
+
+      Para que possamos lhe proporcionar o melhor atendimento, como podemos te auxiliar hoje? Se o interesse for em nossos planos de internet para o endereço informado, já podemos dar andamento à verificação de viabilidade técnica.
+
+      Se preferir um contato mais ágil, você também pode nos chamar diretamente no WhatsApp: (16) 3706-8000.
+
+      Fico no aguardo do seu retorno!
+
+      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Atenciosamente,
+    vars:
+      - name: saudacao
+        type: global
+      - name: empresa_nome
         type: global
 
   # /atraso — Pede desculpas por fila alta no plantão
@@ -771,33 +796,37 @@ matches:
       - name: multa_comodato
         type: global
 
-  # /doctroca — Solicita documentos (PF ou PJ) para iniciar troca de titularidade
-  - trigger: "/doctroca"
+  # /titularidade — Solicita documentos do NOVO titular (PF ou PJ) para iniciar troca de titularidade
+  - trigger: "/titularidade"
     force_clipboard: true
-    replace: |-
-      Para darmos andamento à troca de titularidade, por gentileza, nos envie os seguintes dados e documentos do **{{formulario.tipo_titular}}**:
-
-      {{formulario.documentos}}
-
-      Você pode nos enviar as fotos ou arquivos em PDF por aqui mesmo.
+    replace: "{{resultado}}"
     vars:
       - name: formulario
         type: form
         params:
-          layout: |
-            Tipo de titular: [[tipo_titular]]
-            Documentos: [[documentos]]
+          layout: "Perfil do novo titular: [[perfil]]"
           fields:
-            tipo_titular:
+            perfil:
               type: choice
               values:
-                - novo titular
-                - titular atual
-            documentos:
-              type: choice
-              values:
-                - "• Documento com foto (RG ou CNH)\n• CPF\n• Data de nascimento\n• E-mail\n• Endereço completo"
-                - "• Cartão CNPJ\n• Razão social\n• Comprovante de inscrição e situação cadastral\n• E-mail\n• Endereço completo"
+                - Pessoa Física
+                - Pessoa Jurídica
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $perfil = "{{formulario.perfil}}"
+
+            if ($perfil -eq "Pessoa Física") {
+                $docs = "• Documento com foto (RG ou CNH)`n• CPF`n• Data de nascimento`n• E-mail`n• Endereço completo"
+            } else {
+                $docs = "• Cartão CNPJ`n• Razão Social`n• Comprovante de Inscrição e Situação Cadastral`n• E-mail`n• Endereço completo"
+            }
+
+            $msg = "Para darmos andamento à troca de titularidade, por gentileza, nos envie os seguintes dados e documentos do novo titular:`n`n$docs`n`nVocê pode nos enviar as fotos ou arquivos em PDF por aqui mesmo."
+            Write-Output $msg
 
   # /fid — Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
   # Uso: /fid [meses ativos] — Exemplo: /fid 5 (para um cliente com 5 meses de uso)
@@ -1855,6 +1884,21 @@ matches:
       Se você precisa acessar a mesma conta em mais de um aparelho ou quer ter o backup no servidor, a recomendação técnica é utilizar o IMAP. 
 
       Qual você prefere utilizar para que eu possa te orientar com as portas corretas de configuração?
+
+  # /dns — Solicita dados para criação/alteração de apontamentos DNS
+  - trigger: "/dns"
+    force_clipboard: true
+    replace: |-
+      Para darmos andamento à criação ou alteração dos apontamentos de DNS, por gentileza, informe os dados exatos que precisam ser configurados:
+
+      • Tipo de registro (Ex: A, CNAME, TXT, MX)
+      • Nome/Host (Ex: www, loja, mail ou @)
+      • Destino/Valor/IP (Ex: 192.168.0.1 ou dominio.com)
+
+      ⚠️ Aviso importante sobre o DNS:
+      Assim que realizarmos a inserção dessas chaves em nossa plataforma, inicia-se o período de propagação global na internet. Esse processo pode levar de 2 a 24 horas para que os servidores externos reconheçam as novas regras e o seu serviço volte a operar normalmente.
+
+      Fico no aguardo das chaves para iniciarmos!
 
   # =============================================================================
   # 5 · Registros Internos — Financeiro
@@ -2936,36 +2980,10 @@ matches:
               type: text
               multiline: true
 
-  # /logtroca — Log de troca de titularidade com dados do titular atual e do novo
-  - trigger: "/logtroca"
+  # /logtitularidade — Log de troca de titularidade com dados do titular atual e do novo
+  - trigger: "/logtitularidade"
     force_clipboard: true
-    replace: |-
-      Troca de Titularidade
-      INFORMAÇÕES
-      • Canal de Atendimento: {{formulario.canal}}
-      • Contrato: {{formulario.contrato}}
-
-      DADOS DO TITULAR ATUAL
-      • Tipo de Perfil: {{formulario.tipo_atual}}
-      • Nome / Razão Social: {{formulario.nome_atual}}
-      • CPF / CNPJ: {{formulario.doc_atual}}
-
-      DADOS DO NOVO TITULAR
-      • Tipo de Perfil: {{formulario.tipo_novo}}
-      • Nome / Razão Social: {{formulario.nome_novo}}
-      • CPF / CNPJ: {{formulario.cpf_novo}}
-      • RG / Inscrição Estadual: {{formulario.rg_novo}}
-      • E-mail: {{formulario.email_novo}}
-      • Telefone: {{formulario.tel_novo}}
-      • Endereço: {{formulario.end_novo}}
-
-      VERIFICAÇÕES
-      • Análise de Restrição: {{formulario.restricao}}
-      • Documentos Anexados: {{formulario.docs_anexos}}
-
-      SOLUÇÃO E ENCAMINHAMENTO
-      • Parecer e Setor de Destino: 
-      {{formulario.acao}}
+    replace: "{{resultado}}"
     vars:
       - name: formulario
         type: form
@@ -2975,7 +2993,7 @@ matches:
             Contrato: [[contrato]]
             Tipo perfil atual: [[tipo_atual]]
             Nome/Razão atual: [[nome_atual]]
-            Doc atual: [[doc_atual]]
+            Doc atual (CPF/CNPJ): [[doc_atual]]
             Tipo perfil novo: [[tipo_novo]]
             Nome/Razão novo: [[nome_novo]]
             CPF/CNPJ novo: [[cpf_novo]]
@@ -2983,9 +3001,8 @@ matches:
             E-mail novo: [[email_novo]]
             Telefone novo: [[tel_novo]]
             Endereço novo: [[end_novo]]
-            Restrição: [[restricao]]
-            Docs anexados: [[docs_anexos]]
-            Ação: [[acao]]
+            Documentos recebidos: [[docs_anexos]]
+            Restrição (protesto) do novo titular: [[restricao]]
           fields:
             canal:
               type: choice
@@ -3000,14 +3017,45 @@ matches:
               values:
                 - Pessoa Física
                 - Pessoa Jurídica
+            docs_anexos:
+              type: choice
+              values:
+                - Todos os documentos anexados ao chamado
+                - Documentos pendentes de envio pelo cliente
             restricao:
               type: choice
               values:
                 - Sem Restrição
                 - Com Restrição
-            acao:
-              type: text
-              multiline: true
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $canal = "{{formulario.canal}}"
+            $contrato = "{{formulario.contrato}}"
+            $tipoAtual = "{{formulario.tipo_atual}}"
+            $nomeAtual = "{{formulario.nome_atual}}"
+            $docAtual = "{{formulario.doc_atual}}"
+            $tipoNovo = "{{formulario.tipo_novo}}"
+            $nomeNovo = "{{formulario.nome_novo}}"
+            $cpfNovo = "{{formulario.cpf_novo}}"
+            $rgNovo = "{{formulario.rg_novo}}"
+            $emailNovo = "{{formulario.email_novo}}"
+            $telNovo = "{{formulario.tel_novo}}"
+            $endNovo = "{{formulario.end_novo}}"
+            $docsAnexos = "{{formulario.docs_anexos}}"
+            $restricao = "{{formulario.restricao}}"
+
+            if ($restricao -eq "Com Restrição") {
+                $acao = "Restrição (protesto) encontrada no CPF/CNPJ do novo titular. Troca de titularidade negada e cliente informado da negativa."
+            } else {
+                $acao = "Sem restrições encontradas. Chamado encaminhado para a fila do Financeiro para cadastro no SAP e alteração contratual."
+            }
+
+            $msg = "Troca de Titularidade`n`nINFORMAÇÕES`n• Canal de Atendimento: $canal`n• Contrato: $contrato`n`nDADOS DO TITULAR ATUAL`n• Tipo de Perfil: $tipoAtual`n• Nome / Razão Social: $nomeAtual`n• CPF / CNPJ: $docAtual`n`nDADOS DO NOVO TITULAR`n• Tipo de Perfil: $tipoNovo`n• Nome / Razão Social: $nomeNovo`n• CPF / CNPJ: $cpfNovo`n• RG / Inscrição Estadual: $rgNovo`n• E-mail: $emailNovo`n• Telefone: $telNovo`n• Endereço: $endNovo`n`nVERIFICAÇÕES`n• Documentos Anexados: $docsAnexos`n• Análise de Restrição: $restricao`n`nSOLUÇÃO E ENCAMINHAMENTO`n• $acao"
+            Write-Output $msg
 
   # /logpmg — Log detalhado de orientação sobre o Gateway Antispam PMG
   - trigger: "/logpmg"
@@ -4270,8 +4318,8 @@ matches:
             dominio:
               type: text
 
-  # /logencbloq — Log interno de encaminhamento para o N2 realizar bloqueio
-  - trigger: "/logencbloq"
+  # /logtransbloq — Log interno de encaminhamento para o N2 realizar bloqueio
+  - trigger: "/logtransbloq"
     force_clipboard: true
     replace: |-
       Escalonamento para Nível 2 — Bloqueio de Serviço
@@ -4296,8 +4344,8 @@ matches:
             servico:
               type: text
 
-  # /logencdesbloq — Log interno de encaminhamento para o N2 realizar desbloqueio
-  - trigger: "/logencdesbloq"
+  # /logtransdesbloq — Log interno de encaminhamento para o N2 realizar desbloqueio
+  - trigger: "/logtransdesbloq"
     force_clipboard: true
     replace: |-
       Escalonamento para Nível 2 — Desbloqueio de Serviço
@@ -4517,3 +4565,54 @@ matches:
           - Retorno repassado à HelpNet confirmando falso alarme. Chamado finalizado.
           - Viatura da HelpNet acionada para o local para averiguação presencial.
           - Polícia Militar (190) acionada imediatamente devido a risco real.
+
+  # /logdns — Log interno de criação, edição ou remoção de apontamentos DNS
+  - trigger: "/logdns"
+    force_clipboard: true
+    replace: |-
+      Gestão de Apontamentos DNS
+
+      INFORMAÇÕES
+      • Canal de Atendimento: {{formulario.canal}}
+      • Solicitante: {{formulario.solicitante}}
+      • Domínio: {{formulario.dominio}}
+      • Plataforma de Gestão: {{formulario.plataforma}}
+
+      PROCEDIMENTOS REALIZADOS
+      • Ação: {{formulario.acao}}
+      • Registros afetados:
+      {{formulario.registros}}
+
+      SOLUÇÃO
+      • Status: Procedimento realizado com sucesso. Cliente orientado sobre o prazo de propagação global (2 a 24 horas). Chamado encerrado.
+    vars:
+      - name: formulario
+        type: form
+        params:
+          layout: |
+            Canal: [[canal]]
+            Solicitante: [[solicitante]]
+            Domínio: [[dominio]]
+            Plataforma de Gestão: [[plataforma]]
+            Ação executada: [[acao]]
+            Registros afetados (descreva): [[registros]]
+          fields:
+            canal:
+              type: choice
+              values: *canal_padrao
+            plataforma:
+              type: choice
+              values:
+                - Cloudflare (Leeloo)
+                - cPanel (Zone Editor)
+                - Registro.br
+            acao:
+              type: choice
+              values:
+                - Criação de novos apontamentos
+                - Edição de apontamentos existentes
+                - Remoção de apontamentos
+                - Reset completo da zona DNS
+            registros:
+              type: text
+              multiline: true
