@@ -317,12 +317,12 @@ matches:
     replace: |-
       Olá, {{saudacao}}! Tudo bem? 😊
 
-      Sou o {{atendente_nome}} e darei sequência ao seu atendimento.
+      Sou o {{atendente_nome}} e vou seguir com o seu atendimento a partir de agora.
 
-      Para continuarmos, confirme, por gentileza, os seguintes dados:
+      Antes de começarmos, preciso confirmar alguns dados com você:
 
-      Seu Nome Completo:
-      CPF ou CNPJ:
+      Nome completo:
+      CPF ou CNPJ do cadastro:
       Telefone:
       E-mail:
     vars:
@@ -358,9 +358,9 @@ matches:
             $primeiroNome = ($nomeFormatado -split ' ')[0]
 
             if ($primeiroNome) {
-                $msg = "Agradeço pela confirmação dos dados, $primeiroNome! 😊`n`nComo posso te auxiliar hoje?"
+                $msg = "Obrigado pela confirmação, $primeiroNome! 😊`n`nComo posso te ajudar hoje?"
             } else {
-                $msg = "Agradeço pela confirmação dos dados! 😊`n`nComo posso te auxiliar hoje?"
+                $msg = "Obrigado pela confirmação! 😊`n`nComo posso te ajudar hoje?"
             }
 
             Write-Output $msg
@@ -369,9 +369,9 @@ matches:
   - trigger: "/proto"
     force_clipboard: true
     replace: |-
-      O número do protocolo referente a este atendimento é: {{formulario.protocolo}}
+      O protocolo deste atendimento é {{formulario.protocolo}}, aberto hoje, {{data_hoje}}.
 
-      Data: {{data_hoje}}
+      Guarde esse número: com ele conseguimos localizar o histórico do caso rapidamente.
     vars:
       - name: data_hoje
         type: global
@@ -386,10 +386,9 @@ matches:
     replace: |-
       Olá, {{saudacao}}! Aqui é o {{atendente_nome}}, do suporte técnico da {{empresa_nome}}.
 
-      Recebemos o seu chamado por meio do nosso setor Comercial referente aos seus serviços.
-      Para que eu possa iniciar o diagnóstico de forma precisa, por gentileza, detalhe o que está ocorrendo no momento.
+      O nosso setor Comercial nos repassou o seu chamado sobre os serviços contratados.
 
-      Você está próximo ao equipamento para realizarmos os testes?
+      Para eu começar o diagnóstico, me conte o que está acontecendo agora. Você está perto do equipamento para fazermos alguns testes?
     vars:
       - name: atendente_nome
         type: global
@@ -404,15 +403,13 @@ matches:
     form: |
       Olá, [[nome_cliente]], {{saudacao}}!
 
-      Recebemos o seu contato através do formulário do nosso site. Agradecemos o interesse na {{empresa_nome}}!
+      Recebemos o seu contato pelo nosso site e agradecemos o interesse na {{empresa_nome}}.
 
-      Para que possamos lhe proporcionar o melhor atendimento, como podemos te auxiliar hoje? Se o interesse for em nossos planos de internet para o endereço informado, já podemos dar andamento à verificação de viabilidade técnica.
+      Como podemos te ajudar? Também chamamos você no WhatsApp, no telefone que nos informou.
 
-      Se preferir um contato mais ágil, você também pode nos chamar diretamente no WhatsApp: (16) 3706-8000.
+      Fico no aguardo do seu retorno.
 
-      Fico no aguardo do seu retorno!
-
-      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Qualquer dúvida, a {{empresa_nome}} segue à disposição.
       Atenciosamente,
     vars:
       - name: saudacao
@@ -424,32 +421,32 @@ matches:
   - trigger: "/atraso"
     force_clipboard: true
     replace: |-
-      Olá, {{saudacao}}! Peço sinceras desculpas pelo tempo de espera em nosso retorno. 
+      Olá, {{saudacao}}! Desculpe a demora para te responder.
 
-      Estamos operando com um volume de chamados excepcionalmente alto no plantão de hoje, o que acabou gerando fila e impactando o nosso tempo de resposta.
+      O plantão de hoje está com um volume de chamados bem acima do normal, e isso acabou formando fila no atendimento.
     vars:
       - name: saudacao
         type: global
 
   # /espera — Solicita pausa breve para consultar o sistema (obrigatório monitoria)
   - trigger: "/espera"
-    replace: "Só um momento, por gentileza, enquanto verifico as informações. ⏱️"
+    replace: "Só um instante, por favor, vou verificar essas informações no sistema. ⏱️"
 
   # /analise — Informa pausa longa para análise técnica aprofundada nos logs
   - trigger: "/analise"
-    replace: "Vou precisar realizar uma análise mais detalhada nos logs do servidor para identificar a causa raiz. Isso pode levar alguns minutos. Assim que eu tiver o diagnóstico, retorno aqui, combinado? ⏱️"
+    replace: "Vou analisar os logs do servidor com mais calma para encontrar a origem do problema. Isso leva alguns minutos e, assim que eu tiver o diagnóstico, te chamo aqui. Combinado? ⏱️"
 
   # /voltei — Agradece ao cliente após retorno de pausa (obrigatório monitoria)
   - trigger: "/voltei"
-    replace: "Obrigado por aguardar! Peço desculpas pela demora. 😊"
+    replace: "Obrigado por aguardar! Desculpe a demora. 😊"
 
   # /transfere — Informa ao cliente a transferência para outro setor
   - trigger: "/transfere"
     force_clipboard: true
     replace: |-
-      Vou encaminhar o seu atendimento para o setor de {{formulario.setor}}, que dará continuidade à sua solicitação.
+      Vou transferir o seu atendimento para o setor {{formulario.setor}}, que segue com a sua solicitação daqui em diante.
 
-      Peço que aguarde um momento, por gentileza.
+      Só um momento, por favor.
     vars:
       - name: formulario
         type: form
@@ -466,9 +463,9 @@ matches:
   - trigger: "/prazo"
     force_clipboard: true
     replace: |-
-      A sua solicitação foi registrada com sucesso. O nosso prazo de retorno para este tipo de atendimento é de até {{formulario.horas}} horas úteis.
+      Sua solicitação já está registrada. O prazo de retorno para esse tipo de atendimento é de até {{formulario.horas}} horas úteis.
 
-      Assim que tivermos uma atualização, entraremos em contato por aqui.
+      Assim que tivermos uma atualização, falamos com você por aqui.
     vars:
       - name: formulario
         type: form
@@ -494,21 +491,21 @@ matches:
     replace: |-
       Olá! 😊
 
-      Você ainda precisa da nossa ajuda?
+      Você ainda precisa de ajuda?
 
-      Estamos há algum tempo sem o seu retorno; por isso, este atendimento será encerrado automaticamente em 30 minutos.
+      Como estamos sem o seu retorno há algum tempo, este atendimento será encerrado automaticamente em 30 minutos.
 
-      Quando precisar, é só responder por aqui!
+      Se ainda precisar, basta responder por aqui.
 
   # /final — Encerra o atendimento por inatividade com pedido de avaliação
   - trigger: "/final"
     force_clipboard: true
     replace: |-
-      Como não recebemos mais retorno, encerro este atendimento por inatividade.
+      Como não tivemos mais retorno, vou encerrar este atendimento por inatividade.
 
-      Se precisar de ajuda novamente, fale com a gente por aqui. Estamos à disposição! 🤝
+      Se precisar de ajuda outra vez, fale com a gente por aqui. Estamos à disposição! 🤝
 
-      Seu feedback é importante para a Com4 Data Center. Poste uma avaliação no nosso perfil do Google:
+      Seu feedback ajuda muito a Com4 Data Center. Se puder, deixe uma avaliação no nosso perfil do Google:
       👉 https://g.page/r/CdBIvBOvM7UBEAE/review
 
   # /horario — Informa horário comercial de atendimento presencial e telefônico
@@ -521,17 +518,16 @@ matches:
       • Sábados: das 08:00 às 12:00
       • Domingos e feriados: plantão técnico conforme escala (suporte remoto)
 
-      Visitas técnicas presenciais são agendadas dentro deste horário, com confirmação prévia por este canal.
+      As visitas técnicas são agendadas dentro desse horário, e confirmamos a data e o horário por este canal antes de enviar a equipe.
 
   # /avalie — Solicita avaliação no Google de forma isolada (Chat/Blip)
   - trigger: "/avalie"
     force_clipboard: true
     replace: |-
-      Fico feliz que conseguimos resolver a sua solicitação! 😊
+      Fico feliz que a sua solicitação foi resolvida! 😊
 
-      A sua opinião é muito importante para nós. Se o atendimento foi satisfatório, você poderia nos deixar uma avaliação no Google? Leva menos de um minuto e nos ajuda a continuar melhorando.
-
-      Basta acessar este link: https://g.page/r/CdBIvBOvM7UBEAE/review
+      Se o atendimento foi bom, você poderia deixar uma avaliação no nosso Google? Leva menos de um minuto e ajuda bastante a equipe:
+      https://g.page/r/CdBIvBOvM7UBEAE/review
 
       A {{empresa_nome}} agradece!
     vars:
@@ -542,9 +538,9 @@ matches:
   - trigger: "/avaliaemail"
     force_clipboard: true
     replace: |-
-      Obrigado pelo seu contato hoje. A sua avaliação nos ajuda a melhorar e atender mais clientes. 
+      Obrigado pelo seu contato de hoje.
 
-      Seu feedback é muito importante para a {{empresa_nome}}. Por gentileza, poste uma avaliação no nosso perfil através do link abaixo:
+      Se puder, deixe uma avaliação no perfil da {{empresa_nome}} no Google. É rápido e nos ajuda a melhorar o atendimento:
       https://g.page/r/CdBIvBOvM7UBEAE/review
     vars:
       - name: empresa_nome
@@ -554,9 +550,9 @@ matches:
   - trigger: "/tchau"
     force_clipboard: true
     replace: |-
-      Fico feliz que a solicitação foi resolvida! Caso tenha qualquer outra dúvida, estamos à disposição. 😊
+      Fico feliz que a sua solicitação foi resolvida! Se aparecer qualquer outra dúvida, é só chamar. 😊
 
-      A sua opinião é muito importante para nós. Se o atendimento foi satisfatório, poderia nos avaliar no Google? Leva menos de um minuto:
+      Se o atendimento foi bom, você poderia nos avaliar no Google? Leva menos de um minuto:
       👉 https://g.page/r/CdBIvBOvM7UBEAE/review
 
       A {{empresa_nome}} agradece o seu contato. {{despedida}}!
@@ -570,11 +566,11 @@ matches:
   - trigger: "/retornovendas"
     force_clipboard: true
     replace: |-
-      Olá, {{saudacao}}! Tudo bem? Sou o {{atendente_nome}} da Com4. Agradeço pelo seu retorno!
+      Olá, {{saudacao}}! Tudo bem? Sou o {{atendente_nome}}, da Com4. Obrigado pelo retorno!
 
-      Pedimos sinceras desculpas pela ausência de resposta imediata; enfrentamos uma instabilidade sistêmica em nossos canais de recepção de mensagens recentemente, mas a situação já foi normalizada.
+      Desculpe não termos respondido antes: tivemos uma instabilidade nos nossos canais de mensagens, que já está resolvida.
 
-      Vi que você havia nos procurado com interesse em nossos serviços. Como posso te auxiliar hoje? Você gostaria de consultar os nossos planos disponíveis ou já verificar a viabilidade para o seu endereço?
+      Vi que você nos procurou interessado nos nossos serviços. Como posso te ajudar? Prefere conhecer os planos disponíveis ou já verificar a viabilidade para o seu endereço?
     vars:
       - name: saudacao
         type: global
@@ -584,12 +580,13 @@ matches:
   # /aniversario — Mensagem padrão de feliz aniversário para o grupo da Com4
   - trigger: "/aniversario"
     force_clipboard: true
-    replace: "Parabéns {{formulario.nome}}! Muitos anos de vida, saúde e felicidades! 🥳🎉"
+    replace: "Parabéns, {{formulario.nome}}! Muitos anos de vida, saúde e alegria! 🥳🎉"
     vars:
       - name: formulario
         type: form
         params:
           layout: "Nome do aniversariante: [[nome]]"
+
   # =============================================================================
   # 2 · Financeiro — Cliente
   # =============================================================================
@@ -598,13 +595,11 @@ matches:
   - trigger: "/bloqueado"
     force_clipboard: true
     replace: |-
-      Ao consultar seu cadastro, identifiquei que os serviços estão temporariamente suspensos devido a uma fatura com vencimento em {{formulario.vencimento}} que consta em aberto em nosso sistema.
+      Verifiquei o seu cadastro: os serviços estão suspensos por causa da fatura com vencimento em {{formulario.vencimento}}, que ainda consta em aberto aqui.
 
-      Para restaurarmos o seu acesso, envie por aqui o comprovante, caso o pagamento já tenha sido realizado.
+      Se você já pagou, me envie o comprovante por aqui que eu libero o acesso. Se ainda não, posso emitir a 2ª via atualizada agora mesmo.
 
-      Ou, se preferir, posso emitir a 2ª via atualizada agora mesmo.
-
-      Como deseja seguir?
+      Como você prefere seguir?
     vars:
       - name: formulario
         type: form
@@ -615,11 +610,11 @@ matches:
   - trigger: "/2via"
     force_clipboard: true
     replace: |-
-      Conforme solicitado, segue em anexo a segunda via do boleto, com vencimento em {{formulario.vencimento}}.
+      Segue em anexo a segunda via do boleto, com vencimento em {{formulario.vencimento}}.
 
-      Por gentileza, revise os dados antes de pagar.
+      Confira os dados antes de pagar, por favor.
 
-      Se possível, envie o comprovante por aqui para agilizarmos a baixa em nosso sistema.
+      Se puder me enviar o comprovante depois, agilizamos a baixa no sistema.
     vars:
       - name: formulario
         type: form
@@ -630,9 +625,9 @@ matches:
   - trigger: "/nfe"
     force_clipboard: true
     replace: |-
-      Conforme solicitado, segue em anexo a sua Nota Fiscal referente ao mês de {{formulario.mes_referencia}}.
+      Segue em anexo a sua Nota Fiscal referente ao mês de {{formulario.mes_referencia}}.
 
-      Qualquer dúvida, sigo à disposição!
+      Qualquer dúvida, é só me chamar!
     vars:
       - name: formulario
         type: form
@@ -643,25 +638,25 @@ matches:
   - trigger: "/agendamento"
     force_clipboard: true
     replace: |-
-      Analisamos o documento enviado, mas verificamos que se trata de um comprovante de agendamento.
+      Conferi o documento que você enviou: ele é um comprovante de agendamento, e não do pagamento em si.
 
-      Para conseguirmos prosseguir com a baixa no sistema e a liberação dos seus serviços, precisamos do comprovante de pagamento efetivado.
+      Para eu dar baixa no sistema e liberar os seus serviços, preciso do comprovante do pagamento já efetivado.
 
-      Por gentileza, assim que a transação for concluída pelo seu banco, nos envie o comprovante definitivo por aqui.
+      Assim que o seu banco concluir a transação, me envie o comprovante definitivo por aqui.
 
   # /pix — Envia chave PIX e linha digitável do boleto
   - trigger: "/pix"
     force_clipboard: true
     replace: |-
-      Para agilizar o pagamento, segue abaixo a nossa chave PIX:
+      Para agilizar o pagamento, seguem os nossos dados:
 
       🔑 Chave PIX: {{formulario.chave}}
 
-      👤 Linha Digitável do Boleto: {{formulario.boleto}}
+      📄 Linha digitável do boleto: {{formulario.boleto}}
 
-      Após realizar o pagamento, envie o comprovante por aqui para que possamos dar continuidade ao seu atendimento.
+      Depois de pagar, me envie o comprovante por aqui para eu dar sequência ao atendimento.
 
-      ⚠️ Atenção: confirme os dados do favorecido antes de concluir a transação.
+      ⚠️ Atenção: confirme o nome do favorecido antes de concluir a transferência.
     vars:
       - name: formulario
         type: form
@@ -674,11 +669,11 @@ matches:
   - trigger: "/ofer"
     force_clipboard: true
     replace: |-
-      Podemos realizar um desbloqueio em acordo para que a sua conexão seja restabelecida neste momento.
+      Posso fazer um desbloqueio em acordo, e a sua conexão volta agora mesmo.
 
-      Esse procedimento libera os seus serviços por 2 dias úteis, tempo hábil para a compensação bancária. Caso o pagamento não seja efetivado e baixado em nosso sistema até o final do dia {{data_2d_uteis}}, o serviço será restrito novamente de forma automática.
+      O acordo libera os serviços por 2 dias úteis, prazo suficiente para o banco compensar o pagamento. Se a baixa não constar no nosso sistema até o fim do dia {{data_2d_uteis}}, o bloqueio volta automaticamente.
 
-      Deseja que eu realize essa liberação no seu cadastro?
+      Quer que eu faça essa liberação no seu cadastro?
     vars:
       - name: data_2d_uteis
         type: global
@@ -687,11 +682,11 @@ matches:
   - trigger: "/acordo"
     force_clipboard: true
     replace: |-
-      Certo! Concluí o desbloqueio em acordo dos seus serviços nesta data.
+      Pronto! Fiz o desbloqueio em acordo dos seus serviços agora.
 
-      Em até cinco minutos o seu serviço deverá normalizar.
+      A conexão deve normalizar em até cinco minutos.
 
-      Caso o pagamento não seja compensado até o final do dia {{data_2d_uteis}}, o sistema poderá aplicar um novo bloqueio automaticamente.
+      Lembrando que, se o pagamento não for compensado até o fim do dia {{data_2d_uteis}}, o sistema pode aplicar um novo bloqueio automático.
     vars:
       - name: data_2d_uteis
         type: global
@@ -700,15 +695,15 @@ matches:
   - trigger: "/norm"
     force_clipboard: true
     replace: |-
-      O desbloqueio dos seus serviços foi concluído.
+      Desbloqueei os seus serviços.
 
-      Sua conexão deve retornar à normalidade em instantes.
+      A conexão deve voltar ao normal em instantes.
 
   # /porn — Resposta informal de despedida
   - trigger: "/porn"
     force_clipboard: true
     replace: |-
-      Por nada! Tenha um ótimo dia e excelente semana
+      Por nada! Tenha um ótimo dia e uma excelente semana. 😊
 
   # /comp — Confirma recebimento e registro do comprovante de pagamento
   - trigger: "/comp"
@@ -716,8 +711,7 @@ matches:
     replace: |-
       Recebemos o seu comprovante! ✅
 
-      Ele já foi anexado ao seu cadastro financeiro.
-      Muito obrigado!
+      Já anexei ao seu cadastro financeiro. Muito obrigado!
 
   # /emailcomp — Confirmação formal de recebimento de comprovante via e-mail
   - trigger: "/emailcomp"
@@ -725,10 +719,11 @@ matches:
     form: |
       Olá, [[nome]], {{saudacao}}!
 
-      Informamos que o comprovante foi verificado e você já pode voltar a utilizar os nossos serviços.
-      Lembramos que, caso o pagamento não seja processado pelo banco dentro de 24 horas, o serviço poderá ser suspenso automaticamente.
+      Conferimos o comprovante e você já pode voltar a usar os nossos serviços.
 
-      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Um lembrete: se o banco não processar o pagamento em até 24 horas, o serviço pode ser suspenso novamente de forma automática.
+
+      Qualquer dúvida, a {{empresa_nome}} segue à disposição.
       Atenciosamente,
     vars:
       - name: saudacao
@@ -742,11 +737,11 @@ matches:
     form: |
       Olá, [[nome]], {{saudacao}}!
 
-      Recebemos o comprovante de pagamento, no entanto, para que possamos localizar seu cadastro e anexá-lo corretamente, por gentileza, nos informe o CPF ou CNPJ vinculado.
+      Recebemos o comprovante de pagamento, mas ele veio sem identificação. Para localizarmos o seu cadastro e anexar o documento no contrato correto, nos informe o CPF ou CNPJ vinculado, por gentileza.
 
       Fico no aguardo do seu retorno.
 
-      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Qualquer dúvida, a {{empresa_nome}} segue à disposição.
       Atenciosamente,
     vars:
       - name: saudacao
@@ -779,21 +774,21 @@ matches:
   - trigger: "/transfereprotesto"
     force_clipboard: true
     replace: |-
-      Compreendo a solicitação referente ao título protestado.
+      Sobre o título protestado: esse caso é tratado pelo nosso setor Financeiro, porque envolve a emissão de um boleto atualizado e, depois, a liberação da carta de anuência.
 
-      Como este procedimento exige a emissão de um boleto atualizado e a posterior liberação da carta de anuência, vou encaminhar o seu atendimento diretamente para o nosso setor Financeiro.
+      Vou transferir o seu atendimento para lá agora. A equipe assume o caso e envia a documentação por aqui mesmo.
 
-      A equipe assumirá o caso e enviará a documentação necessária por aqui mesmo. Peço que aguarde um momento, por gentileza.
+      Só um momento, por favor.
 
   # /comodato — Informa regras de devolução do equipamento e multa por extravio
   - trigger: "/comodato"
     force_clipboard: true
     replace: |-
-      Lembramos que os equipamentos instalados (modem e fonte de alimentação) são cedidos em regime de comodato.
+      Os equipamentos instalados (modem e fonte de alimentação) são cedidos em regime de comodato, então precisam voltar para nós quando o serviço é encerrado.
 
-      Com o encerramento do serviço, a devolução é obrigatória. Conforme previsto em contrato, em caso de extravio, dano ou não devolução, é aplicada uma taxa de restituição no valor de R$ {{multa_comodato}}.
+      Conforme o contrato, em caso de extravio, dano ou falta de devolução, aplicamos uma taxa de restituição de R$ {{multa_comodato}}.
 
-      Como prefere organizar a devolução? Podemos agendar a retirada pela nossa equipe técnica ou você prefere entregar diretamente em nossa sede?
+      Como você prefere fazer a devolução? Podemos agendar a retirada com a nossa equipe técnica, ou você pode entregar direto na nossa sede.
     vars:
       - name: multa_comodato
         type: global
@@ -827,16 +822,16 @@ matches:
                 $docs = "• Cartão CNPJ`n• Razão Social`n• Comprovante de Inscrição e Situação Cadastral`n• E-mail`n• Endereço completo"
             }
 
-            $msg = "Para darmos andamento à troca de titularidade, por gentileza, nos envie os seguintes dados e documentos do novo titular:`n`n$docs`n`nVocê pode nos enviar as fotos ou arquivos em PDF por aqui mesmo."
+            $msg = "Para seguirmos com a troca de titularidade, preciso dos dados e documentos do novo titular:`n`n$docs`n`nVocê pode mandar as fotos ou os arquivos em PDF por aqui mesmo."
             Write-Output $msg
 
-  # /trocarestricao — Informa negativa de troca de titularidade devido a protesto no CPF/CNPJ do novo titular
+# /trocarestricao — Informa negativa de troca de titularidade devido a protesto no CPF/CNPJ do novo titular
   - trigger: "/trocarestricao"
     force_clipboard: true
     replace: |-
-      Realizamos a análise dos dados encaminhados para a troca de titularidade.
+      Analisamos os dados que você nos enviou para a troca de titularidade.
 
-      Identificamos que consta uma restrição ativa (protesto) vinculada ao documento (CPF/CNPJ) do novo titular. Conforme os nossos procedimentos internos, a transferência do contrato não pode ser aprovada e concluída enquanto houver pendências ativas no nome do novo responsável.
+      O documento (CPF/CNPJ) do novo titular tem uma restrição ativa (protesto). Pelos nossos procedimentos internos, não conseguimos aprovar a transferência do contrato enquanto essa pendência estiver em aberto no nome do novo responsável.
 
   # /fid — Calcula e explica a multa de fidelidade automaticamente (Regra BDC)
   # Uso: /fid [meses ativos] — Exemplo: /fid 5 (para um cliente com 5 meses de uso)
@@ -856,7 +851,7 @@ matches:
             $mesesUsados = [int]"{{meses}}"
 
             if ($mesesUsados -ge 12) {
-                Write-Output "Verifiquei em nosso sistema e o seu contrato foi ativado há $mesesUsados meses.`n`nComo o período obrigatório de 12 meses já foi concluído, você está isento da multa de fidelidade. Podemos prosseguir com o cancelamento sem custos rescisórios."
+                Write-Output "Verifiquei aqui: o seu contrato está ativo há $mesesUsados meses.`n`nComo a fidelidade de 12 meses já foi cumprida, não há multa a pagar. Podemos seguir com o cancelamento sem custo rescisório."
                 exit
             }
 
@@ -872,7 +867,7 @@ matches:
             $cultura = [System.Globalization.CultureInfo]::GetCultureInfo("pt-BR")
             $multaFormatada = $multa.ToString("N2", $cultura)
 
-            $mensagem = "Verifiquei em nosso sistema e o seu contrato foi ativado há $mesesUsados meses.`n`nNossos contratos de prestação de serviço possuem uma cláusula de fidelização padrão de 12 meses. Como o cancelamento está sendo solicitado antes deste período, haverá a cobrança proporcional da multa por quebra de contrato.`n`nO valor atualizado da multa rescisória é de R$ $multaFormatada. Você está de acordo com esta cobrança para prosseguirmos com o cancelamento?"
+            $mensagem = "Verifiquei aqui: o seu contrato está ativo há $mesesUsados meses.`n`nOs nossos contratos têm fidelidade de 12 meses. Como o cancelamento está sendo pedido antes desse prazo, há cobrança proporcional aos $mesesRestantes meses restantes.`n`nO valor da multa fica em R$ $multaFormatada. Você concorda com essa cobrança para eu seguir com o cancelamento?"
 
             Write-Output $mensagem
 
@@ -880,49 +875,49 @@ matches:
   - trigger: "/retirada"
     force_clipboard: true
     replace: |-
-      Para concluirmos o processo de cancelamento, precisamos recolher os equipamentos cedidos em comodato (modem e fonte de alimentação).
+      Para concluirmos o cancelamento, precisamos recolher os equipamentos cedidos em comodato (modem e fonte de alimentação).
 
-      Por gentileza, confirme os melhores dias e horários da próxima semana para que a nossa equipe técnica vá até o local realizar a retirada.
+      Me confirme os melhores dias e horários da próxima semana para a nossa equipe técnica ir até o local fazer a retirada.
 
-      Lembramos que é necessária a presença de um responsável maior de 18 anos no local.
+      ⚠️ É necessário que uma pessoa maior de 18 anos esteja no local para receber o técnico.
 
   # /pague — Lembrete proativo de fatura em aberto antes do bloqueio ocorrer
   - trigger: "/pague"
     force_clipboard: true
     form: |
-      Aproveitando o nosso contato, notei ao consultar o seu cadastro que a fatura com vencimento em [[vencimento]] consta como pendente em nosso sistema.
+      Aproveitando o nosso contato: vi no seu cadastro que a fatura com vencimento em [[vencimento]] ainda consta pendente.
 
-      Como os seus serviços continuam ativos, decidi enviar a segunda via atualizada em anexo (ou via PIX) para facilitar a sua regularização e evitar qualquer interrupção sistêmica nos próximos dias.
+      Como os seus serviços continuam ativos, já envio a segunda via atualizada em anexo (ou por PIX, se preferir) para você regularizar antes que ocorra qualquer interrupção nos próximos dias.
 
-      Se o pagamento já foi realizado, peço que desconsidere este aviso ou nos envie o comprovante para baixarmos manualmente.
+      Se o pagamento já foi feito, desconsidere este aviso ou me envie o comprovante para eu dar baixa manualmente.
 
   # /negado — Informa que o comprovante está ilegível ou incompleto
   - trigger: "/negado"
     force_clipboard: true
     replace: |-
-      Recebemos o documento, mas não foi possível validá-lo para baixa no sistema.
+      Recebemos o documento, mas não consegui validá-lo para dar baixa no sistema.
 
-      O comprovante está ilegível, incompleto ou sem os dados necessários (valor, data, favorecido ou código de autenticação).
+      O comprovante está ilegível ou sem alguma informação necessária (valor, data, favorecido ou código de autenticação).
 
-      Por gentileza, envie uma nova imagem ou o PDF original emitido pelo banco.
+      Envie uma nova imagem ou o PDF original emitido pelo banco, por gentileza.
 
   # /duplicata — Informa que o comprovante já consta registrado no sistema
   - trigger: "/duplicata"
     force_clipboard: true
     replace: |-
-      Verificamos que este comprovante já consta registrado em nosso sistema.
+      Esse comprovante já consta registrado aqui no sistema.
 
-      A baixa está em processamento ou já foi concluída. Caso o acesso ainda não tenha normalizado, nos avise para verificarmos novamente.
+      A baixa está em processamento ou já foi concluída. Se o acesso ainda não normalizou, me avise que eu verifico de novo.
 
   # /desbloqprazo — Informa prazo de desbloqueio após compensação bancária
   - trigger: "/desbloqprazo"
     force_clipboard: true
     replace: |-
-      Após a confirmação da compensação bancária em nosso sistema, o desbloqueio dos serviços ocorre de forma automática.
+      Assim que a compensação bancária aparece no nosso sistema, o desbloqueio dos serviços acontece automaticamente.
 
-      O prazo médio para compensação é de 1 dia útil (previsão: {{data_1d_util}}). Assim que a baixa for registrada, a conexão deve normalizar em até cinco minutos.
+      O prazo médio de compensação é de 1 dia útil (previsão: {{data_1d_util}}), e a conexão normaliza em até cinco minutos depois da baixa.
 
-      Caso o pagamento tenha sido feito via PIX, a confirmação costuma ocorrer em poucas horas.
+      Pagamentos por PIX costumam ser confirmados em poucas horas.
     vars:
       - name: data_1d_util
         type: global
@@ -931,13 +926,13 @@ matches:
   - trigger: "/correios"
     force_clipboard: true
     form: |
-      Verifiquei o seu cadastro e confirmo que as faturas estão sendo enviadas normalmente de forma digital para o e-mail registrado: [[email]].
+      Verifiquei o seu cadastro: as faturas estão sendo enviadas normalmente para o e-mail registrado, [[email]].
 
-      Em relação à fatura impressa, estamos enfrentando problemas de atraso e extravio nas entregas devido a paralisações e greves dos Correios. Como a logística física é terceirizada, acaba fugindo do nosso controle garantir a data exata em que a correspondência chegará ao seu endereço neste momento.
+      Sobre a fatura impressa, os Correios estão com atrasos e extravios por causa de paralisações e greves. Como essa entrega é terceirizada, não conseguimos garantir a data exata em que a correspondência chega ao seu endereço.
 
-      Lembramos que o envio automático por e-mail continua operando normalmente. Além disso, sempre que precisar, você pode solicitar a segunda via atualizada de forma rápida pelos nossos canais de atendimento (WhatsApp, telefone ou e-mail).
+      O envio automático por e-mail segue funcionando, e você também pode pedir a segunda via atualizada quando precisar pelo WhatsApp, telefone ou e-mail.
 
-      Deseja que eu te envie a fatura deste mês por aqui agora mesmo?
+      Quer que eu te envie a fatura deste mês por aqui agora?
     form_fields:
       email:
         type: text
@@ -946,11 +941,11 @@ matches:
   - trigger: "/cancelapf"
     force_clipboard: true
     replace: |-
-      Compreendo a sua solicitação.
+      Certo, vou registrar a sua solicitação de cancelamento.
 
-      Vou registrar as informações e encaminhar ao nosso setor Financeiro para validação contratual e financeira antes da efetivação do cancelamento. Poderá haver contato do Financeiro (e, se necessário, do nosso setor Comercial) para tratativas antes da conclusão.
+      O pedido passa pelo nosso setor Financeiro para validação contratual e financeira antes de ser efetivado. Nesse período, o Financeiro (ou o Comercial, se for necessário) pode entrar em contato com você para tratar do assunto.
 
-      O seu serviço não será bloqueado neste momento, e o retorno para conclusão do processo ocorrerá em até 24 horas úteis.
+      O seu serviço não será bloqueado agora, e o retorno para conclusão do processo ocorrerá em até 24 horas úteis.
 
       Posso confirmar a abertura do chamado?
 
@@ -958,36 +953,34 @@ matches:
   - trigger: "/cancelapj"
     force_clipboard: true
     replace: |-
-      Compreendo a sua solicitação.
+      Certo. Como o seu cadastro é empresarial, o cancelamento precisa ser formalizado por e-mail, enviado para cancelamento@com4.com.br.
 
-      Como o seu cadastro é empresarial, para prosseguirmos, será necessário o envio da formalização através de e-mail para cancelamento@com4.com.br.
-
-      Por gentileza, o e-mail deve conter as seguintes informações:
+      O e-mail deve conter:
       • Razão Social;
       • CNPJ;
       • Serviço(s) que deseja cancelar;
       • Motivo do cancelamento;
       • Nome e cargo do responsável pela solicitação.
 
-      Após o recebimento, a solicitação será encaminhada ao nosso setor Financeiro para validação contratual e financeira. O serviço permanecerá ativo durante o processo, e o retorno para conclusão ocorrerá em até 24 horas úteis após o recebimento do e-mail no setor responsável.
+      Depois que recebermos, a solicitação segue para o Financeiro fazer a validação contratual e financeira. O serviço continua ativo durante o processo, e o retorno para conclusão ocorrerá em até 24 horas úteis após o e-mail chegar ao setor responsável.
 
   # /solcomp — Cliente bloqueado informa que já pagou; solicita o comprovante para liberação
   - trigger: "/solcomp"
     force_clipboard: true
     replace: |-
-      Compreendo! Como o pagamento já foi realizado, é provável que o sistema ainda esteja aguardando o prazo de compensação bancária.
+      Entendi! Se o pagamento já foi feito, provavelmente o sistema ainda está aguardando a compensação bancária.
 
-      Para agilizarmos o processo, por gentileza, envie o comprovante de pagamento (foto, print ou PDF) por aqui. 
+      Para agilizar, me envie o comprovante por aqui (foto, print ou PDF).
 
-      Assim que recebermos, faremos a validação, anexaremos ao seu cadastro e daremos andamento imediato na liberação dos seus serviços.
+      Assim que ele chegar, eu valido, anexo ao seu cadastro e sigo com a liberação dos seus serviços.
 
   # /trocapf — Solicita dados e documentos do novo titular para troca PF
   - trigger: "/trocapf"
     force_clipboard: true
     replace: |-
-      Para darmos andamento à troca de titularidade, precisamos confirmar os dados do novo titular (Pessoa Física).
+      Para seguirmos com a troca de titularidade, preciso confirmar os dados do novo titular (pessoa física).
 
-      Por gentileza, preencha as informações abaixo e nos envie:
+      Me envie as informações abaixo:
       • Nome completo:
       • CPF:
       • RG:
@@ -995,15 +988,15 @@ matches:
       • Telefone de contato:
       • Endereço completo (com CEP):
 
-      Além dos dados, é necessário enviar por aqui uma foto legível ou PDF do **documento com foto (RG ou CNH)** do novo titular.
+      Junto com os dados, envie também uma foto legível ou PDF do documento com foto (RG ou CNH) do novo titular.
 
   # /trocapj — Solicita dados e documentos do novo titular para troca PJ
   - trigger: "/trocapj"
     force_clipboard: true
     replace: |-
-      Para darmos andamento à troca de titularidade, precisamos confirmar os dados do novo titular (Pessoa Jurídica).
+      Para seguirmos com a troca de titularidade, preciso confirmar os dados do novo titular (pessoa jurídica).
 
-      Por gentileza, preencha as informações abaixo e nos envie:
+      Me envie as informações abaixo:
       • Razão Social:
       • CNPJ:
       • Inscrição Estadual (ou Isento):
@@ -1011,29 +1004,29 @@ matches:
       • Telefone de contato:
       • Endereço completo (com CEP):
 
-      Além dos dados, é necessário enviar por aqui o **Cartão CNPJ** atualizado e uma foto/PDF do **documento com foto (RG ou CNH)** do representante legal da empresa.
+      Junto com os dados, envie o Cartão CNPJ atualizado e uma foto ou PDF do documento com foto (RG ou CNH) do representante legal da empresa.
 
   # /protestoboleto — Informa que o chamado foi para o Financeiro gerar o boleto atualizado do protesto
   - trigger: "/protestoboleto"
     force_clipboard: true
     replace: |-
-      Compreendo a sua solicitação referente ao título protestado.
+      Sobre o título protestado: o nosso setor Financeiro precisa levantar as custas do cartório e emitir um boleto atualizado com esses valores.
 
-      Como este procedimento envolve o levantamento das custas cartorárias e a emissão de um boleto atualizado com esses valores, vou encaminhar o seu caso agora mesmo para o nosso setor Financeiro.
+      Vou encaminhar o seu caso para lá agora. A equipe faz a emissão e envia o boleto para você por aqui mesmo.
 
-      Eles farão a emissão do documento e enviarão o boleto diretamente para você por aqui. Peço que aguarde um momento, por gentileza!
+      Só um momento, por favor!
 
   # /invertido — Avisa o cliente sobre o pagamento invertido e o prazo de desbloqueio
   - trigger: "/invertido"
     force_clipboard: true
     replace: |-
-      Identificamos em nosso sistema que o pagamento realizado foi referente à fatura do próximo mês (vencimento em {{formulario.vencimento_pago}}), e não à fatura que estava pendente (vencimento em {{formulario.vencimento_atual}}).
+      Identifiquei aqui que o pagamento foi feito na fatura do próximo mês (vencimento em {{formulario.vencimento_pago}}), e não na que estava pendente (vencimento em {{formulario.vencimento_atual}}).
 
-      Para que você não fique sem conexão devido a essa inversão, já realizei o desbloqueio manual dos seus serviços de forma excepcional.
+      Para você não ficar sem conexão por causa dessa inversão, já fiz o desbloqueio manual dos serviços, em caráter excepcional.
 
-      O seu acesso permanecerá liberado até o dia {{formulario.vencimento_pago}}. Caso a fatura pendente ({{formulario.vencimento_atual}}) não seja regularizada até essa data, o sistema aplicará um novo bloqueio automático.
+      O acesso fica liberado até o dia {{formulario.vencimento_pago}}. Se a fatura pendente ({{formulario.vencimento_atual}}) não for regularizada até essa data, o sistema aplica um novo bloqueio automático.
 
-      Deseja que eu te envie a 2ª via atualizada da fatura pendente agora mesmo para facilitar a regularização?
+      Quer que eu te envie a 2ª via atualizada da fatura pendente agora, para facilitar?
     vars:
       - name: formulario
         type: form
@@ -1053,23 +1046,23 @@ matches:
     replace: |-
       Verifique, por favor, se o cabo de fibra óptica está bem encaixado no equipamento.
 
-      Não é necessário retirar nem limpar o conector da fibra: ele é delicado — apenas confira se está firme na porta.
+      Não precisa retirar nem limpar o conector: ele é bem sensível, então só confira se está firme na porta.
 
-      Olhe o cabo pela parte visível (sem forçá-lo): dobras marcadas, torções ou rupturas podem indicar problema físico na conexão.
+      Dê uma olhada no cabo pela parte visível, sem forçá-lo. Dobras marcadas, torções ou rupturas podem indicar um problema físico na conexão.
 
-      Esses cuidados ajudam bastante na análise do caso. ✅
+      Essas informações ajudam bastante na análise. ✅
 
   # /fotos — Solicita evidências visuais do equipamento (painel de luzes e cabeamento)
   - trigger: "/fotos"
     force_clipboard: true
     replace: |-
-      Para que eu possa analisar o status físico da sua conexão com maior precisão, você poderia me enviar algumas fotos dos equipamentos aí no local? 📸
+      Você pode me enviar algumas fotos dos equipamentos aí no local? Isso ajuda bastante na análise do status físico da sua conexão. 📸
 
-      Por gentileza, tente capturar:
-      1. A parte frontal do modem da {{empresa_nome}} (mostrando nitidamente quais luzes estão acesas, apagadas ou piscando).
-      2. A parte traseira (mostrando como os cabos estão conectados).
+      Tente capturar:
+      1. A parte frontal do modem da {{empresa_nome}}, mostrando quais luzes estão acesas, apagadas ou piscando.
+      2. A parte traseira, mostrando como os cabos estão conectados.
 
-      Com essas evidências visuais, consigo identificar possíveis falhas de cabeamento, travamentos ou perda de sinal de forma muito mais rápida!
+      Com essas fotos, consigo identificar falhas de cabeamento, travamentos ou perda de sinal bem mais rápido.
     vars:
       - name: empresa_nome
         type: global
@@ -1078,9 +1071,9 @@ matches:
   - trigger: "/los"
     force_clipboard: true
     replace: |-
-      A luz vermelha no seu modem {{empresa_nome}} (modelo branco com o logo da {{empresa_nome}}) indica perda de sinal (LOS) — ou seja, interrupção no trecho da fibra entre o seu equipamento e a nossa rede.
+      A luz vermelha no seu modem {{empresa_nome}} (modelo branco com o logo da {{empresa_nome}}) indica perda de sinal, chamada de LOS: há uma interrupção no trecho de fibra entre o seu equipamento e a nossa rede.
 
-      Para solucionar isso, vou registrar o seu caso com a equipe de manutenção de fibra óptica, para que restabeleçam sua conexão no menor prazo possível.
+      Vou registrar o seu caso com a equipe de manutenção de fibra para restabelecerem a conexão o quanto antes.
     vars:
       - name: empresa_nome
         type: global
@@ -1089,39 +1082,39 @@ matches:
   - trigger: "/testelink"
     force_clipboard: true
     replace: |-
-      Realizei uma análise detalhada dos parâmetros da sua conexão em nosso sistema de monitoramento, verificando o sinal óptico, o histórico de estabilidade e o comportamento do seu equipamento até este momento.
+      Analisei os parâmetros da sua conexão no nosso sistema de monitoramento: sinal óptico, histórico de estabilidade e comportamento do equipamento até agora.
 
-      Como as verificações remotas não são suficientes para identificar a causa exata desta ocorrência, será necessário o envio de um técnico até o local para realizar um teste de link presencial (aferição direta de sinal na ONU e no cabeamento de fibra).
+      As verificações remotas não foram suficientes para identificar a causa exata dessa ocorrência, então vou enviar um técnico até o local para um teste de link presencial (aferição direta de sinal na ONU e no cabeamento de fibra).
 
   # /romp — Informa rompimento grave de fibra óptica na região (acidente/evento externo)
   - trigger: "/romp"
     force_clipboard: true
     form: |
-      Pedimos sinceras desculpas pela paralisação dos serviços de internet ocorrida hoje.
+      Pedimos desculpas pela interrupção dos serviços de internet hoje.
 
-      A indisponibilidade foi causada por um rompimento de fibra óptica de grande proporção que atingiu a infraestrutura de rede na região. Por se tratar de um incidente em larga escala, outras operadoras também foram afetadas e estão enfrentando interrupções em seus serviços.
+      Ela foi causada por um rompimento de fibra óptica de grande proporção, que atingiu a infraestrutura de rede na região. Como é um incidente em larga escala, outras operadoras também foram afetadas e estão com interrupções nos seus serviços.
 
-      As equipes responsáveis já estão trabalhando de forma contínua para realizar os reparos necessários e restabelecer a conectividade o mais rápido possível. Neste momento, a previsão para a normalização dos serviços é entre [[previsao]].
+      As equipes responsáveis já estão trabalhando nos reparos para restabelecer a conectividade o mais rápido possível. A previsão atual para normalizar os serviços é entre [[previsao]].
 
-      Lamentamos os transtornos causados e agradecemos pela compreensão e paciência durante este período. Continuaremos acompanhando a situação e informaremos qualquer atualização relevante.
+      Lamentamos o transtorno e agradecemos a paciência. Vamos acompanhar a situação e avisar sobre qualquer atualização relevante.
 
   # /resolvido — Notifica o cliente que a falha massiva foi resolvida pela equipe de campo
   - trigger: "/resolvido"
     force_clipboard: true
     replace: |-
-      Olá! Informamos que a intervenção técnica que afetava os serviços na sua região foi concluída com sucesso pela nossa equipe de Manutenção de Fibra.
+      Olá! A intervenção técnica que afetava os serviços na sua região foi concluída pela nossa equipe de Manutenção de Fibra.
 
-      A sua conexão já foi restabelecida e deve operar com total normalidade. Por precaução, recomendamos que desligue o modem da tomada por 1 minuto e ligue novamente.
+      A sua conexão já foi restabelecida. Por precaução, recomendamos desligar o modem da tomada por 1 minuto e ligar novamente.
 
-      Por gentileza, confirme se o seu acesso normalizou!
+      Confirma para mim se o acesso normalizou?
 
   # /clima — Informa interrupção causada por condições climáticas severas na área
   - trigger: "/clima"
     force_clipboard: true
     replace: |-
-      Identificamos que as fortes chuvas e condições climáticas adversas na sua região afetaram o fornecimento de energia elétrica ou a infraestrutura externa da nossa rede de fibra óptica.
+      As fortes chuvas e as condições climáticas na sua região afetaram o fornecimento de energia ou a infraestrutura externa da nossa rede de fibra.
 
-      Nossas equipes de campo já estão de prontidão e atuando para restabelecer os serviços na área afetada assim que as condições de segurança permitirem.
+      As nossas equipes de campo já estão a caminho para restabelecer os serviços assim que as condições de segurança permitirem.
 
       Pedimos desculpas pelo transtorno e agradecemos a compreensão!
 
@@ -1129,76 +1122,76 @@ matches:
   - trigger: "/online"
     force_clipboard: true
     replace: |-
-      Nossos sistemas de monitoramento indicam que o sinal da sua conexão já foi restabelecido após a conclusão dos reparos.
+      O nosso monitoramento mostra que o sinal da sua conexão já foi restabelecido depois dos reparos.
 
-      Por gentileza, realize um teste de navegação para confirmarmos se o serviço normalizou completamente. Caso o acesso ainda não tenha retornado, recomendamos reiniciar o seu equipamento (retirar o modem/roteador da tomada por 1 minuto e ligar novamente).
+      Pode testar a navegação para confirmarmos se o serviço normalizou? Se o acesso ainda não voltou, tente reiniciar o equipamento (tirar o modem/roteador da tomada por 1 minuto e ligar de novo).
 
-      Fico no aguardo da sua confirmação!
+      Fico no aguardo!
 
   # /speedwifi — Explica a limitação de velocidade via Wi-Fi e pede teste via cabo (Proposto)
   - trigger: "/speedwifi"
     force_clipboard: true
     replace: |-
-      Notamos que o teste de velocidade foi realizado através da rede Wi-Fi. 
+      Notei que o teste de velocidade foi feito pelo Wi-Fi.
 
-      O sinal sem fio sofre perda natural de pacotes e interferências do ambiente (paredes, espelhos, outros eletrônicos), não conseguindo transmitir a velocidade total da fibra óptica.
+      O sinal sem fio perde pacotes naturalmente e sofre interferência do ambiente (paredes, espelhos, outros eletrônicos), então não transmite a velocidade total da fibra.
 
-      Para atestarmos a real capacidade que chega ao seu equipamento, é fundamental realizar o teste com um computador conectado diretamente ao modem através de um cabo de rede. Consegue realizar este teste e nos enviar o resultado?
+      Para vermos a capacidade real que chega até você, o ideal é testar com um computador ligado direto no modem por cabo de rede. Consegue fazer esse teste e nos enviar o resultado?
 
   # /rotoff — Informa que o modem Com4 está normal, mas o roteador do cliente está desligado/desconectado
   - trigger: "/rotoff"
     force_clipboard: true
     replace: |-
-      Realizei uma análise detalhada da sua conexão e confirmo que o sinal da fibra óptica e o modem da Com4 estão operando perfeitamente. A internet está chegando com total normalidade até o local.
+      Analisei a sua conexão: o sinal da fibra e o modem da Com4 estão funcionando bem, e a internet está chegando normalmente até o local.
 
-      No entanto, o nosso sistema não está detectando o seu roteador particular (que emite o Wi-Fi). Isso indica que ele pode estar desligado da energia ou que o cabo de rede que liga o modem da Com4 ao seu roteador foi desconectado/está frouxo.
+      O que o nosso sistema não está detectando é o seu roteador particular (o que emite o Wi-Fi). Isso indica que ele pode estar desligado da tomada, ou que o cabo entre o modem da Com4 e o roteador está solto ou desconectado.
 
-      Por gentileza, verifique se o seu roteador está na tomada (com as luzes acesas) e confira se o cabo de rede está bem encaixado entre os dois aparelhos (geralmente na porta "WAN" ou "Internet" do seu roteador). 
+      Verifique se o roteador está ligado (com as luzes acesas) e se o cabo de rede está bem encaixado entre os dois aparelhos, geralmente na porta "WAN" ou "Internet" do roteador.
 
-      Pode fazer essa verificação física e me confirmar?
+      Pode conferir e me confirmar?
 
   # /instab — Questionário de diagnóstico de instabilidade (lentidão, queda, falha específica)
   - trigger: "/instab"
     force_clipboard: true
     replace: |-
-      Para que eu possa diagnosticar a causa dessa instabilidade de forma precisa, por gentileza, detalhe os seguintes pontos:
+      Para eu diagnosticar essa instabilidade, me conte:
 
-      1. O que ocorre exatamente? (Lentidão, quedas frequentes ou falta total de conexão?)
-      2. A falha afeta todos os dispositivos ou está isolada em algum específico (ex: só no celular ou no computador)?
-      3. O problema ocorre apenas no Wi-Fi ou em aparelhos conectados diretamente pelo cabo de rede também?
-      4. A falha é geral ou acontece apenas em algum site/aplicativo específico (ex: só no YouTube ou no WhatsApp)?
+      1. O que está acontecendo exatamente? Lentidão, quedas frequentes ou falta total de conexão?
+      2. A falha afeta todos os dispositivos ou só algum específico (por exemplo, só no celular ou no computador)?
+      3. Acontece só no Wi-Fi ou também nos aparelhos ligados por cabo de rede?
+      4. É uma falha geral ou só em algum site ou aplicativo específico (por exemplo, só no YouTube ou no WhatsApp)?
 
-      Com essas informações, consigo isolar o foco do problema e aplicar a correção mais rapidamente.
+      Com essas respostas, consigo isolar o problema e resolver mais rápido.
 
   # /reset — Confirma sinal normal e propõe reconfiguração lógica remota do modem
   - trigger: "/reset"
     force_clipboard: true
     form: |
-      Realizei uma análise detalhada da sua conexão e confirmo que os serviços até o modem da Com4 estão operando com total normalidade.
+      Analisei a sua conexão: até o modem da Com4, os serviços estão funcionando bem.
 
-      O sinal da fibra óptica que chega aos seus equipamentos encontra-se dentro dos padrões ideais de operação, com consumo de banda larga regular. O seu modem, inclusive, está ativo e sem quedas há [[uptime]].
+      O sinal da fibra chega dentro dos padrões ideais, com consumo de banda regular. O seu modem está ativo e sem quedas há [[uptime]].
 
-      Caso a instabilidade persista e você nos autorize, podemos refazer as configurações lógicas do seu modem por aqui (reiniciando o aparelho e recriando as regras de roteamento/bridge).
+      Se a instabilidade continuar e você autorizar, posso refazer as configurações lógicas do seu modem por aqui (reiniciando o aparelho e recriando as regras de roteamento/bridge).
 
-      ⚠️ Importante: se seguirmos por esse caminho, a sua conexão cairá momentaneamente durante o processo.
+      ⚠️ Importante: nesse processo, a sua conexão vai cair por alguns instantes.
 
-      Deseja que eu realize essa reconfiguração?
+      Quer que eu faça essa reconfiguração?
 
   # /fast — Explica limitação do roteador Fast (100Mbps) e sugere troca por Gigabit
   - trigger: "/fast"
     force_clipboard: true
     form: |
-      Realizei uma análise detalhada da sua conexão e confirmo que os serviços até o modem da Com4 estão operando com total normalidade. O sinal da fibra óptica encontra-se excelente e dentro dos padrões ideais de operação, com consumo regular de banda larga. O seu modem, inclusive, está ativo e sem quedas há [[uptime]].
+      Analisei a sua conexão: até o modem da Com4, os serviços estão funcionando bem. O sinal da fibra está excelente, dentro dos padrões ideais, com consumo regular de banda. O seu modem está ativo e sem quedas há [[uptime]].
 
-      A limitação de velocidade que está ocorrendo se deve ao seu roteador particular. Identificamos que ele é um equipamento com tecnologia "Fast". Isso significa que ele possui um limite físico nas portas de rede que restringe a passagem de internet a, no máximo, 100 Mega, impedindo que você utilize a velocidade total do seu plano — além de poder causar quedas recorrentes na rede.
+      A limitação de velocidade vem do seu roteador particular: é um equipamento com tecnologia "Fast", que tem um limite físico nas portas de rede de no máximo 100 Mega. Isso impede o uso da velocidade total do seu plano e ainda pode causar quedas recorrentes na rede.
 
-      Para resolver isso e aproveitar 100% da sua conexão, a nossa recomendação técnica é que seja feita a troca desse aparelho por um roteador "Gigabit" (Giga), que possui portas preparadas para altas velocidades e tecnologias mais atualizadas, mantendo maior estabilidade e conseguindo entregar até 1 Giga (1000 Mbps).
+      Para resolver e aproveitar 100% da sua conexão, recomendamos trocar esse roteador por um modelo "Gigabit" (Giga), com portas preparadas para velocidades mais altas, tecnologia mais recente e entrega de até 1 Giga (1000 Mbps).
 
-      Para facilitar, estou enviando em anexo um PDF com alguns modelos de roteadores Giga de excelente custo-benefício que sugerimos.
+      Estou enviando em anexo um PDF com alguns modelos Giga de bom custo-benefício.
 
-      ⚠️ Importante: a Com4 realiza apenas a indicação técnica para garantir a sua melhor experiência. Nós não comercializamos estes aparelhos, mas você pode encontrá-los facilmente em lojas de informática ou na internet.
+      ⚠️ A Com4 faz apenas a indicação técnica. Não vendemos esses aparelhos, mas você encontra facilmente em lojas de informática ou pela internet.
 
-      Se tiver qualquer dúvida sobre os modelos, sigo à disposição!
+      Qualquer dúvida sobre os modelos, é só chamar!
 
   # /roteadores — Envia o PDF de recomendação de roteadores Giga e reforça a visita gratuita
   - trigger: "/roteadores"
@@ -1221,27 +1214,27 @@ matches:
   - trigger: "/visita"
     force_clipboard: true
     replace: |-
-      Para continuarmos com o agendamento da visita técnica no local, confirme, por gentileza, as informações abaixo:
+      Para agendar a visita técnica, confirme estas informações:
 
       📍 Endereço completo:
       🕒 Melhores dias e horários para receber a equipe:
 
       ⚠️ Avisos importantes:
 
-      1. Nossos técnicos de campo atuam em horário comercial: de segunda a sexta-feira, das 08:00 às 18:00, e aos sábados, das 08:00 às 12:00.
-      2. A presença de um responsável maior de 18 anos é obrigatória no local durante o atendimento.
-      3. A confirmação exata da data e horário será feita pela equipe técnica diretamente neste canal.
+      1. Os técnicos de campo atendem em horário comercial: de segunda a sexta-feira, das 08:00 às 18:00, e aos sábados, das 08:00 às 12:00.
+      2. É obrigatória a presença de uma pessoa maior de 18 anos no local durante o atendimento.
+      3. A equipe técnica confirma a data e o horário exatos diretamente por este canal.
 
   # /pppoe — Envia as credenciais de discagem (PPPoE) para configuração de roteador próprio
   - trigger: "/pppoe"
     force_clipboard: true
     replace: |-
-      Conforme solicitado, seguem os dados de autenticação (PPPoE) da sua conexão, necessários para a configuração do seu roteador particular:
+      Conforme pedido, seguem os dados de autenticação (PPPoE) da sua conexão, para configurar o seu roteador particular:
 
       👤 Usuário: {{formulario.user}}
       🔑 Senha: {{formulario.senha}}
 
-      ⚠️ Importante: Resguarde estes dados com segurança. Eles são exclusivos da sua assinatura e autorizam o acesso do seu equipamento à nossa rede.
+      ⚠️ Guarde estes dados com segurança: eles são exclusivos da sua assinatura e autorizam o acesso do seu equipamento à nossa rede.
     vars:
       - name: formulario
         type: form
@@ -1254,12 +1247,12 @@ matches:
   - trigger: "/speedrouter"
     force_clipboard: true
     replace: |-
-      Para medirmos a velocidade com precisão, realize o teste seguindo estas orientações:
+      Para medirmos a velocidade com precisão, siga estes passos:
 
       1. Conecte o computador diretamente ao modem {{empresa_nome}} por cabo de rede (evite Wi-Fi).
       2. Feche downloads, streams e VPNs durante o teste.
-      3. Acesse speedtest.net ou fast.com e execute o teste.
-      4. Envie por aqui o print do resultado (download e upload).
+      3. Acesse speedtest.net ou fast.com e rode o teste.
+      4. Me envie o print do resultado (download e upload).
 
       Com isso, consigo comparar o desempenho com o plano contratado.
     vars:
@@ -1270,18 +1263,18 @@ matches:
   - trigger: "/speedbridge"
     force_clipboard: true
     replace: |-
-      Para medirmos a velocidade com precisão direto no modem em modo Bridge, precisamos criar um discador no seu computador. Siga estas orientações:
+      Para medirmos a velocidade direto no modem em modo Bridge, precisamos criar um discador no seu computador. Siga estes passos:
 
       1. Conecte o computador (Windows) diretamente ao modem da {{empresa_nome}} por cabo de rede.
       2. Pressione a tecla Windows e pesquise por "Configurar uma conexão de discagem" (ou vá em Configurações > Rede e Internet > Acesso Discado > Configurar uma nova conexão).
-      3. Escolha "Conectar-se à Internet" e depois clique em "Banda Larga (PPPoE)".
-      4. Insira as suas credenciais de acesso da assinatura:
+      3. Escolha "Conectar-se à Internet" e clique em "Banda Larga (PPPoE)".
+      4. Insira as credenciais da sua assinatura:
          👤 Usuário: {{formulario.user}}
          🔑 Senha: {{formulario.senha}}
       5. Clique em Conectar.
-      6. Após a conexão ser estabelecida, feche downloads e VPNs, acesse speedtest.net ou fast.com e execute o teste.
+      6. Depois de conectar, feche downloads e VPNs, acesse speedtest.net ou fast.com e rode o teste.
 
-      Por fim, nos envie o print do resultado (download e upload) por aqui.
+      Por fim, me envie o print do resultado (download e upload) por aqui.
     vars:
       - name: empresa_nome
         type: global
@@ -1298,36 +1291,35 @@ matches:
   - trigger: "/iptv"
     force_clipboard: true
     replace: |-
-      Realizei uma análise detalhada da sua conexão e confirmo que os serviços até o modem da Com4 estão operando com total normalidade. O sinal da fibra óptica está estável e entregando a velocidade contratada perfeitamente.
+      Analisei a sua conexão: até o modem da Com4, os serviços estão funcionando bem, e o sinal da fibra está estável, entregando a velocidade contratada.
 
-      A instabilidade (travamentos ou lentidão) que você está enfrentando está isolada no uso do seu aparelho de TV Box / IPTV. Como muitos desses serviços operam de forma não homologada e estão frequentemente atrelados à pirataria de sinal, a própria Anatel (Agência Nacional de Telecomunicações) aplica bloqueios e restrições severas e diárias aos servidores desses aplicativos em todo o Brasil.
+      A instabilidade que você está enfrentando (travamentos ou lentidão) está isolada no seu aparelho de TV Box / IPTV. Muitos desses serviços operam sem homologação e ficam atrelados à pirataria de sinal, e a própria Anatel aplica bloqueios diários e severos aos servidores desses aplicativos em todo o Brasil.
 
-      É por isso que a sua internet funciona bem no celular e no computador, mas a transmissão da TV oscila bastante. Como a restrição ocorre direto na fonte do aplicativo, foge do escopo de atuação do provedor de internet. 
+      Por isso a sua internet funciona bem no celular e no computador, mas a TV oscila. Como a restrição acontece direto na fonte do aplicativo, foge do escopo de um provedor de internet.
 
-      Recomendamos que entre em contato direto com o fornecedor da sua TV Box / IPTV para que eles verifiquem rotas alternativas, servidores disponíveis ou atualizações para o seu aparelho.
+      Recomendamos falar direto com o fornecedor da sua TV Box / IPTV para que verifiquem rotas alternativas, servidores disponíveis ou atualizações para o aparelho.
 
   # /eng — Informa escalonamento do chamado para a Engenharia (Nível 2)
   - trigger: "/eng"
     force_clipboard: true
     replace: |-
-      Realizamos os testes e diagnósticos iniciais.
+      Já fizemos os testes e diagnósticos iniciais.
 
-      Porém, para concluir a sua solicitação, será preciso uma intervenção mais ampla na infraestrutura do servidor.
+      Para concluir a sua solicitação, é preciso uma intervenção mais ampla na infraestrutura do servidor, então estou escalando este chamado para a Equipe de Engenharia (Nível 2).
 
-      Por isso, estou escalando este chamado para a Equipe de Engenharia (Nível 2).
-      Eles já receberam o histórico detalhado do que fizemos até aqui e darão sequência ao caso.
+      Eles já receberam o histórico completo do que fizemos até aqui e vão seguir com o caso.
 
-      Você receberá retorno neste mesmo chamado quando a intervenção terminar ou se a Engenharia precisar de mais algum detalhe.
+      Você recebe retorno neste mesmo chamado quando a intervenção terminar, ou antes, se a Engenharia precisar de mais algum detalhe.
 
   # /congelado — Explica bloqueio por domínio congelado no Registro.br
   - trigger: "/congelado"
     force_clipboard: true
     replace: |-
-      Ao analisar a sua conexão, verificamos que o seu domínio ({{formulario.dominio}}) encontra-se com o status "Congelado" no Registro.br, o órgão que regula os domínios nacionais.
+      Verificamos que o seu domínio ({{formulario.dominio}}) está com o status "Congelado" no Registro.br, o órgão que regula os domínios nacionais.
 
-      Isso geralmente ocorre devido a uma pendência na taxa anual de renovação, fazendo com que o site e os e-mails parem de funcionar.
+      Isso costuma acontecer por uma pendência na taxa anual de renovação, e é por isso que o site e os e-mails param de funcionar.
 
-      Como a gestão do domínio é externa, é necessário acessar o portal do Registro.br (ou contactar o responsável pelo registro) para regularizar a situação. Após a compensação, os serviços voltarão ao normal de forma automática.
+      Como a gestão do domínio é externa, é preciso acessar o portal do Registro.br (ou falar com quem cuida do registro) para regularizar. Depois que o pagamento compensar, os serviços voltam ao normal automaticamente.
     vars:
       - name: formulario
         type: form
@@ -1338,39 +1330,39 @@ matches:
   - trigger: "/pmg"
     force_clipboard: true
     replace: |-
-      Enviamos para a sua caixa de entrada o relatório atualizado do Gateway Antispam (PMG), contendo os e-mails retidos em quarentena.
+      Enviamos para a sua caixa de entrada o relatório atualizado do Gateway Antispam (PMG), com os e-mails retidos em quarentena.
 
-      Para consultá-lo em tempo real, abra o e-mail e, logo no início da mensagem, localize e clique na palavra "aqui" destacada nesta frase:
+      Para consultá-lo em tempo real, abra o e-mail e, logo no início da mensagem, clique na palavra "aqui" destacada nesta frase:
 
       "Por favor use a interface WEB clicando aqui para gerenciar os spams de sua caixa de email."
 
-      💡 Dica: Para facilitar o uso, você pode alterar o idioma do painel para Português. Basta clicar no seu e-mail no canto superior direito da tela, selecionar a opção "Idioma" (ou Language) e escolher "Português Brasileiro".
+      💡 Dica: você pode mudar o idioma do painel para português. Clique no seu e-mail no canto superior direito da tela, selecione "Idioma" (ou Language) e escolha "Português Brasileiro".
 
-      Observamos que esses remetentes retidos ainda não aparecem na sua lista de confiança. O filtro atua de forma automática barrando mensagens com base na pontuação de risco (Spam Score). 
+      Esses remetentes retidos ainda não estão na sua lista de confiança. O filtro barra mensagens automaticamente com base na pontuação de risco (Spam Score).
 
-      O Spam Score é um número atribuído pela rede que avalia a reputação do remetente. A pontuação sobe (indicando maior risco de ser spam) quando o domínio de origem não possui os apontamentos de segurança corretos (SPF, DKIM e DMARC), o IP está em blacklists ou a mensagem contém links/termos suspeitos. Em contrapartida, a pontuação desce (indicando maior confiabilidade) quando o domínio está devidamente autenticado e possui um bom histórico de envios.
+      O Spam Score é um número que avalia a reputação do remetente. Ele sobe (mais risco de spam) quando o domínio de origem não tem os apontamentos de segurança corretos (SPF, DKIM e DMARC), o IP está em blacklists ou a mensagem tem links/termos suspeitos. E desce (mais confiabilidade) quando o domínio está bem autenticado e tem bom histórico de envios.
 
-      No painel, você pode usar as opções abaixo para intervir manualmente:
+      No painel, você pode intervir manualmente com estas opções:
 
-      ✅ Whitelist / Welcomelist: libera o e-mail na quarentena e adiciona o remetente à lista de confiança (mensagens futuras tendem a ser liberadas). Na interface web, clique na seta ao lado do botão "Enviar" e selecione "Welcomelist".
-      ❌ Blacklist / Blocklist: bloqueia novas mensagens desse remetente. Na interface web, clique na seta ao lado do botão "Apagar" e selecione "Blocklist".
-      📨 Entregar (Enviar): entrega somente aquele e-mail para a sua caixa, sem cadastrar o remetente como confiável.
-      🗑️ Deletar (Apagar): remove o e-mail da quarentena de forma permanente.
+      ✅ Whitelist / Welcomelist: libera o e-mail da quarentena e adiciona o remetente à lista de confiança (as próximas mensagens tendem a ser liberadas). Na interface web, clique na seta ao lado do botão "Enviar" e selecione "Welcomelist".
+      ❌ Blacklist / Blocklist: bloqueia novas mensagens desse remetente. Clique na seta ao lado do botão "Apagar" e selecione "Blocklist".
+      📨 Entregar (Enviar): manda só aquele e-mail para a sua caixa, sem marcar o remetente como confiável.
+      🗑️ Deletar (Apagar): remove o e-mail da quarentena de forma definitiva.
 
-      Atenção: é possível solicitar a desativação do antispam do domínio, se desejado — porém isso retira uma camada vital de segurança e aumentará significativamente o volume de spam, lixo eletrônico e riscos de malware na caixa de entrada.
+      Se preferir, também dá para desativar o antispam do domínio, mas isso tira uma camada importante de segurança e aumenta bastante o volume de spam, lixo eletrônico e risco de malware na caixa de entrada.
 
-      Em apoio, segue também um PDF com o passo a passo ilustrado em anexo.
+      Segue também um PDF com o passo a passo ilustrado, em anexo.
       Qualquer dúvida, seguimos à disposição! 😊
 
   # /cpanel — Solicita e-mail corporativo formal para envio seguro de credenciais cPanel
   - trigger: "/cpanel"
     force_clipboard: true
     replace: |-
-      Para que possamos enviar os dados de acesso ao cPanel, pedimos que formalize a solicitação e realize o envio de um e-mail para {{email_atendimento}} contendo os itens listados.
+      Para enviarmos os dados de acesso ao cPanel, precisamos que você formalize a solicitação por e-mail, enviado para {{email_atendimento}} com os itens abaixo.
 
-      ⚠️ Importante (Segurança): o envio deve ser feito obrigatoriamente a partir de um endereço de e-mail corporativo (domínio da empresa).
+      ⚠️ Importante (segurança): o e-mail precisa vir de um endereço corporativo (domínio da empresa).
 
-      Inclua, por gentileza:
+      Inclua:
 
       • CPF ou CNPJ do titular
       • Nome completo ou Razão Social
@@ -1384,49 +1376,47 @@ matches:
   - trigger: "/ssl"
     force_clipboard: true
     replace: |-
-      O certificado SSL do seu domínio está sendo instalado/renovado.
+      O certificado SSL do seu domínio está sendo instalado ou renovado.
 
-      Durante e logo após o processo, é normal que alguns navegadores exibam temporariamente um aviso de "site inseguro" ou "conexão não privada". Isso ocorre porque o certificado ainda está sendo propagado na internet.
+      Durante e logo depois do processo, é normal alguns navegadores mostrarem um aviso temporário de "site inseguro" ou "conexão não privada". Isso acontece porque o certificado ainda está se propagando na internet.
 
-      ⏱️ O prazo de propagação é de até 24 horas, mas na maioria dos casos se resolve em poucos minutos.
+      ⏱️ O prazo de propagação é de até 24 horas, mas na maioria dos casos resolve em poucos minutos.
 
-      Enquanto isso, você pode acessar normalmente — o aviso é temporário e não representa risco real neste momento.
+      Enquanto isso, você pode acessar normalmente: o aviso é temporário e não representa risco real agora.
 
-      Assim que a propagação for concluída, o cadeado de segurança voltará a aparecer no navegador. Qualquer dúvida, sigo à disposição! 😊
+      Assim que a propagação terminar, o cadeado de segurança volta a aparecer no navegador. Qualquer dúvida, sigo à disposição! 😊
 
   # /escopo — Delimita o escopo da Com4: infra e rede, não sistemas de terceiros
   - trigger: "/escopo"
     force_clipboard: true
     replace: |-
-      Compreendo a sua solicitação referente a este erro na aplicação.
+      Sobre esse erro na aplicação: o suporte técnico da Com4 garante a disponibilidade da infraestrutura (servidor, rede e conectividade), mas configurar, corrigir ou auditar sistemas de terceiros (ERPs, códigos particulares, plugins ou integrações de API) foge do nosso escopo.
 
-      No entanto, o suporte técnico da Com4 garante a disponibilidade da infraestrutura (servidor, rede e conectividade). A configuração, correção ou auditoria de sistemas de terceiros (ERPs, códigos particulares, plugins ou integrações de API) foge ao nosso escopo de atuação.
-
-      Recomendamos que acione o desenvolvedor responsável pela sua aplicação ou o seu suporte de TI local para analisar os logs do software.
+      Recomendamos acionar o desenvolvedor responsável pela sua aplicação ou o suporte de TI local para analisar os logs do software.
 
   # /spamout — Trata conta de e-mail bloqueada por disparo de spam (conta comprometida)
   - trigger: "/spamout"
     force_clipboard: true
     replace: |-
-      Identificamos um comportamento anômalo na sua conta de e-mail: ela foi utilizada para o disparo massivo de mensagens (SPAM).
+      Identificamos um comportamento anômalo na sua conta de e-mail: ela foi usada para disparar um volume grande de mensagens (spam).
 
-      Para proteger a reputação do seu domínio e do nosso servidor, a conta foi temporariamente bloqueada para envios. Esse cenário geralmente ocorre quando a senha da conta é capturada por vírus ou malwares no computador do usuário.
+      Para proteger a reputação do seu domínio e do nosso servidor, bloqueamos a conta temporariamente para envios. Isso costuma acontecer quando a senha é capturada por vírus ou malware no computador do usuário.
 
-      Para restabelecermos o acesso, é obrigatório:
-      1. Realizar uma varredura completa com antivírus em todos os dispositivos que acessam esta conta.
-      2. Alterar a senha do e-mail imediatamente através do cPanel ou Webmail (utilize uma senha forte com letras, números e símbolos).
+      Para restabelecer o acesso, é preciso:
+      1. Rodar uma varredura completa com antivírus em todos os dispositivos que acessam essa conta.
+      2. Trocar a senha do e-mail imediatamente pelo cPanel ou Webmail (use uma senha forte, com letras, números e símbolos).
 
-      Assim que a senha for alterada, nos avise para realizarmos a liberação.
+      Assim que trocar a senha, nos avise para liberarmos a conta.
 
   # /dnsprop — Explica propagação DNS ao cliente (2 a 24 horas)
   - trigger: "/dnsprop"
     force_clipboard: true
     replace: |-
-      As alterações de DNS já foram aplicadas, mas a propagação na internet pode levar de 2 a 24 horas.
+      As alterações de DNS já foram aplicadas, mas a propagação pela internet pode levar de 2 a 24 horas.
 
-      Durante esse período, é normal que alguns usuários ainda vejam o endereço antigo ou apresentem instabilidade intermitente.
+      Nesse período, é normal que alguns usuários ainda vejam o endereço antigo ou tenham instabilidade momentânea.
 
-      Recomendamos aguardar a conclusão da propagação antes de novos testes. Qualquer dúvida, sigo à disposição!
+      Vale esperar a propagação terminar antes de testar de novo. Qualquer dúvida, sigo à disposição!
 
   # /viabilidade — Informa cliente (Lead) que há viabilidade de fibra no endereço (Padrão BDC)
   - trigger: "/viabilidade"
@@ -1434,12 +1424,11 @@ matches:
     form: |
       Olá, [[nome]], {{saudacao}}!
 
-      Temos uma ótima notícia: o endereço que você nos informou possui viabilidade para instalação com fibra óptica! Isso significa que conseguimos te atender com a nossa internet de alta qualidade.
-      Se tiver interesse, já podemos seguir com os próximos passos para a contratação.
+      Boa notícia: o endereço que você informou tem viabilidade para instalação de fibra óptica! Ou seja, conseguimos te atender com a nossa internet.
 
-      Para dar continuidade, você pode nos chamar no WhatsApp: (16) 3706-8000 ou, se preferir, é só responder por aqui com seu nome e número de telefone, que um de nossos consultores entrará em contato com você.
+      Se tiver interesse, já podemos seguir com a contratação. Você pode nos chamar no WhatsApp (16) 3706-8000 ou responder por aqui com seu nome e telefone, que um consultor entra em contato.
 
-      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Qualquer dúvida, a {{empresa_nome}} está à disposição.
       Atenciosamente,
     vars:
       - name: saudacao
@@ -1453,11 +1442,11 @@ matches:
     form: |
       Olá, [[nome]], {{saudacao}}!
 
-      Agradecemos o seu interesse em contratar nossos serviços. No momento, ainda não temos viabilidade técnica para atender no seu endereço.
+      Obrigado pelo interesse em contratar nossos serviços. No momento, ainda não temos viabilidade técnica no seu endereço.
 
-      Mas fique tranquilo: assim que ampliarmos nossa infraestrutura na sua região, entraremos em contato com você.
+      Assim que ampliarmos a nossa infraestrutura na região, entramos em contato com você.
 
-      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Qualquer dúvida, a {{empresa_nome}} está à disposição.
       Atenciosamente,
     vars:
       - name: saudacao
@@ -1469,31 +1458,31 @@ matches:
   - trigger: "/power"
     force_clipboard: true
     replace: |-
-      Por favor, verifique se o cabo da fonte de energia está bem encaixado na parte de trás do equipamento e também na tomada.
+      Verifique se o cabo da fonte está bem encaixado na parte de trás do equipamento e também na tomada, por favor.
 
-      Para descartarmos mau contato ou falha na rede elétrica, tire o aparelho da tomada por 1 minuto. Em seguida, ligue-o novamente, mas de preferência em uma tomada diferente (direto na parede, sem o uso de réguas, benjamins ou filtros de linha).
+      Para descartar mau contato ou falha na rede elétrica, tire o aparelho da tomada por 1 minuto e ligue de novo, de preferência em uma tomada diferente (direto na parede, sem réguas, benjamins ou filtros de linha).
 
-      Esses cuidados ajudam bastante na nossa análise. Me avise assim que fizer o teste, por gentileza! ✅
+      Isso ajuda bastante na análise. Me avise assim que fizer o teste! ✅
 
   # /luzpower — Explica falha elétrica/hardware e abre chamado para visita técnica
   - trigger: "/luzpower"
     force_clipboard: true
     replace: |-
-      Como o equipamento apresenta apenas a luz "Power" acesa/piscando mesmo após os testes na tomada, isso indica uma falha no fornecimento de energia ou um travamento de hardware. O defeito pode estar na fonte de alimentação (que não envia a voltagem correta) ou no próprio aparelho, impedindo que o sistema inicie.
+      Como o equipamento mostra só a luz "Power" acesa ou piscando, mesmo depois dos testes na tomada, isso indica uma falha na energia ou um travamento de hardware. O defeito pode estar na fonte de alimentação (que não envia a voltagem certa) ou no próprio aparelho, impedindo que o sistema inicie.
 
-      Para solucionar isso de forma definitiva, vou registrar uma visita técnica. Nossa equipe irá até o local para avaliar o equipamento e realizar a troca da fonte ou do modem para restabelecer a sua conexão.
+      Vou registrar uma visita técnica para resolver isso. A nossa equipe vai até o local avaliar o equipamento e trocar a fonte ou o modem para restabelecer a sua conexão.
 
   # /agendafibra — Informa encaminhamento para o setor de fibra agendar instalação
   - trigger: "/agendafibra"
     force_clipboard: true
     replace: |-
-      Tudo certo com o seu cadastro e o contrato foi gerado com sucesso! ✅
+      Tudo certo com o seu cadastro, e o contrato já foi gerado! ✅
 
-      A sua solicitação já foi aprovada e encaminhada diretamente para a nossa equipe de Fibra Óptica.
+      A sua solicitação foi aprovada e encaminhada para a nossa equipe de Fibra Óptica.
 
-      Como o nosso setor de agendamentos atua em horário comercial, eles entrarão em contato com você no próximo dia útil para formalizar a data e o horário exatos da visita técnica para a instalação e ativação dos seus serviços.
+      Como o agendamento é feito em horário comercial, eles entram em contato com você no próximo dia útil para marcar a data e o horário da visita técnica de instalação e ativação.
 
-      Seja muito bem-vindo(a) à Com4! Qualquer dúvida, sigo à disposição! 😊
+      Seja bem-vindo(a) à Com4! Qualquer dúvida, sigo à disposição! 😊
 
   # /liberapmg — Informa liberação de e-mails retidos no PMG
   - trigger: "/liberapmg"
@@ -1501,11 +1490,11 @@ matches:
     replace: |-
       Olá, {{saudacao}}! Tudo bem? 😊
 
-      Informamos que os e-mails retidos do remetente {{formulario.remetente}} foram devidamente liberados da quarentena do nosso Gateway Antispam (PMG).
+      Os e-mails retidos do remetente {{formulario.remetente}} já foram liberados da quarentena do nosso Gateway Antispam (PMG).
 
-      As mensagens já constam na sua caixa de entrada, posicionadas na data e hora originais em que foram emitidas pelo remetente (não constarão como "recebidas agora"). 
+      As mensagens já estão na sua caixa de entrada, na data e hora originais em que foram enviadas (não aparecem como "recebidas agora").
 
-      Caso não as localize nas primeiras posições, recomendamos realizar uma busca pelo e-mail ou nome do remetente na barra de pesquisa. Qualquer dúvida, sigo à disposição!
+      Se não encontrar nas primeiras posições, busque pelo e-mail ou nome do remetente na barra de pesquisa. Qualquer dúvida, sigo à disposição!
     vars:
       - name: saudacao
         type: global
@@ -1514,26 +1503,26 @@ matches:
         params:
           layout: "Remetente liberado: [[remetente]]"
 
-# /mudanca — Orienta o cliente e solicita dados para mudança de endereço
+  # /mudanca — Orienta o cliente e solicita dados para mudança de endereço
   - trigger: "/mudanca"
     force_clipboard: true
     replace: |-
-      Compreendo a sua solicitação para a mudança de endereço da sua conexão! 😊
+      Entendido, vamos cuidar da mudança de endereço da sua conexão! 😊
 
-      Para que possamos verificar a viabilidade técnica da fibra óptica no novo local e prosseguir com o seu agendamento, por gentileza, me confirme:
+      Para verificar a viabilidade técnica de fibra no novo local e seguir com o agendamento, me confirme:
 
       📍 Endereço novo completo (com CEP e ponto de referência):
-      🏠 Tipo de imóvel (Casa, Comércio ou Prédio/Condomínio):
-      📦 Você já se mudou para o novo local ou qual a data prevista?
+      🏠 Tipo de imóvel (casa, comércio ou prédio/condomínio):
+      📦 Você já se mudou ou qual a data prevista?
 
-      ⚠️ Aviso Importante sobre os Equipamentos:
-      A nossa equipe de rua não realiza a retirada dos aparelhos no endereço antigo. É necessário que você leve o equipamento atual da Com4 (modem e fonte na tomada) para o novo endereço, onde o técnico fará a reinstalação e ativação da rede.
+      ⚠️ Sobre os equipamentos: a nossa equipe de rua não retira os aparelhos do endereço antigo. Leve o modem e a fonte atuais da Com4 para o novo endereço, onde o técnico faz a reinstalação e ativação da rede.
 
-      Assim que me confirmar os dados acima, farei a validação no sistema e encaminharei o seu atendimento para a nossa equipe de Ativação agendar a visita técnica com você!
+      Assim que confirmar esses dados, valido no sistema e encaminho o atendimento para a equipe de Ativação agendar a visita com você!
 
-  # =============================================================================
-  # 4 · E-mail, Hospedagem e Migração
-  # =============================================================================
+
+# =============================================================================
+# 4 · E-mail, Hospedagem e Migração
+# =============================================================================
 
   # /ativhosp — Envia dados de acesso ao cPanel, FTP, Webmail e DNS (ativação de hospedagem)
   - trigger: "/ativhosp"
@@ -1541,7 +1530,7 @@ matches:
     replace: |-
       Olá, {{saudacao}}! Tudo bem? 😊
 
-      Sou o {{atendente_nome}}. Seguem abaixo os dados para acesso ao painel de controle da hospedagem {{formulario.dominio}}:
+      Sou o {{atendente_nome}}. Seguem os dados de acesso ao painel de controle da hospedagem {{formulario.dominio}}:
 
       Painel de Controle da Hospedagem:
       Endereço: http://189.90.130.{{formulario.ip}}:2082 ou cpanel.{{formulario.dominio}}
@@ -1557,13 +1546,13 @@ matches:
       Endereço: http://189.90.130.{{formulario.ip}}:2095/ ou webmail.{{formulario.dominio}}
       Login com a conta de e-mail e a respectiva senha.
 
-      Configurações em gerenciador de e-mails (Ex: Outlook):
+      Configurações em gerenciador de e-mails (ex.: Outlook):
       Servidor de entrada/saída: mail.{{formulario.dominio}}
       Porta IMAP: 143
       Porta POP3: 110
       Porta de saída SMTP: 587
 
-      Confira o PDF em anexo para verificar a documentação a respeito do nosso Gateway Antispam.
+      Veja o PDF em anexo com a documentação do nosso Gateway Antispam.
 
       Servidores DNS:
       {{formulario.dns}}
@@ -1631,7 +1620,7 @@ matches:
             $senhaPl = "{{formulario.senha_plesk}}"
             $saudacao = "{{saudacao}}"
 
-            $msg = "Olá, ${saudacao}! Tudo bem? 😊`n`nConforme solicitado, seguem os dados de acesso ao painel de controle da hospedagem do domínio ${dom}:`n"
+            $msg = "Olá, ${saudacao}! Tudo bem? 😊`n`nSeguem os dados de acesso ao painel de controle da hospedagem do domínio ${dom}:`n"
 
             if ($plat -eq "cPanel") {
                 $msg += "`nPainel Administrativo cPanel:`nEndereço: https://cpanel.${dom}/ ou https://189.90.130.${ip}:2083/`nUsuário: ${userCp}`nSenha: ${senhaCp}"
@@ -1648,21 +1637,21 @@ matches:
     replace: |-
       Olá, {{saudacao}}! Tudo bem? 😊
 
-      Seguem abaixo os dados para acesso à sua conta de e-mail {{empresa_nome}}:
+      Seguem os dados de acesso à sua conta de e-mail {{empresa_nome}}:
 
       WebMail:
       Endereço: webmail.com4.com.br ou http://189.90.130.10:2096/
       Usuário: {{formulario.email_cliente}}
       Senha: {{formulario.senha}}
 
-      Configurações em gerenciador de e-mails (Ex: Outlook):
+      Configurações em gerenciador de e-mails (ex.: Outlook):
       Servidor de entrada/saída: mail.com4.com.br ou 189.90.130.10
       Usuário: {{formulario.email_cliente}}
       Porta IMAP: 143
       Porta POP3: 110
-      Porta de Saída SMTP: 587
+      Porta de saída SMTP: 587
 
-      Confira o PDF em anexo para verificar a documentação a respeito do nosso Gateway Antispam.
+      Veja o PDF em anexo com a documentação do nosso Gateway Antispam.
     vars:
       - name: empresa_nome
         type: global
@@ -1681,23 +1670,23 @@ matches:
     replace: |-
       Olá, {{saudacao}}! Tudo bem? 😊
 
-      Gostaríamos de informar que o servidor que hospeda o seu domínio {{formulario.dominio}} será migrado para uma nova infraestrutura em nosso Data Center. Esta atualização visa garantir maior estabilidade, segurança e suporte a tecnologias mais recentes.
+      O servidor que hospeda o seu domínio {{formulario.dominio}} vai ser migrado para uma nova infraestrutura no nosso Data Center, o que traz mais estabilidade, segurança e suporte a tecnologias recentes.
 
-      Identificamos que a gestão do seu DNS é externa (não está conosco). Para prosseguirmos com a migração, precisamos definir como será feita a atualização dos apontamentos:
+      A gestão do seu DNS é externa, não está com a gente. Para seguirmos com a migração, precisamos definir como atualizar os apontamentos:
 
-      • Opção 01 (Nossa Gestão): Você nos fornece os dados de acesso à sua plataforma de DNS ({{formulario.plataforma}}) e a nossa engenharia realiza todas as alterações técnicas necessárias.
-      • Opção 02 (Sua Gestão): Nós realizamos a migração dos dados e informamos os novos registros para que você, ou o seu técnico, realize a alteração manual.
+      • Opção 1 (nossa gestão): você nos passa os dados de acesso da sua plataforma de DNS ({{formulario.plataforma}}), e a nossa engenharia faz as alterações técnicas.
+      • Opção 2 (sua gestão): nós migramos os dados e te passamos os novos registros, para você ou o seu técnico fazer a alteração manual.
 
-      Nota: Onde houver o IP 189.90.13X.XXX (Tipo A), deverá ser alterado para {{formulario.novo_ip}}.
+      Nota: onde houver o IP 189.90.13X.XXX (tipo A), ele precisa mudar para {{formulario.novo_ip}}.
 
-      Observações Importantes:
-      • Janela de Manutenção: Durante o processo, haverá uma breve indisponibilidade do serviço. Recomendamos que a execução ocorra fora do horário comercial.
-      • Credenciais: Suas senhas de e-mail e de painel de controle permanecerão as mesmas na grande maioria dos casos.
+      Observações importantes:
+      • Janela de manutenção: o serviço fica brevemente indisponível durante o processo, então recomendamos executar fora do horário comercial.
+      • Credenciais: na maioria dos casos, as senhas de e-mail e do painel de controle continuam as mesmas.
 
-      Poderia nos confirmar qual método prefere e sugerir um dia/horário para a execução?
-      Ficamos no aguardo do seu retorno para dar continuidade ao procedimento.
+      Qual método você prefere, e qual dia/horário sugere para a execução?
+      Ficamos no aguardo do seu retorno para seguir com o procedimento.
 
-      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Qualquer dúvida, a {{empresa_nome}} está à disposição.
       Atenciosamente,
     vars:
       - name: empresa_nome
@@ -1718,15 +1707,15 @@ matches:
     replace: |-
       Olá, {{saudacao}}! Tudo bem? 😊
 
-      Gostaríamos de propor a migração do domínio {{formulario.dominio}} para um de nossos servidores mais recentes, que conta com uma infraestrutura mais robusta, oferecendo melhorias significativas em desempenho e segurança.
+      Gostaríamos de propor a migração do domínio {{formulario.dominio}} para um dos nossos servidores mais recentes, com infraestrutura mais robusta e melhorias em desempenho e segurança.
 
-      Caso concorde com a sugestão, recomendamos que a migração seja agendada para o final de semana, a fim de minimizar qualquer impacto no funcionamento dos serviços durante os dias úteis.
+      Se concordar, recomendamos agendar a migração para o fim de semana, para reduzir qualquer impacto nos dias úteis.
 
-      Além disso, solicitamos que nos adicione como {{contato_registro_br}} no campo de Contato Técnico do domínio no Registro.br, o que é essencial para que possamos executar os ajustes DNS necessários relacionados à migração.
+      Também precisamos que nos adicione como {{contato_registro_br}} no campo de Contato Técnico do domínio no Registro.br: isso é essencial para fazermos os ajustes de DNS da migração.
 
-      Ficamos no aguardo da sua aprovação para dar continuidade às etapas.
+      Ficamos no aguardo da sua aprovação para seguir com as próximas etapas.
 
-      Caso tenha alguma dúvida ou necessite de suporte adicional, a {{empresa_nome}} está à disposição para ajudar.
+      Qualquer dúvida, a {{empresa_nome}} está à disposição.
       Atenciosamente,
     vars:
       - name: empresa_nome
@@ -1747,12 +1736,12 @@ matches:
     replace: |-
       Olá,
 
-      Conforme solicitado, segue em anexo o boleto para a renovação de registro do domínio {{formulario.dominio}}.
+      Segue em anexo o boleto para renovar o registro do domínio {{formulario.dominio}}.
 
       Período: {{formulario.periodo}} anos.
       Valor: R$ {{formulario.valor}}.
 
-      Obrigado pelo contato. Conte sempre conosco!
+      Obrigado pelo contato. Conte com a gente!
     vars:
       - name: formulario
         type: form
@@ -1766,21 +1755,21 @@ matches:
   - trigger: "/dnsemail"
     force_clipboard: true
     replace: |-
-      Para que o seu site funcione no provedor externo e os seus e-mails continuem operando perfeitamente conosco, será necessário configurar os apontamentos DNS abaixo na zona de DNS do seu provedor de site atual.
+      Para o seu site funcionar no provedor externo e os e-mails continuarem operando com a gente, configure os apontamentos DNS abaixo na zona de DNS do seu provedor de site atual.
 
-      1. Apontamentos MX (Recebimento de E-mails via PMG Antispam)
-      Estes são obrigatórios para que o domínio receba e-mails passando pelo nosso filtro de segurança padrão.
+      1. Apontamentos MX (recebimento de e-mails via PMG Antispam)
+      Obrigatórios para o domínio receber e-mails passando pelo nosso filtro de segurança padrão.
       • Tipo: MX | Nome: {{formulario.dominio}} (ou @) | Prioridade: 10 | Destino: mx1.com4datacenter.com.br
       • Tipo: MX | Nome: {{formulario.dominio}} (ou @) | Prioridade: 10 | Destino: mx2.com4datacenter.com.br
 
-      2. Apontamentos de Autenticação TXT (Segurança contra Spam)
-      Estes garantem que os e-mails enviados pela Com4 não caiam na caixa de spam dos destinatários.
+      2. Apontamentos de autenticação TXT (segurança contra spam)
+      Garantem que os e-mails enviados pela Com4 não caiam no spam dos destinatários.
       • Tipo: TXT | Nome: {{formulario.dominio}} (ou @) | Destino: v=spf1 +a +mx +ip4:189.90.130.0/23 -all
       • Tipo: TXT | Nome: _dmarc.{{formulario.dominio}} | Destino: v=DMARC1; p=none; fo=0; adkim=r; aspf=r; pct=100; rf=afrf; ri=86400; sp=none
       • Tipo: TXT | Nome: default._domainkey.{{formulario.dominio}} | Destino: {{formulario.dkim}}
 
-      3. Apontamentos de Serviço E-mail (Tipo A)
-      Para garantir o acesso ao painel e a comunicação dos gerenciadores (como Outlook).
+      3. Apontamentos de serviço de e-mail (tipo A)
+      Para garantir o acesso ao painel e a comunicação dos gerenciadores (como o Outlook).
       • Tipo: A | Nome: mail.{{formulario.dominio}} | Destino: 189.90.130.{{formulario.ip}}
       • Tipo: A | Nome: webmail.{{formulario.dominio}} | Destino: 189.90.130.{{formulario.ip}}
       • Tipo: A | Nome: pop.{{formulario.dominio}} | Destino: 189.90.130.{{formulario.ip}}
@@ -1788,7 +1777,7 @@ matches:
       • Tipo: A | Nome: smtp.{{formulario.dominio}} | Destino: 189.90.130.{{formulario.ip}}
       • Tipo: A | Nome: cpanel.{{formulario.dominio}} | Destino: 189.90.130.{{formulario.ip}}
 
-      Após realizar essas configurações, o tempo de propagação DNS pode levar de 2 a 24 horas.
+      Depois de configurar, a propagação DNS pode levar de 2 a 24 horas.
       Qualquer dúvida durante o processo, sigo à disposição!
     vars:
       - name: formulario
@@ -1803,25 +1792,25 @@ matches:
   - trigger: "/autormigra"
     force_clipboard: true
     replace: |-
-      Para prosseguirmos com a migração da sua hospedagem para o novo servidor, precisamos da sua autorização formal por este canal.
+      Para seguirmos com a migração da sua hospedagem para o novo servidor, precisamos da sua autorização formal por este canal.
 
-      Este procedimento visa melhorar a performance e a segurança do seu serviço. Na grande maioria dos casos, as credenciais de acesso (cPanel, e-mails, FTP, banco de dados) não sofrem alterações.
+      Essa migração melhora a performance e a segurança do seu serviço. Na maioria dos casos, as credenciais de acesso (cPanel, e-mails, FTP, banco de dados) não mudam.
 
-      Você autoriza a execução desta migração? Se sim, por favor, confirme o melhor dia e horário para realizarmos o procedimento (recomendamos a execução fora do horário comercial para minimizar impactos).
+      Você autoriza a migração? Se sim, me confirme o melhor dia e horário (recomendamos fora do horário comercial, para reduzir qualquer impacto).
 
   # /ftp — Envia host, usuário e porta 21 para conexão via FileZilla (FTP)
   - trigger: "/ftp"
     force_clipboard: true
     replace: |-
-      Para realizar a transferência dos arquivos do seu site, recomendamos a utilização do software FileZilla (ou outro cliente FTP de sua preferência).
+      Para transferir os arquivos do seu site, recomendamos o FileZilla (ou outro cliente FTP de sua preferência).
 
-      Utilize os seguintes dados para a conexão:
+      Use estes dados para a conexão:
       • Host / Servidor: ftp.{{formulario.dominio}}
-      • Nome de Usuário: O mesmo usuário do seu cPanel
-      • Senha: A senha do seu cPanel
+      • Usuário: o mesmo do seu cPanel
+      • Senha: a senha do seu cPanel
       • Porta: 21
 
-      Caso o seu provedor de internet bloqueie a porta 21, informe-nos para verificarmos uma alternativa de conexão segura (SFTP).
+      Se o seu provedor de internet bloquear a porta 21, nos avise para vermos uma alternativa segura (SFTP).
     vars:
       - name: formulario
         type: form
@@ -1832,11 +1821,11 @@ matches:
   - trigger: "/propag"
     force_clipboard: true
     replace: |-
-      Informamos que a migração/alteração de DNS do domínio {{formulario.dominio}} foi concluída em nosso ambiente.
+      A migração/alteração de DNS do domínio {{formulario.dominio}} já foi concluída aqui do nosso lado.
 
-      A propagação global dos novos apontamentos pode levar de 2 a 24 horas. Durante esse intervalo, e-mails e site podem apresentar comportamento intermitente.
+      A propagação global dos novos apontamentos pode levar de 2 a 24 horas, e nesse período e-mails e site podem se comportar de forma intermitente.
 
-      Recomendamos evitar novas alterações de DNS nesse período. Assim que a propagação estabilizar, os serviços devem operar normalmente.
+      Evite novas alterações de DNS nesse intervalo. Assim que a propagação estabilizar, os serviços voltam ao normal.
     vars:
       - name: formulario
         type: form
@@ -1847,11 +1836,11 @@ matches:
   - trigger: "/senhaemail"
     force_clipboard: true
     replace: |-
-      Compreendo a sua solicitação. No entanto, por políticas de privacidade e segurança da informação, a {{empresa_nome}} não possui acesso para visualizar ou recuperar senhas de contas de e-mail individuais criadas dentro da sua hospedagem.
+      Por política de privacidade e segurança da informação, a {{empresa_nome}} não tem acesso para ver ou recuperar senhas de contas de e-mail individuais criadas na sua hospedagem.
 
-      A gestão das caixas de e-mail é feita exclusivamente através do painel de controle (cPanel / Plesk). Apenas o responsável técnico da sua empresa que possui o acesso administrativo a esse painel consegue realizar a redefinição de uma nova senha para a sua conta.
+      A gestão das caixas de e-mail é feita só pelo painel de controle (cPanel / Plesk). Apenas quem tem o acesso administrativo do painel, geralmente o responsável técnico da sua empresa, consegue redefinir a senha de uma conta.
 
-      Recomendamos que entre em contato com o administrador da sua hospedagem ou com o setor de TI da sua empresa para que eles realizem a alteração, tudo bem?
+      Recomendamos falar com o administrador da hospedagem ou o setor de TI da sua empresa para fazer essa alteração, tudo bem?
     vars:
       - name: empresa_nome
         type: global
@@ -1860,15 +1849,15 @@ matches:
   - trigger: "/senhacp"
     force_clipboard: true
     replace: |-
-      Para redefinir a senha de uma conta de e-mail, siga os passos abaixo no cPanel:
+      Para redefinir a senha de uma conta de e-mail, siga estes passos no cPanel:
 
       1. Acesse o painel de controle (cpanel.seudominio.com.br) com o usuário administrador.
       2. Vá em "Contas de E-mail" (Email Accounts).
-      3. Localize a conta desejada e clique em "Gerenciar" (Manage).
+      3. Localize a conta e clique em "Gerenciar" (Manage).
       4. Em "Senha", defina uma nova senha forte (letras, números e símbolos).
       5. Salve e atualize a senha nos dispositivos (Outlook, celular etc.).
 
-      ⚠️ A {{empresa_nome}} não possui acesso às senhas individuais das contas — apenas o administrador do cPanel consegue alterá-las.
+      ⚠️ A {{empresa_nome}} não tem acesso às senhas individuais das contas: só o administrador do cPanel consegue alterá-las.
     vars:
       - name: empresa_nome
         type: global
@@ -1877,38 +1866,37 @@ matches:
   - trigger: "/popimap"
     force_clipboard: true
     replace: |-
-      Compreendo a sua dúvida! A escolha entre os protocolos POP e IMAP define como o seu aplicativo de e-mail (Outlook, celular) vai interagir com as mensagens no nosso servidor. 
+      Boa pergunta! A escolha entre POP e IMAP define como o seu aplicativo de e-mail (Outlook, celular) interage com as mensagens no nosso servidor.
 
-      Aqui está a diferença de forma direta:
+      A diferença, direto ao ponto:
 
-      🌐 IMAP (Recomendado)
+      🌐 IMAP (recomendado)
       • Sincroniza em tempo real com o servidor.
-      • As mensagens permanecem salvas na nuvem e podem ser acessadas de vários aparelhos ao mesmo tempo (computador, celular e webmail).
-      • Tudo o que você fizer (ler, apagar ou mover para pastas) em um dispositivo, refletirá automaticamente nos outros.
+      • As mensagens ficam salvas na nuvem e você acessa de vários aparelhos ao mesmo tempo (computador, celular e webmail).
+      • O que você fizer em um dispositivo (ler, apagar, mover para pastas) reflete automaticamente nos outros.
 
       💻 POP (POP3)
-      • Faz o download (baixa) das mensagens para o seu aparelho e, por padrão, as apaga do nosso servidor.
-      • Ideal se você precisa economizar espaço de armazenamento na sua hospedagem ou acessa o e-mail de um único computador fixo.
-      • Não possui sincronização: se você baixar e ler os e-mails no computador, não conseguirá vê-los no celular depois.
+      • Baixa as mensagens para o seu aparelho e, por padrão, apaga do nosso servidor.
+      • Bom se você quer economizar espaço na hospedagem ou só acessa o e-mail de um computador fixo.
+      • Não sincroniza: se ler os e-mails no computador, não vai vê-los no celular depois.
 
-      Se você precisa acessar a mesma conta em mais de um aparelho ou quer ter o backup no servidor, a recomendação técnica é utilizar o IMAP. 
+      Se você acessa a mesma conta em mais de um aparelho, ou quer ter backup no servidor, o ideal é o IMAP.
 
-      Qual você prefere utilizar para que eu possa te orientar com as portas corretas de configuração?
+      Qual você prefere, para eu te passar as portas corretas de configuração?
 
   # /dns — Solicita dados para criação/alteração de apontamentos DNS
   - trigger: "/dns"
     force_clipboard: true
     replace: |-
-      Para darmos andamento à criação ou alteração dos apontamentos de DNS, por gentileza, informe os dados exatos que precisam ser configurados:
+      Para criar ou alterar os apontamentos de DNS, me informe os dados exatos:
 
-      • Tipo de registro (Ex: A, CNAME, TXT, MX)
-      • Nome/Host (Ex: www, loja, mail ou @)
-      • Destino/Valor/IP (Ex: 192.168.0.1 ou dominio.com)
+      • Tipo de registro (ex.: A, CNAME, TXT, MX)
+      • Nome/Host (ex.: www, loja, mail ou @)
+      • Destino/Valor/IP (ex.: 192.168.0.1 ou dominio.com)
 
-      ⚠️ Aviso importante sobre o DNS:
-      Assim que realizarmos a inserção dessas chaves em nossa plataforma, inicia-se o período de propagação global na internet. Esse processo pode levar de 2 a 24 horas para que os servidores externos reconheçam as novas regras e o seu serviço volte a operar normalmente.
+      ⚠️ Sobre o DNS: assim que inserirmos essas chaves na nossa plataforma, começa a propagação global pela internet. Isso pode levar de 2 a 24 horas até os servidores externos reconhecerem as novas regras e o serviço voltar ao normal.
 
-      Fico no aguardo das chaves para iniciarmos!
+      Fico no aguardo dos dados para começarmos!
 
   # =============================================================================
   # 5 · Registros Internos — Financeiro
@@ -4052,18 +4040,42 @@ matches:
           shell: powershell
           cmd: |
             [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-            $canal = "{{formulario.canal}}"
-            $solicitante = "{{formulario.solicitante}}"
-            $origem = "{{formulario.origem}}"
-            $hospedagem = "{{formulario.hospedagem}}"
-            $servidor = "{{formulario.servidor_com4}}"
-            $vpsIp = "{{formulario.vps_ip}}"
-            $autorizacaoVps = "{{formulario.autorizacao_vps}}"
-            $tipo = "{{formulario.tipo}}"
-            $emailAfetado = "{{formulario.email_afetado}}"
-            $pastaEspecifica = "{{formulario.pasta_especifica}}"
-            $dataBackup = "{{formulario.data_backup}}"
-            $acoes = "{{formulario.acoes}}"
+            $canal = @'
+            {{formulario.canal}}
+            '@.Trim()
+            $solicitante = @'
+            {{formulario.solicitante}}
+            '@.Trim()
+            $origem = @'
+            {{formulario.origem}}
+            '@.Trim()
+            $hospedagem = @'
+            {{formulario.hospedagem}}
+            '@.Trim()
+            $servidor = @'
+            {{formulario.servidor_com4}}
+            '@.Trim()
+            $vpsIp = @'
+            {{formulario.vps_ip}}
+            '@.Trim()
+            $autorizacaoVps = @'
+            {{formulario.autorizacao_vps}}
+            '@.Trim()
+            $tipo = @'
+            {{formulario.tipo}}
+            '@.Trim()
+            $emailAfetado = @'
+            {{formulario.email_afetado}}
+            '@.Trim()
+            $pastaEspecifica = @'
+            {{formulario.pasta_especifica}}
+            '@.Trim()
+            $dataBackup = @'
+            {{formulario.data_backup}}
+            '@.Trim()
+            $acoes = @'
+            {{formulario.acoes}}
+            '@.Trim()
 
             $msg = "Solicitação de Restauração de Backup`n`nINFORMAÇÕES`n• Canal de Atendimento: $canal`n• Solicitante: $solicitante`n• Origem: $origem`n"
 
