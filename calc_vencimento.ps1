@@ -51,7 +51,7 @@ if ($Modo -eq "cliente") {
         $regra = "📅 Apenas ajuste no dia: a referência do mês de cobrança continuará a mesma, alterando apenas o dia exato do pagamento dentro do mês."
     }
 
-    Write-Output "Entendido! Sobre a mudança da data de vencimento para o dia $Novo: como as nossas datas têm referências de cobrança diferentes (mês anterior vs. mês vigente), esse ajuste altera o seu faturamento assim:`n`n$regra`n`nO cenário da sua assinatura fica assim:`n• Último boleto gerado: vencimento em $ultimoStr (referente ao mês de $mesUltimo).`n• Próximo boleto a faturar: vencimento em $proximoStr (referente ao mês de $mesProximo).`n`nVocê concorda com esse ajuste para eu encaminhar a solicitação ao nosso setor Financeiro?"
+    Write-Output "Compreendo a sua solicitação para alterar a data de vencimento para o dia $Novo.`n`nPara alinharmos as expectativas, como as nossas datas possuem referências de cobrança diferentes (mês anterior vs. mês vigente), essa mudança gerará o seguinte ajuste no seu faturamento:`n`n$regra`n`nO cenário da sua assinatura ficará assim:`n• Último boleto gerado: vencimento em $ultimoStr (referente ao mês de $mesUltimo).`n• Próximo boleto a faturar: vencimento em $proximoStr (referente ao mês de $mesProximo).`n`nVocê está de acordo com este ajuste para que eu possa encaminhar a solicitação de alteração ao nosso setor Financeiro?"
 } else {
     Write-Output "Alteração Data Vencimento`n`nCliente entrou em contato solicitando para alterar a data de vencimento de seus boletos do dia $Atual para todo dia $Novo.`n`nForam passadas as seguintes informações ao cliente:`nÚltimo boleto gerado: $ultimoStr - Referente ao mês de $mesUltimo`nPróximo boleto gerado: $proximoStr - Referente ao mês de $mesProximo`n`nPor gentileza, verificar."
 }
