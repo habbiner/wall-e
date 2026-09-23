@@ -1524,38 +1524,10 @@ matches:
 # 4 · E-mail, Hospedagem e Migração
 # =============================================================================
 
-  # /ativhosp — Envia dados de acesso ao cPanel, FTP, Webmail e DNS (ativação de hospedagem)
+# /ativhosp — Envia dados de acesso ao cPanel, FTP, Webmail e DNS (ativação de hospedagem)
   - trigger: "/ativhosp"
     force_clipboard: true
-    replace: |-
-      Olá, {{saudacao}}! Tudo bem? 😊
-
-      Sou o {{atendente_nome}}. Seguem os dados de acesso ao painel de controle da hospedagem {{formulario.dominio}}:
-
-      Painel de Controle da Hospedagem:
-      Endereço: http://189.90.130.{{formulario.ip}}:2082 ou cpanel.{{formulario.dominio}}
-      Usuário: {{formulario.user}}
-      Senha: {{formulario.senha}}
-
-      Dados do FTP:
-      Endereço: ftp.{{formulario.dominio}} ou ftp://189.90.130.{{formulario.ip}}
-      Usuário: {{formulario.user}}
-      Senha: {{formulario.senha}}
-
-      WEBMAIL:
-      Endereço: http://189.90.130.{{formulario.ip}}:2095/ ou webmail.{{formulario.dominio}}
-      Login com a conta de e-mail e a respectiva senha.
-
-      Configurações em gerenciador de e-mails (ex.: Outlook):
-      Servidor de entrada/saída: mail.{{formulario.dominio}}
-      Porta IMAP: 143
-      Porta POP3: 110
-      Porta de saída SMTP: 587
-
-      Veja o PDF em anexo com a documentação do nosso Gateway Antispam.
-
-      Servidores DNS:
-      {{formulario.dns}}
+    replace: "{{resultado}}"
     vars:
       - name: atendente_nome
         type: global
@@ -1566,17 +1538,98 @@ matches:
         params:
           layout: |
             Domínio: [[dominio]]
-            IP final (ex: 45): [[ip]]
+            Servidor: [[server]]
             Usuário: [[user]]
             Senha: [[senha]]
             DNS: [[dns]]
           fields:
+            server:
+              type: choice
+              values: 
+                - "Cpanel 1 — 189.90.130.2"
+                - "Cpanel 2 — 189.90.130.58"
+                - "Cpanel 3 — 189.90.130.60"
+                - "Cpanel 4 — 189.90.130.100"
+                - "Cpanel 5 — 189.90.130.52"
+                - "Cpanel 6 — 189.90.130.200"
+                - "Cpanel 7 — 189.90.130.138"
+                - "Cpanel 9 — 189.90.130.102"
+                - "Cpanel 12 — 189.90.130.154"
+                - "Cpanel 15 — 189.90.130.16"
+                - "Cloud CPanel 1 — 189.90.130.140"
+                - "Cloud CPanel 2 (152) — 189.90.130.152"
+                - "Cloud CPanel 2 (232) — 189.90.130.232"
+                - "Cpanel Email Corp1 (120) — 189.90.130.120"
+                - "Cpanel Email Corp1 (129) — 189.90.130.129"
+                - "Cpanel Email Corp2 — 189.90.131.130"
+                - "Cpanel Email Com4 — 189.90.130.10"
+                - "Cpanel Rev1 — 189.90.130.208"
+                - "Cpanel Rev2 — 189.90.130.210"
+                - "Cpanel Rev3 — 189.90.130.212"
             dns:
               type: choice
               values:
                 - ian.ns.cloudflare.com e melinda.ns.cloudflare.com
                 - coco.ns.cloudflare.com e lamar.ns.cloudflare.com
+      - name: resultado
+        type: shell
+        params:
+          shell: powershell
+          cmd: |
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            $atendente = "{{atendente_nome}}"
+            $saudacao = "{{saudacao}}"
+            
+            $dominio = @'
+            {{formulario.dominio}}
+            '@.Trim()
+            
+            $serverCompleto = @'
+            {{formulario.server}}
+            '@.Trim()
+            
+            $user = @'
+            {{formulario.user}}
+            '@.Trim()
+            
+            $senha = @'
+            {{formulario.senha}}
+            '@.Trim()
+            
+            $dns = @'
+            {{formulario.dns}}
+            '@.Trim()
 
+            # Extrai apenas o IP após o traço na lista de servidores
+            $ip = ""
+            if ($serverCompleto -match "—") {
+                $ip = ($serverCompleto -split "—")[1].Trim()
+            } else {
+                $ip =$serverCompleto
+            }
+
+            $msg = "Olá, ${saudacao}! Tudo bem? 😊`n`nSou o ${atendente}. Seguem os dados de acesso ao painel de controle da hospedagem ${dominio}:`n`n"
+            $msg += "Painel de Controle da Hospedagem:`n"
+            $msg += "Endereço: http://${ip}:2082 ou cpanel.${dominio}`n"
+            $msg += "Usuário: ${user}`n"
+            $msg += "Senha: ${senha}`n`n"
+            $msg += "Dados do FTP:`n"
+            $msg += "Endereço: ftp.${dominio} ou ftp://${ip}`n"
+            $msg += "Usuário: ${user}`n"
+            $msg += "Senha: ${senha}`n`n"
+            $msg += "WEBMAIL:`n"
+            $msg += "Endereço: http://${ip}:2095/ ou webmail.${dominio}`n"
+            $msg += "Login com a conta de e-mail e a respectiva senha.`n`n"
+            $msg += "Configurações em gerenciador de e-mails (ex.: Outlook):`n"
+            $msg += "Servidor de entrada/saída: mail.${dominio}`n"
+            $msg += "Porta IMAP: 143`n"
+            $msg += "Porta POP3: 110`n"
+            $msg += "Porta de saída SMTP: 587`n`n"
+            $msg += "Veja o PDF em anexo com a documentação do nosso Gateway Antispam.`n`n"
+            $msg += "Servidores DNS:`n${dns}"
+
+            Write-Output $msg
+            
   # /dadospainel — Envia URLs e senhas do cPanel ou Plesk dinamicamente
   - trigger: "/dadospainel"
     force_clipboard: true
@@ -2123,7 +2176,7 @@ matches:
       • Meio de Envio: {{formulario.envio}}
 
       SOLUÇÃO
-      • Ação Realizada: Nota fiscal enviada ao cliente com sucesso.
+      • Ação Realizada: Nota fiscal enviada ao cliente.
     vars:
       - name: formulario
         type: form
@@ -2634,7 +2687,7 @@ matches:
 
       PROCEDIMENTOS REALIZADOS
       • Orientações Passadas: Realizada orientação para verificação visual do cabo drop interno, confirmando a ausência de dobras, rompimentos ou objetos pressionando a fibra.
-      • Retorno do Cliente: Confirmou que o conector está devidamente encaixado na ONU e a falha persiste. Solicito o envio de técnico ao local para verificação presencial.
+      • Retorno do Cliente: Confirmou que o conector está bem encaixado na ONU e a falha persiste. Solicito o envio de técnico ao local para verificação presencial.
     vars:
       - name: formulario
         type: form
@@ -3139,7 +3192,7 @@ matches:
       • Solicitante foi formalmente alertado sobre os riscos de segurança (aumento de spam e malwares).
 
       SOLUÇÃO
-      • Filtro antispam desativado com sucesso conforme solicitação. Chamado encerrado.
+      • Filtro antispam desativado. Chamado encerrado.
     vars:
       - name: formulario
         type: form
@@ -3179,7 +3232,7 @@ matches:
       • Solicitante instruído de que as políticas de segurança e a retenção de mensagens em quarentena voltaram a atuar ativamente no domínio.
 
       SOLUÇÃO
-      • Filtro antispam reativado com sucesso conforme solicitação. Chamado encerrado.
+      • Filtro antispam reativado. Chamado encerrado.
     vars:
       - name: formulario
         type: form
@@ -3208,7 +3261,7 @@ matches:
     force_clipboard: true
     replace: |-
       Atendimento encerrado automaticamente por timeout (inatividade do usuário no Blip).
-      Não houve o reporte de incidentes ou solicitações adicionais, resultando na finalização do ticket sem a necessidade de intervenção técnica ou aplicação de procedimentos de troubleshooting.
+      Cliente não reportou incidentes ou solicitações adicionais. Ticket finalizado sem necessidade de intervenção técnica.
 
   # /logbloq — Log de bloqueio no servidor/painel e encaminhamento correto
   - trigger: "/logbloq"
@@ -3241,7 +3294,7 @@ matches:
             $server = "{{formulario.server}}"
 
             if ($tipo -match "Data Center") {
-                $acao = "Conta/serviço suspenso com sucesso no servidor."
+                $acao = "Conta/serviço suspenso no servidor."
                 $encaminhamento = "Chamado encaminhado para a fila do Financeiro detalhando o serviço bloqueado, para alteração do status do contrato para 'Bloqueado' no sistema."
             } else {
                 $acao = "Bloqueio do serviço executado via SAP/HANA."
@@ -3282,7 +3335,7 @@ matches:
             $server = "{{formulario.server}}"
 
             if ($tipo -match "Data Center") {
-                $acao = "Conta/serviço desbloqueado com sucesso no servidor."
+                $acao = "Conta/serviço desbloqueado no servidor."
                 $encaminhamento = "Chamado transferido para a fila do Financeiro para alterar o status do contrato para 'Ativo' no sistema e formalizar a baixa."
             } else {
                 $acao = "Desbloqueio executado via SAP/HANA."
@@ -3323,7 +3376,7 @@ matches:
 
       VERIFICAÇÕES E PROCEDIMENTOS
       • Viabilidade Técnica: Confirmada no Ozmap/Google Maps.
-      • Equipamentos: Cliente devidamente orientado a levar o modem da Com4 e a fonte de alimentação para o novo endereço.
+      • Equipamentos: Cliente orientado a levar o modem da Com4 e a fonte de alimentação para o novo endereço.
 
       SOLUÇÃO
       • Chamado encaminhado para a fila Fibra Ativação para contato e agendamento da instalação.
@@ -3400,7 +3453,7 @@ matches:
 
       PROCEDIMENTOS E ORIENTAÇÕES
       • Diagnóstico: Identificado que o cliente foi afetado por um rompimento de fibra óptica de grande proporção na região.
-      • Orientação: Cliente devidamente posicionado sobre o incidente em larga escala e informado sobre a previsão de normalização para as {{formulario.previsao}}.
+      • Orientação: Cliente posicionado sobre o incidente em larga escala e informado sobre a previsão de normalização para as {{formulario.previsao}}.
 
       SOLUÇÃO
       • Ação Realizada: Cliente ciente da indisponibilidade sistêmica e do prazo de reparo estipulado pela Engenharia/Equipe de Campo.
@@ -3429,7 +3482,7 @@ matches:
       • Engenharia/Equipe de Campo concluiu o reparo físico da infraestrutura.
       • Sistema de monitoramento confirmou o retorno do link (Sinal óptico normalizado / ONU online).
 
-      Ação: Conexão normalizada com sucesso. Chamado encerrado.
+      Ação: Conexão normalizada. Chamado encerrado.
 
   # /loginviavel — Log de inviabilidade técnica; encaminha estudo de expansão para Projetos
   - trigger: "/loginviavel"
@@ -3551,7 +3604,7 @@ matches:
       {{formulario.acoes}}
 
       ORIENTAÇÕES REPASSADAS AO CLIENTE
-      • Reforçada a normalidade e estabilidade dos serviços até o modem da Com4.
+      • Confirmada a normalidade e estabilidade dos serviços até o modem da Com4.
       • Explicado que a instabilidade/limitação ocorre devido à capacidade física do roteador atual.
       • Orientada a troca por um roteador de padrão Gigabit (Giga).
       • Cliente informado de que a Com4 não comercializa o aparelho; enviada a lista em PDF com sugestões de modelos.
@@ -3631,14 +3684,14 @@ matches:
       INFORMAÇÕES
       • Canal de Atendimento: {{formulario.canal}}
       • Solicitante: {{formulario.solicitante}}
-      • Validação de Segurança: Dados cadastrais/titularidade confirmados com sucesso.
+      • Validação de Segurança: Dados cadastrais/titularidade confirmados.
 
       PROCEDIMENTOS E ORIENTAÇÕES
       • Motivo da solicitação: {{formulario.motivo}}
       • Cliente instruído sobre o uso seguro das credenciais PPPoE para discagem/autenticação em seu equipamento.
 
       SOLUÇÃO
-      • Dados de acesso (Usuário e Senha) repassados ao cliente com sucesso. Chamado encerrado.
+      • Dados de acesso (Usuário e Senha) repassados ao cliente. Chamado encerrado.
     vars:
       - name: formulario
         type: form
@@ -3676,7 +3729,7 @@ matches:
       • Análise: Link físico estável. Sintoma relatado apontava para travamento lógico ou falha de roteamento no equipamento da Com4.
 
       PROCEDIMENTOS REALIZADOS
-      • Autorização: Cliente devidamente orientado e autorizou a queda momentânea do link.
+      • Autorização: Cliente orientado e autorizou a queda momentânea do link.
       • Ações executadas: Realizado o reboot remoto da ONU e a recriação das configurações lógicas (regras de roteamento/bridge).
 
       SOLUÇÃO
@@ -3705,7 +3758,7 @@ matches:
             status:
               type: choice
               values:
-                - Conexão normalizada com sucesso. Chamado encerrado.
+                - Conexão normalizada. Chamado encerrado.
                 - Falha persiste — Aberta visita técnica para verificação/troca no local.
                 - Falha persiste — Chamado escalonado para a Engenharia.
 
@@ -3725,7 +3778,7 @@ matches:
       • Diagnóstico NOC 1: Instabilidade externa e isolada nos servidores do aplicativo de IPTV do cliente.
 
       ORIENTAÇÕES REPASSADAS
-      • Cliente posicionado de que a infraestrutura e a entrega de banda da Com4 estão em plena normalidade.
+      • Cliente informado de que a infraestrutura e a entrega de banda da Com4 estão normais.
       • Explicado que serviços de IPTV não homologados sofrem restrições e bloqueios frequentes pela Anatel.
       • Orientado a buscar suporte diretamente com o fornecedor do serviço de IPTV para rotas ou atualizações alternativas.
 
@@ -3775,7 +3828,7 @@ matches:
             status:
               type: choice
               values:
-                - Equipamento religado/reconectado. Conexão normalizada com sucesso.
+                - Equipamento religado/reconectado. Conexão normalizada.
                 - Falha física no roteador do cliente constatada. Orientado a acionar suporte de TI.
                 - Cliente não retornou após orientações. Mantido em aberto.
 
@@ -3889,7 +3942,7 @@ matches:
       • Domínio / Cliente: {{formulario.cliente}}
 
       SOLUÇÃO
-      • Ação Realizada: Cliente instruído sobre o procedimento de segurança obrigatório para liberação de acessos ao painel de hospedagem (cPanel). Informado sobre a necessidade de envio de solicitação formal através de uma conta de e-mail corporativa, contendo os dados cadastrais de validação.
+      • Ação Realizada: Cliente instruído a enviar solicitação formal por e-mail corporativo, com os dados cadastrais de validação, para liberação de acesso ao painel (cPanel).
       • Próximo Passo: Aguardando a formalização da solicitação via e-mail pelo cliente para darmos andamento ao encaminhamento das credenciais.
     vars:
       - name: formulario
@@ -3919,7 +3972,7 @@ matches:
       • E-mail do Solicitante: {{formulario.email}}
 
       SOLUÇÃO
-      • Ação Realizada: Os dados enviados pelo cliente foram validados e conferem com o cadastro do titular. Após a confirmação, as credenciais de acesso ao cPanel foram encaminhadas com sucesso em resposta ao e-mail corporativo do cliente.
+      • Ação Realizada: Os dados enviados pelo cliente foram validados e conferem com o cadastro do titular. As credenciais de acesso ao cPanel foram encaminhadas em resposta ao e-mail corporativo do cliente.
       • Chamado encerrado.
     vars:
       - name: formulario
@@ -4172,7 +4225,7 @@ matches:
             status:
               type: choice
               values:
-                - Conta configurada com sucesso. Chamado encerrado.
+                - Conta configurada. Chamado encerrado.
                 - Cliente com dificuldades técnicas. Oferecido/Agendado acesso remoto.
                 - Falha na validação. Chamado escalonado ou mantido para acompanhamento.
 
@@ -4197,7 +4250,7 @@ matches:
       • Consulta de Protesto: Realizada e sem restrições impeditivas.
       • Lead / Oportunidade: Registrado.
       • Contrato Físico: Gerado, preenchido e impresso em duas vias.
-      • Documentação: Documentos de identificação, comprovante de endereço e print da consulta de protesto devidamente anexados a este chamado.
+      • Documentação: Documentos de identificação, comprovante de endereço e print da consulta de protesto anexados a este chamado.
 
       SOLUÇÃO
       • Chamado classificado como "Pedido de Ativação" e encaminhado para a fila "Fibra Ativação - Fibra Ativação" para agendamento e execução da instalação.
@@ -4264,7 +4317,7 @@ matches:
       • Conta de E-mail: {{formulario.email}}
 
       PROCEDIMENTOS REALIZADOS
-      • Validação de Segurança: Dados cadastrais e titularidade confirmados com sucesso.
+      • Validação de Segurança: Dados cadastrais e titularidade confirmados.
       • Motivo: Perda, bloqueio ou esquecimento do acesso atual.
 
       SOLUÇÃO
@@ -4353,7 +4406,7 @@ matches:
 
       PROCEDIMENTOS E ORIENTAÇÕES
       • Status do Fluxo: O bloqueio é temporário e o contador reseta automaticamente na virada da hora. Testes confirmam que o fluxo de envios já se encontra normalizado no momento do atendimento.
-      • Orientação Passada: Cliente instruído sobre o funcionamento do bloqueio protetivo (que evita que o domínio caia em Blacklists) e fortemente orientado a realizar a higienização da sua lista de contatos/mala direta.
+      • Orientação Passada: Cliente instruído sobre o funcionamento do bloqueio protetivo (que evita que o domínio caia em Blacklists) e orientado a higienizar a lista de contatos/mala direta.
 
       SOLUÇÃO
       • Status Final: Serviços normalizados e cliente ciente das boas práticas de envio. Chamado encerrado.
@@ -4441,10 +4494,10 @@ matches:
       PROCEDIMENTOS REALIZADOS
       • Acesso ao painel do Gateway Antispam (PMG).
       • E-mails retidos do remetente especificado foram entregues manualmente na caixa de entrada do cliente (Deliver).
-      • Cliente devidamente orientado de que as mensagens estarão posicionadas na data de emissão original no gerenciador.
+      • Cliente orientado de que as mensagens estarão posicionadas na data de emissão original no gerenciador.
 
       SOLUÇÃO
-      • Liberação executada com sucesso e cliente posicionado. Chamado encerrado.
+      • Liberação executada e cliente posicionado. Chamado encerrado.
     vars:
       - name: formulario
         type: form
@@ -4567,7 +4620,7 @@ matches:
 
       ACOMPANHAMENTO E COMUNICAÇÃO
       • Setor Responsável pelo acompanhamento: [[acompanhamento]]
-      • Recepção e Grupo 'Alertas Com4 Nagios' devidamente notificados.
+      • Recepção e Grupo 'Alertas Com4 Nagios' notificados.
     form_fields:
       tipo:
         type: choice
@@ -4640,7 +4693,7 @@ matches:
       {{formulario.registros}}
 
       SOLUÇÃO
-      • Status: Procedimento realizado com sucesso. Cliente orientado sobre o prazo de propagação global (2 a 24 horas). Chamado encerrado.
+      • Status: Procedimento realizado. Cliente orientado sobre o prazo de propagação global (2 a 24 horas). Chamado encerrado.
     vars:
       - name: formulario
         type: form
