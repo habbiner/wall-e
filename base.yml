@@ -321,7 +321,7 @@ matches:
 
       Antes de começarmos, preciso confirmar alguns dados com você. Por gentileza, responda a todas estas informações:
 
-      Nome completo:
+      Seu Nome completo:
       CPF ou CNPJ do cadastro:
       Telefone:
       E-mail:
@@ -749,7 +749,7 @@ matches:
       - name: empresa_nome
         type: global
 
-  # /venc — Alteração de vencimento com cálculo automático para o CLIENTE (BDC)
+# /venc — Alteração de vencimento com cálculo automático para o CLIENTE (BDC)
   # Uso: /venc [dia atual] [dia novo] — Exemplo: /venc 25 10
   - regex: "/venc (?P<atual>05|10|15|20|25) (?P<novo>05|10|15|20|25)"
     force_clipboard: true
@@ -768,7 +768,8 @@ matches:
         params:
           shell: powershell
           cmd: |
-            & "$env:CONFIG\match\scripts\calc_vencimento.ps1" -Atual "{{atual}}" -Novo "{{novo}}" -UltimoGerado "{{formulario.ultimo_gerado}}" -Modo cliente
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$env:CONFIG\scripts\calc_vencimento.ps1" -Atual "{{atual}}" -Novo "{{novo}}" -UltimoGerado "{{formulario.ultimo_gerado}}" -Modo "cliente"
 
   # /transfereprotesto — Explica o processo e encaminha o cliente ciente do título protestado ao Financeiro
   - trigger: "/transfereprotesto"
@@ -2209,7 +2210,7 @@ matches:
                 - Blip
                 - E-mail
 
-  # /logvenc — Log de abertura de chamado ao Financeiro (alteração de vencimento) — cálculo automático
+# /logvenc — Log de abertura de chamado ao Financeiro (alteração de vencimento) — cálculo automático
   # Uso: /logvenc [dia atual] [dia novo] — Exemplo: /logvenc 25 10
   - regex: "/logvenc (?P<atual>05|10|15|20|25) (?P<novo>05|10|15|20|25)"
     force_clipboard: true
@@ -2223,14 +2224,14 @@ matches:
 
             Confira no sistema a data do ÚLTIMO boleto já gerado:
             Data (dd/mm ou dd/mm/aaaa): [[ultimo_gerado]]
-
       - name: resultado
         type: shell
         params:
           shell: powershell
           cmd: |
-            & "$env:CONFIG\match\scripts\calc_vencimento.ps1" -Atual "{{atual}}" -Novo "{{novo}}" -UltimoGerado "{{formulario.ultimo_gerado}}" -Modo interno
-
+            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+            powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$env:CONFIG\scripts\calc_vencimento.ps1" -Atual "{{atual}}" -Novo "{{novo}}" -UltimoGerado "{{formulario.ultimo_gerado}}" -Modo "interno"
+            
   # /loginvertido — Log interno de pagamento de fatura do mês incorreto
   - trigger: "/loginvertido"
     force_clipboard: true
@@ -2267,6 +2268,9 @@ matches:
   - trigger: "/logcanc"
     force_clipboard: true
     replace: |-
+
+      Cancelamento de Serviços
+
       DESCRIÇÃO
       Cliente entrou em contato solicitando o cancelamento dos serviços.
 
