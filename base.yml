@@ -27,7 +27,7 @@
 #   /aniversario        Mensagem padrão de feliz aniversário para o grupo da Com4
 #
 # 2 · Financeiro — Cliente
-#   /bloqueado          Informa suspensão por fatura em aberto; oferece 2ª via ou aguarda comprovante
+#   /bloqueado          Informa suspensão por fatura em aberto; reforça baixa imediata
 #   /2via               Envia 2ª via do boleto com data de vencimento
 #   /nfe                Envia a Nota Fiscal (NFe) solicitada pelo cliente
 #   /agendamento        Informa que o documento enviado é comprovante de agendamento, não pagamento
@@ -591,15 +591,16 @@ matches:
   # 2 · Financeiro — Cliente
   # =============================================================================
 
-  # /bloqueado — Informa suspensão por fatura em aberto; oferece 2ª via ou aguarda comprovante
+  # /bloqueado — Informa suspensão por fatura em aberto; reforça baixa imediata
   - trigger: "/bloqueado"
     force_clipboard: true
     replace: |-
       Verifiquei o seu cadastro: os serviços estão suspensos por causa da fatura com vencimento em {{formulario.vencimento}}, que ainda consta em aberto aqui.
 
-      Se você já pagou, me envie o comprovante por aqui que eu libero o acesso. Se ainda não, posso emitir a 2ª via atualizada agora mesmo.
+      A nossa compensação bancária agora é imediata! Assim que você realizar o pagamento, a baixa ocorre em instantes e o serviço de internet (Fibra) é desbloqueado automaticamente. 
+      (Atenção: se o seu serviço for Hospedagem/Data Center, nos avise assim que pagar para liberarmos manualmente).
 
-      Como você prefere seguir?
+      Posso emitir a 2ª via atualizada ou o PIX para você agora mesmo?
     vars:
       - name: formulario
         type: form
@@ -634,17 +635,17 @@ matches:
         params:
           layout: "Mês de referência: [[mes_referencia]]"
 
-  # /agendamento — Informa que o documento enviado é comprovante de agendamento, não pagamento
+  # /agendamento — Informa que é apenas agendamento, mas reforça a automação
   - trigger: "/agendamento"
     force_clipboard: true
     replace: |-
       Conferi o documento que você enviou: ele é um comprovante de agendamento, e não do pagamento em si.
 
-      Para eu dar baixa no sistema e liberar os seus serviços, preciso do comprovante do pagamento já efetivado.
+      Para a liberação dos seus serviços, precisamos do pagamento já efetivado.
 
-      Assim que o seu banco concluir a transação, me envie o comprovante definitivo por aqui.
+      Lembrando que a baixa em nosso sistema agora é imediata! Assim que o seu banco concluir a transação no dia agendado, o sistema reconhecerá automaticamente e fará o desbloqueio da sua conexão.
 
-  # /pix — Envia chave PIX e linha digitável do boleto
+  # /pix — Envia chave PIX e linha digitável do boleto (sem pedir comprovante)
   - trigger: "/pix"
     force_clipboard: true
     replace: |-
@@ -654,7 +655,8 @@ matches:
 
       📄 Linha digitável do boleto: {{formulario.boleto}}
 
-      Depois de pagar, me envie o comprovante por aqui para eu dar sequência ao atendimento.
+      Nossa compensação agora é imediata! Não é necessário enviar o comprovante: assim que pago, o sistema reconhece em instantes e libera sua conexão de internet automaticamente.
+      *(Caso o seu serviço seja de Data Center, por favor, nos avise após o pagamento para a liberação manual).*
 
       ⚠️ Atenção: confirme o nome do favorecido antes de concluir a transferência.
     vars:
@@ -705,23 +707,25 @@ matches:
     replace: |-
       Por nada! Tenha um ótimo dia e uma excelente semana. 😊
 
-  # /comp — Confirma recebimento e registro do comprovante de pagamento
+  # /comp — Confirmação de comprovante (se o cliente mandar por iniciativa própria)
   - trigger: "/comp"
     force_clipboard: true
     replace: |-
       Recebemos o seu comprovante! ✅
 
-      Já anexei ao seu cadastro financeiro. Muito obrigado!
+      Como a nossa baixa bancária agora é imediata, o seu pagamento já deve constar no sistema.
+      Se o seu serviço é de Fibra Óptica, a conexão será normalizada automaticamente em até 5 minutos.
+      Se for um serviço de Data Center (Hospedagem, Servidor Virtual), já estou providenciando a liberação manual por aqui!
 
-  # /emailcomp — Confirmação formal de recebimento de comprovante via e-mail
+  # /emailcomp — Confirmação formal via e-mail sem mencionar prazo de 24h
   - trigger: "/emailcomp"
     force_clipboard: true
     form: |
       Olá, [[nome]], {{saudacao}}!
 
-      Conferimos o comprovante e você já pode voltar a usar os nossos serviços.
+      Conferimos o seu pagamento e a baixa já ocorreu automaticamente em nossos sistemas.
 
-      Um lembrete: se o banco não processar o pagamento em até 24 horas, o serviço pode ser suspenso novamente de forma automática.
+      Seus serviços já estão liberados para uso normal. Caso enfrente alguma dificuldade de conexão, sugerimos reiniciar o seu equipamento.
 
       Qualquer dúvida, a {{empresa_nome}} segue à disposição.
       Atenciosamente,
@@ -882,7 +886,7 @@ matches:
 
       ⚠️ É necessário que uma pessoa maior de 18 anos esteja no local para receber o técnico.
 
-  # /pague — Lembrete proativo de fatura em aberto antes do bloqueio ocorrer
+  # /pague — Lembrete proativo (Remove a necessidade de enviar comprovante para baixa manual)
   - trigger: "/pague"
     force_clipboard: true
     form: |
@@ -890,7 +894,7 @@ matches:
 
       Como os seus serviços continuam ativos, já envio a segunda via atualizada em anexo (ou por PIX, se preferir) para você regularizar antes que ocorra qualquer interrupção nos próximos dias.
 
-      Se o pagamento já foi feito, desconsidere este aviso ou me envie o comprovante para eu dar baixa manualmente.
+      Se o pagamento já foi feito, desconsidere este aviso, pois a baixa financeira ocorre de forma automática e em instantes constará em no nosso sistema.
 
   # /negado — Informa que o comprovante está ilegível ou incompleto
   - trigger: "/negado"
@@ -902,26 +906,23 @@ matches:
 
       Envie uma nova imagem ou o PDF original emitido pelo banco, por gentileza.
 
-  # /duplicata — Informa que o comprovante já consta registrado no sistema
+  # /duplicata — Informa que o pagamento já foi baixado (antigo "baixa em processamento")
   - trigger: "/duplicata"
     force_clipboard: true
     replace: |-
-      Esse comprovante já consta registrado aqui no sistema.
+      O seu pagamento já consta como baixado aqui no nosso sistema! ✅
 
-      A baixa está em processamento ou já foi concluída. Se o acesso ainda não normalizou, me avise que eu verifico de novo.
+      A sua conexão já foi liberada. Se o acesso ainda não normalizou, recomendo reiniciar o equipamento (tirar da tomada por 1 minuto e ligar de novo). Se o problema persistir, me avise!
 
-  # /desbloqprazo — Informa prazo de desbloqueio após compensação bancária
+  # /desbloqprazo — Remove a menção ao D+1 e detalha a velocidade da nova regra
   - trigger: "/desbloqprazo"
     force_clipboard: true
     replace: |-
-      Assim que a compensação bancária aparece no nosso sistema, o desbloqueio dos serviços acontece automaticamente.
+      A compensação bancária e a baixa de pagamentos agora são imediatas em nosso sistema! ⚡
 
-      O prazo médio de compensação é de 1 dia útil (previsão: {{data_1d_util}}), e a conexão normaliza em até cinco minutos depois da baixa.
+      Assim que a transação é concluída no seu banco (especialmente via PIX), o sistema reconhece em instantes e o desbloqueio da internet (Fibra) acontece automaticamente em até 5 minutos.
 
-      Pagamentos por PIX costumam ser confirmados em poucas horas.
-    vars:
-      - name: data_1d_util
-        type: global
+      ⚠️ Para serviços de Data Center, a baixa financeira também é imediata, mas pedimos que nos avise após o pagamento para realizarmos o desbloqueio operacional.
 
   # /correios — Explica o atraso na entrega física da fatura e reforça os canais digitais
   - trigger: "/correios"
@@ -965,15 +966,13 @@ matches:
 
       Depois que recebermos, a solicitação segue para o Financeiro fazer a validação contratual e financeira. O serviço continua ativo durante o processo, e o retorno para conclusão ocorrerá em até 24 horas úteis após o e-mail chegar ao setor responsável.
 
-  # /solcomp — Cliente bloqueado informa que já pagou; solicita o comprovante para liberação
+  # /solcomp — Cliente bloqueado informa que já pagou (Foco em checar o sistema)
   - trigger: "/solcomp"
     force_clipboard: true
     replace: |-
-      Entendi! Se o pagamento já foi feito, provavelmente o sistema ainda está aguardando a compensação bancária.
+      Entendi! Como a nossa compensação bancária agora é imediata, vou verificar no sistema se a baixa automática já ocorreu.
 
-      Para agilizar, me envie o comprovante por aqui (foto, print ou PDF).
-
-      Assim que ele chegar, eu valido, anexo ao seu cadastro e sigo com a liberação dos seus serviços.
+      Se houver alguma falha de comunicação com o banco, solicitarei o comprovante para análise. Só um momento, por favor!
 
   # /trocapf — Solicita dados e documentos do novo titular para troca PF
   - trigger: "/trocapf"
@@ -2009,18 +2008,16 @@ matches:
             $msg = "Desbloqueio em Acordo`n`nINFORMAÇÕES`n• Contato via: $canal`n• Solicitante: $nome — $telefone`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação: $acao`n• Prazo estendido até: $prazo.`n• Encaminhamento: Chamado assumido pelo próprio analista para acompanhamento da baixa bancária."
             Write-Output $msg
 
-  # /logbaixa — Registra recebimento de comprovante e previsão de compensação D+1 útil
+  # /logbaixa — Log reestruturado para o novo cenário (baixa confirmada imediatamente no sistema)
   - trigger: "/logbaixa"
     force_clipboard: true
     replace: "{{resultado}}"
     vars:
-      - name: data_1d_util
-        type: global
       - name: formulario
         type: form
         params:
           layout: |
-            Comprovante de pagamento
+            Baixa Financeira Imediata
             Canal: [[canal]]
             Nome: [[nome]]
             Telefone: [[telefone]]
@@ -2028,10 +2025,15 @@ matches:
           fields:
             canal:
               type: choice
-              values: *canal_padrao
+              values: 
+                - Blip
+                - Ligação
+                - E-mail
             tipo:
               type: choice
-              values: *tipo_servico_padrao
+              values: 
+                - Data Center (cPanel, Plesk, VPS)
+                - Fibra Óptica
       - name: resultado
         type: shell
         params:
@@ -2042,15 +2044,14 @@ matches:
             $canal = "{{formulario.canal}}"
             $nome = "{{formulario.nome}}"
             $telefone = "{{formulario.telefone}}"
-            $prazo = "{{data_1d_util}}"
 
             if ($tipo -match "Data Center") {
-                $encaminhamento = "Chamado transferido para a fila do Financeiro para validação do comprovante e acompanhamento da baixa no sistema de gestão."
+                $encaminhamento = "Chamado transferido para a fila do Financeiro para liberação manual do serviço/contrato (Baixa financeira imediata confirmada)."
             } else {
-                $encaminhamento = "Chamado mantido na fila aguardando a compensação bancária automática via SAP/HANA."
+                $encaminhamento = "Baixa imediata confirmada no sistema. Desbloqueio automático de Fibra realizado pelo sistema. Chamado encerrado."
             }
 
-            $msg = "Recebimento de Comprovante`n`nINFORMAÇÕES`n• Contato via: $canal`n• Solicitante: $nome — $telefone`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação: Comprovante de pagamento recebido e anexado ao atendimento.`n• Previsão de compensação: $prazo`n• Encaminhamento: $encaminhamento"
+            $msg = "Confirmação de Baixa Financeira`n`nINFORMAÇÕES`n• Contato via: $canal`n• Solicitante: $nome — $telefone`n• Tipo de Serviço: $tipo`n`nPROCEDIMENTOS REALIZADOS`n• Ação: Pagamento validado e baixa imediata confirmada no SAP/HANA.`n• Encaminhamento: $encaminhamento"
             Write-Output $msg
 
   # /logpagou — Registra pagamento compensado e encaminha ao Financeiro (se DC) ou encerra (se Fibra)
